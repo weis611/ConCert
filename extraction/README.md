@@ -11,7 +11,6 @@ After building the project (running `make` from the project's root, or running `
 The extraction can be tested (compiled and run for the targets that have tests).
 Use `make test-extraction` after the project is compiled.
 Note that running this step locally requires additional compilers installed (see below).
-Alternatively, the required compilers are available in the docker image `aucobra/concert:deps-coq-8.11-with-compilers`.
 
 Compiling Liquidity code:
 install the [Liquidity compiler](https://www.liquidity-lang.org/doc/installation/index.html).

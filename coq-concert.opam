@@ -5,10 +5,10 @@ synopsis: "A framework for smart contract verification in Coq"
 description: """
 A framework for smart contract verification in Coq
 """
-maintainer: "Danil Annenkov <danil.v.annenkov@gmail.com>"
-authors: "The COBRA team"
+maintainer: ""
+authors: ""
 license: "MIT License"
-dev-repo: "git+https://github.com/AU-COBRA/ConCert.git"
+dev-repo: ""
 depends: [
   "ocaml" {>= "4.07.1"}
   "coq" {>= "8.11" & < "8.12~"}
