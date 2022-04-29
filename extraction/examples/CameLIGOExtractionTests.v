@@ -159,9 +159,7 @@ Module Counter.
         lmd_receive := counter;
 
         (* code for the entry point *)
-        lmd_entry_point :=
-          CameLIGOPretty.printWrapper ("counter") "msg" "storage" ++ nl
-          ++ CameLIGOPretty.printMain "storage" |}.
+        lmd_entry_point := CameLIGOPretty.printMain "counter" "msg" "storage" |}.
 
 End Counter.
 Section CounterExtraction.
@@ -274,11 +272,11 @@ Defined.
 
       (* code for the entry point *)
       lmd_entry_point :=
-        "type storage = ((time_coq * (tez * address)) * ((address,tez) map * bool))" ++ CameLIGOPretty.printWrapper ("crowdfunding_receive")
+      "type storage = ((time_coq * (tez * address)) * ((address,tez) map * bool))"
+        ++ nl ++ CameLIGOPretty.printMain ("crowdfunding_receive")
                                     "msg_coq"
                                     "storage"
-                                    ++ nl
-                                    ++ CameLIGOPretty.printMain "storage" |}.
+    |}.
 
   (** We run the extraction procedure inside the [TemplateMonad].
       It uses the certified erasure from [MetaCoq] and the certified deboxing procedure
@@ -374,8 +372,7 @@ Section EIP20TokenExtraction.
 
       (* code for the entry point *)
       lmd_entry_point :=
-        CameLIGOPretty.printWrapper "receive_" "msg" "state" ++ nl
-        ++ CameLIGOPretty.printMain "state"|}.
+        CameLIGOPretty.printMain "receive_" "msg" "state" |}.
 
   Definition TT_remap_eip20token : list (kername * string) :=
     TT_remap_default ++ [
