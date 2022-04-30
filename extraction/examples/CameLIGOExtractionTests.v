@@ -103,9 +103,7 @@ Module Counter.
   Definition operation := ActionBody.
   Definition storage := Z × address.
 
-  Definition init (ctx : ContractCallContext) (setup : Z * address) : option storage :=
-    let ctx_ := ctx in (* prevents optimisations from removing unused [ctx]  *)
-    Some setup.
+  Definition init (setup : Z * address) : option storage := Some setup.
 
   Inductive msg :=
   | Inc (_ : Z)
@@ -173,9 +171,9 @@ Section CounterExtraction.
     ; remap <%% operation %%> "operation"
     ].
 
-  (** We run the extraction procedure inside the [TemplateMonad]. *)
-  (*       It uses the certified erasure from [MetaCoq] and the certified deboxing procedure *)
-  (*       that removes application of boxes to constants and constructors. *)
+  (** We run the extraction procedure inside the [TemplateMonad]. It uses the certified
+      erasure from [MetaCoq] and the certified deboxing procedure that removes
+      application of boxes to constants and constructors. *)
 
   (** NOTE: running computations inside [TemplateMonad] is quite slow. That's why we comment out this code and use a different way below *)
 
@@ -213,6 +211,15 @@ Defined.
   Definition crowdfunding_init (ctx : ContractCallContext)
             (setup : (time_coq × Z × address_coq)) : option storage :=
     if ctx.(ctx_amount) =? 0 then Some (setup, (Maps.mnil, false)) else None.
+
+  Definition init (setup : (time_coq × Z × address_coq)) : option storage :=
+    Some (setup, (Maps.mnil, false)).
+
+  Lemma crowdfunding_init_eq_init ctx setup :
+    ctx.(ctx_amount) =? 0 -> (* no money should be sent on deployment *)
+    crowdfunding_init ctx setup = init setup.
+  Proof.
+    intros Hamount. unfold crowdfunding_init. now rewrite Hamount. Qed.
 
   Open Scope Z.
   Import ListNotations.
@@ -260,7 +267,7 @@ Defined.
           (Tezos.now, (42tez,(""tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx"": address)))";
 
       (* initial storage *)
-      lmd_init := crowdfunding_init ;
+      lmd_init := init ;
 
       (* init requires some extra operations *)
       lmd_init_prelude := "";
@@ -277,10 +284,6 @@ Defined.
                                     "msg_coq"
                                     "storage"
     |}.
-
-  (** We run the extraction procedure inside the [TemplateMonad].
-      It uses the certified erasure from [MetaCoq] and the certified deboxing procedure
-      that removes application of boxes to constants and constructors. *)
 
 End Crowdfunding.
 
@@ -334,11 +337,14 @@ Section EIP20TokenExtraction.
 
   Open Scope Z_scope.
 
-  Definition init (ctx : ContractCallContext) (setup : EIP20Token.Setup) : option EIP20Token.State :=
-    let ctx_ := ctx in
+  Definition init (setup : EIP20Token.Setup) : option EIP20Token.State :=
     Some {| total_supply := setup.(init_amount);
             balances := Common.AddressMap.add (EIP20Token.owner setup) (init_amount setup) Common.AddressMap.empty;
             allowances := Common.AddressMap.empty |}.
+
+  Lemma EIP20Token_init_eq_init chain ctx setup :
+    EIP20Token.init chain ctx setup = init setup.
+  Proof. reflexivity. Qed.
 
   Definition receive_ (chain : Chain)
        (ctx : ContractCallContext)

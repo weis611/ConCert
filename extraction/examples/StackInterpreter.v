@@ -316,8 +316,8 @@ Module LiquidityInterp.
   Print liquidity_interp.
 
   (** We redirect the extraction result for later processing and compiling with the Liquidity compiler *)
-  (* Redirect "examples/extracted-code/liquidity-extract/StackInterpreter.liq" *)
-  (* MetaCoq Run (tmMsg liquidity_interp). *)
+  Redirect "examples/extracted-code/liquidity-extract/StackInterpreter.liq"
+  MetaCoq Run (tmMsg liquidity_interp).
 
 End LiquidityInterp.
 
@@ -326,9 +326,8 @@ Module CameLIGOInterp.
   Import CameLIGOExtract CameLIGOPretty.
   Existing Instance PrintConfShortNames.PrintWithShortNames.
 
-  Definition init (ctx : ContractCallContext) (setup : unit) : option storage :=
-    let ctx0 := ctx in
-    let setup0 := setup in (* prevents optimisations from removing unused [ctx] and [setup]  *)
+  Definition init (setup : unit) : option storage :=
+    let setup0 := setup in (* prevents optimisations from removing unused [setup]. TODO: override masks instead  *)
     Some [].
 
 

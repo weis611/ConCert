@@ -45,6 +45,31 @@ Existing Instance PrintConfShortNames.PrintWithShortNames.
 Definition escrow_init_wrapper (cctx : ContractCallContext) (s : Setup * Chain) : option State :=
     Examples.Escrow.init (snd s) cctx (fst s).
 
+Definition ligo_init (s : Address * Setup * nat) : option State :=
+  let seller := s.1.1 in
+  let setup := s.1.2 in
+  let curr_slot := s.2 in
+  let buyer := setup_buyer setup in
+  if (buyer =? seller)%address then None
+  else Some {| last_action := curr_slot;
+               next_step := buyer_commit;
+               seller := seller;
+               buyer := buyer;
+               seller_withdrawable := 0;
+               buyer_withdrawable := 0 |}.
+
+Lemma escrow_init_eq_ligo_init cctx s :
+  (* The contract should be deployed with non-zero even amount *)
+  (ctx_amount cctx =? 0 = false)%Z ->
+  Z.even (ctx_amount cctx) ->
+  escrow_init_wrapper cctx s = ligo_init (cctx.(ctx_from),s.1, s.2.(current_slot)).
+Proof.
+  intros Hamount Heven.
+  unfold escrow_init_wrapper,init, ligo_init. cbn.
+  rewrite Hamount.
+  now destruct (_ =? _)%address; destruct (Z.even _).
+Qed.
+
 Definition escrow_receive (c : Chain) (cctx : ContractCallContext) (s : State) (msg : option Msg) : option (list ActionBody * State) :=
     match Examples.Escrow.receive c cctx s msg with
     | Some (s, acts) => Some (acts, s)
@@ -61,7 +86,7 @@ Module EscrowCameLIGOExtraction.
     ; ("tt", "()")
     ].
 
-  Definition ESCROW_MODULE_LIGO : CameLIGOMod Msg ContractCallContext (Setup * Chain) State ActionBody :=
+  Definition ESCROW_MODULE_LIGO : CameLIGOMod Msg ContractCallContext _ State ActionBody :=
     {| (* a name for the definition with the extracted code *)
       lmd_module_name := "cameligo_escrow" ;
 
@@ -69,7 +94,7 @@ Module EscrowCameLIGOExtraction.
       lmd_prelude := CameLIGOPrelude;
 
       (* initial storage *)
-      lmd_init := escrow_init_wrapper ;
+      lmd_init := ligo_init ;
 
       (* no extra operations in [init] are required *)
       lmd_init_prelude := "";
