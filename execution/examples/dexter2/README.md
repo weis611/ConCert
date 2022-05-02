@@ -29,9 +29,12 @@ Important lemmas:
 
 # Inter-contract communication reasoning
 
-Lemmas and tactics for [reasoning about communicating contracts](../../theories/InterContractCommunication.v)
+Lemmas and tactics for reasoning about communicating contracts[execution/theories/InterContractCommunication.v](../../theories/InterContractCommunication.v)
 
 # Code extraction to CameLIGO
 
-See [the extraction setup](../../../extraction/examples/Dexter2Extract.v)
+See the extraction setup [extraction/examples/Dexter2Extract.v](../../../extraction/examples/Dexter2Extract.v)
 
+Main Contract code [extraction/examples/extracted-code/cameligo-extract/tests/dexter2CertifiedExtraction.mligo](../../../extraction/examples/extracted-code/cameligo-extract/tests/dexter2CertifiedExtraction.mligo)
+
+Liquidity Token code [extraction/examples/extracted-code/cameligo-extract/tests/dexter2fa12.mligo](../../../extraction/examples/extracted-code/cameligo-extract/tests/dexter2fa12.mligo)

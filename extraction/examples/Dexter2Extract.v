@@ -171,7 +171,7 @@ Module Dexter2LqtExtraction.
 
     (** We prove that the "new" init function, which does not use [chain] and [ctx],
         computes the same result as the contract's init *)
-  Lemma init_total_no_context_use chain ctx setup :
+  Lemma init_lqt_eq_init chain ctx setup :
     Dexter2FA12.DEX2LQT.init_lqt chain ctx setup = init setup.
   Proof. reflexivity. Qed.
 
@@ -294,8 +294,8 @@ Section D2E.
       |}.
 
   (** We prove that the "new" init function, which does not use [chain] and [ctx],
-      is total and computes the same result as the contract's init *)
-  Lemma init_total_no_context_use chain ctx setup :
+        computes the same result as the contract's init *)
+  Lemma init_cpmm_eq_init chain ctx setup :
     Dexter2CPMM.DEX2.init_cpmm chain ctx setup = init setup.
   Proof. reflexivity. Qed.
 

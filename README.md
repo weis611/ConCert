@@ -1,6 +1,6 @@
-# ConCert
+# Dexter 2 formalisation in ConCert
 
-A framework for smart contract verification in Coq.
+The development is also available in an anonymised git repository: https://anonymous.4open.science/r/CCS-Dexter2/
 
 ## How to build
 
