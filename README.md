@@ -23,8 +23,8 @@ The documentation will be located in the docs folder after `make html`.
 
 ## Dexter 2 formalisation
 
-The [execution/examples/dexter2](execution/examples/dexter2/) folder contains implementation and proofs related to the Dexter 2 exchange.
-The folder also contains a README file describing the contents.
+The `execution/examples/dexter2` folder contains implementation and proofs related to the Dexter 2 exchange.
+The folder also contains a [README](execution/examples/dexter2/) file describing the contents.
 
 
 ## Structure of the project
