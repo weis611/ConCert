@@ -1,0 +1,699 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.bat.BATCommon</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab133"></a><h1 class="section">Basic Attention Token</h1>
+ This file contains type definitions, utility functions and lemmas for the Basic Attention Token contract.
+
+<div class="paragraph"> </div>
+
+    The implementation of the Basic Attention Token is a ported of
+    https://github.com/brave-intl/basic-attention-token-crowdsale/blob/66c886cc4bfb0493d9e7980f392ca7921ef1e7fc/contracts/BAToken.sol
+
+<div class="paragraph"> </div>
+
+    Definitions and lemmas defined in this file are used in three different implementations of the Basic Attention Token contract.
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" title="var">ConCert.Execution.Examples.BAT</span></span> Classical implementation
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="var">ConCert.Execution.Examples.BATFixed</span></span> An implementation of the Basic Attention Token contract that fixes some bugs in the original implementation
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="var">ConCert.Execution.Examples.BATAltFix</span></span> An alternative implementation of the Basic Attention Token contract that fixes some bugs in the original implementation
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    The BAT contract is a combination of a EIP20 token contract and a crowdsale contract.
+    The types and definitions in this file extends the EIP20 contract implemented in <span class="inlinecode"><span class="id" title="var">ConCert.Execution.Examples.EIP20Token</span></span>.
+
+</div>
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Lia</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Permutation</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Automation</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Extras</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">RecordUpdate</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.EIP20</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">EIP20Token</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">BATCommon</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>}.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Primitive</span> <span class="id" title="var">Projections</span>.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Nonrecursive</span> <span class="id" title="var">Elimination</span> <span class="id" title="var">Schemes</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TokenValue</span> := <span class="id" title="var">EIP20Token.TokenValue</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">Msg</span> :=<br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+Message types from the EIP20/ERC20 Standard Token: 
+</div>
+<div class="code">
+&nbsp;&nbsp;| <span class="id" title="var">tokenMsg</span> : <span class="id" title="var">EIP20Token.Msg</span> -&gt; <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+Message types specific for BAT:  create_tokens acceps the currency of the chain and converts it to BAT according to the pre-specified exchange rate 
+</div>
+<div class="code">
+&nbsp;&nbsp;| <span class="id" title="var">create_tokens</span> : <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+finalize ends the funding period and sends the chain currency home to the pre-specified fund deposit address. Only callable by this address 
+</div>
+<div class="code">
+&nbsp;&nbsp;| <span class="id" title="var">finalize</span> : <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+Allows contributors to recover their ether in the case of a failed funding campaign. 
+</div>
+<div class="code">
+&nbsp;&nbsp;| <span class="id" title="var">refund</span> : <span class="id" title="var">Msg</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_state</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+State from EIP20Token: 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_state</span>       : <span class="id" title="var">EIP20Token.State</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+State for BAT: 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">initSupply</span>        : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fundDeposit</span>    		: <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">batFundDeposit</span> 		: <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">isFinalized</span>    		: <span class="id" title="var">bool</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fundingStart</span>   		: <span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fundingEnd</span>	 	 		: <span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenExchangeRate</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenCreationCap</span> 	: <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenCreationMin</span> 	: <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">Setup</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_setup</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_batFund</span>						: <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_fundDeposit</span> 				: <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_batFundDeposit</span> 		: <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_fundingStart</span>	  		: <span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_fundingEnd</span>					: <span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+In the reference implementation, the fields below are constants, but we allow setting them at initialisation, in order to test out different values. 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_tokenExchangeRate</span>  : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_tokenCreationCap</span> 	: <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_tokenCreationMin</span> 	: <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">total_supply</span> (<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) := <span class="id" title="var">state</span>.(<span class="id" title="var">token_state</span>).(<span class="id" title="var">EIP20Token.total_supply</span>).<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">balances</span> (<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) := <span class="id" title="var">state</span>.(<span class="id" title="var">token_state</span>).(<span class="id" title="var">EIP20Token.balances</span>).<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">allowances</span> (<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) := <span class="id" title="var">state</span>.(<span class="id" title="var">token_state</span>).(<span class="id" title="var">EIP20Token.allowances</span>).<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">transfer</span> <span class="id" title="var">t</span> <span class="id" title="var">a</span> := <span class="id" title="var">tokenMsg</span> (<span class="id" title="var">EIP20Token.transfer</span> <span class="id" title="var">t</span> <span class="id" title="var">a</span>).<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">transfer_from</span> <span class="id" title="var">f</span> <span class="id" title="var">t</span> <span class="id" title="var">a</span> := <span class="id" title="var">tokenMsg</span> (<span class="id" title="var">EIP20Token.transfer_from</span> <span class="id" title="var">f</span> <span class="id" title="var">t</span> <span class="id" title="var">a</span>).<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">approve</span> <span class="id" title="var">d</span> <span class="id" title="var">a</span> := <span class="id" title="var">tokenMsg</span> (<span class="id" title="var">EIP20Token.approve</span> <span class="id" title="var">d</span> <span class="id" title="var">a</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">serializeMsg</span> <span class="id" title="var">msg</span> := (@<span class="id" title="var">serialize</span> <span class="id" title="var">Msg</span> <span class="id" title="var">_</span>) <span class="id" title="var">msg</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">serializeState</span> <span class="id" title="var">state</span> := (@<span class="id" title="var">serialize</span> <span class="id" title="var">State</span> <span class="id" title="var">_</span>) <span class="id" title="var">state</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">serializeSetup</span> <span class="id" title="var">setup</span> := (@<span class="id" title="var">serialize</span> <span class="id" title="var">Setup</span> <span class="id" title="var">_</span>) <span class="id" title="var">setup</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Global</span> <span class="id" title="keyword">Coercion</span> <span class="id" title="var">serializeMsg</span> : <span class="id" title="var">Msg</span> &gt;-&gt; <span class="id" title="var">SerializedValue</span>.<br/>
+<span class="id" title="keyword">Global</span> <span class="id" title="keyword">Coercion</span> <span class="id" title="var">serializeState</span> : <span class="id" title="var">State</span> &gt;-&gt; <span class="id" title="var">SerializedValue</span>.<br/>
+<span class="id" title="keyword">Global</span> <span class="id" title="keyword">Coercion</span> <span class="id" title="var">serializeSetup</span> : <span class="id" title="var">Setup</span> &gt;-&gt; <span class="id" title="var">SerializedValue</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">finalize_act</span> <span class="id" title="var">cstate</span> <span class="id" title="var">caddr</span> : <span class="id" title="var">Action</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_act</span> (<span class="id" title="var">fundDeposit</span> <span class="id" title="var">cstate</span>) (<span class="id" title="var">fundDeposit</span> <span class="id" title="var">cstate</span>) (<span class="id" title="var">act_call</span> <span class="id" title="var">caddr</span> 0 <span class="id" title="var">finalize</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">deploy_act</span> <span class="id" title="var">setup</span> <span class="id" title="var">contract</span> <span class="id" title="var">from</span> : <span class="id" title="var">Action</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">from</span> <span class="id" title="var">from</span> (<span class="id" title="var">act_deploy</span> 0 <span class="id" title="var">contract</span> <span class="id" title="var">setup</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Utility definitions and lemmas 
+</div>
+<div class="code">
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">N_scope</span>.<br/>
+</div>
+
+<div class="doc">
+Stronger version of N.mod_le.
+    N.mod_le requires that b &lt;&gt; 0, however
+    it is possible to prove the same without
+    that assumption 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">N_mod_le</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">m</span> &lt;= <span class="id" title="var">n</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">edestruct</span> <span class="id" title="var">N.le_gt_cases</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">unfold</span> <span class="id" title="var">N.modulo</span>, <span class="id" title="var">N.div_eucl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">destruct_match</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">N.le_0_l</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">destruct_match</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">apply</span> <span class="id" title="var">N.le_refl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">eapply</span> <span class="id" title="var">N.le_trans</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">N.lt_le_incl</span>, <span class="id" title="var">N.pos_div_eucl_remainder</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">rewrite</span> <span class="id" title="var">N.lt_eq_cases</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">N.mod_small</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">N_sub_add_mod</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> <span class="id" title="var">p</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">n</span> &lt;= <span class="id" title="var">p</span> -&gt; <span class="id" title="var">p</span> - <span class="id" title="var">n</span> + <span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">m</span> &lt;= <span class="id" title="var">p</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">N_mod_le</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">mod_le</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">N.le_trans</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">m</span> := <span class="id" title="var">p</span> - <span class="id" title="var">n</span> + <span class="id" title="var">n</span>).<br/>
+&nbsp;&nbsp;- <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">N.sub_add</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">N_div_mod</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">n</span> / <span class="id" title="var">m</span> * <span class="id" title="var">m</span> = <span class="id" title="var">n</span> - <span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">m</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">symmetry</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">N.add_sub_eq_r</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">symmetry</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">N.mul_comm</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">N.div_mod'</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">N_add_le</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> <span class="id" title="var">p</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">n</span> &lt;= <span class="id" title="var">m</span> -&gt; <span class="id" title="var">n</span> &lt;= <span class="id" title="var">p</span> + <span class="id" title="var">m</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;<span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">N_le_add_distr</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> <span class="id" title="var">p</span>,<br/>
+&nbsp;<span class="id" title="var">n</span> + <span class="id" title="var">m</span> &lt;= <span class="id" title="var">p</span> -&gt; <span class="id" title="var">n</span> &lt;= <span class="id" title="var">p</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">N_le_sub</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> <span class="id" title="var">p</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">p</span> &lt;= <span class="id" title="var">m</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">n</span> &lt;= <span class="id" title="var">m</span> - <span class="id" title="var">p</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">n</span> + <span class="id" title="var">p</span> &lt;= <span class="id" title="var">m</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">N_div_mul_le</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span>,<br/>
+&nbsp;&nbsp;(<span class="id" title="var">n</span> / <span class="id" title="var">m</span>) * <span class="id" title="var">m</span> &lt;= <span class="id" title="var">n</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">erewrite</span> <span class="id" title="var">N.div_mod'</span>, <span class="id" title="var">N.mul_comm</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">N.le_add_r</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">N_sub_mod_le</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">n</span> - <span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">m</span> &lt;= <span class="id" title="var">n</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">N_div_mod</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">N_div_mul_le</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">N_le_div_mul</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">m</span> &lt;&gt; 0 -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">n</span> - <span class="id" title="var">m</span> &lt;= (<span class="id" title="var">n</span> / <span class="id" title="var">m</span>) * <span class="id" title="var">m</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">N.add_le_mono_r</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">N.mul_comm</span>, &lt;- <span class="id" title="var">N.div_mod'</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">N_le_sub</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">N.mod_le</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">N.sub_le_mono_l</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">N.lt_le_incl</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">N.mod_lt</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The balance of a single account is always less than
+    or equal to the sum of all balances 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">balance_le_sum_balances</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">addr</span> <span class="id" title="var">state</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">with_default</span> 0 (<span class="id" title="var">FMap.find</span> <span class="id" title="var">addr</span> (<span class="id" title="var">balances</span> <span class="id" title="var">state</span>)) &lt;= <span class="id" title="var">EIP20Token.sum_balances</span> (<span class="id" title="var">token_state</span> <span class="id" title="var">state</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">FMap.find</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">balance</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">eapply</span> <span class="id" title="var">FMap.In_elements</span>, <span class="id" title="var">sumN_in_le</span> <span class="id" title="tactic">in</span> <span class="id" title="var">balance</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">N.le_trans</span>; <span class="id" title="var">cycle</span> 1; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">apply</span> <span class="id" title="var">N.le_0_l</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">balance_le_sum_balances_ne</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">addr1</span> <span class="id" title="var">addr2</span> <span class="id" title="var">state</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">addr1</span> &lt;&gt; <span class="id" title="var">addr2</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">with_default</span> 0 (<span class="id" title="var">FMap.find</span> <span class="id" title="var">addr1</span> (<span class="id" title="var">balances</span> <span class="id" title="var">state</span>)) &lt;=<br/>
+&nbsp;&nbsp;<span class="id" title="var">EIP20Token.sum_balances</span> (<span class="id" title="var">token_state</span> <span class="id" title="var">state</span>) - <span class="id" title="var">with_default</span> 0 (<span class="id" title="var">FMap.find</span> <span class="id" title="var">addr2</span> (<span class="id" title="var">balances</span> <span class="id" title="var">state</span>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> * <span class="id" title="var">addr_ne</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">FMap.find</span> <span class="id" title="var">addr2</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">balance_addr1</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">unfold</span> <span class="id" title="var">EIP20Token.sum_balances</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">erewrite</span> <span class="id" title="var">sumN_permutation</span> <span class="id" title="tactic">by</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">eapply</span> <span class="id" title="var">Permutation_sym</span>, (<span class="id" title="var">fin_maps.map_to_list_delete</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">n</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">N.add_comm</span>, &lt;- <span class="id" title="var">N.add_sub_assoc</span>, <span class="id" title="var">N.sub_diag</span>, <span class="id" title="var">N.add_0_r</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">FMap.find</span> <span class="id" title="var">addr1</span> (<span class="id" title="var">FMap.remove</span> <span class="id" title="var">addr2</span> (<span class="id" title="var">balances</span> <span class="id" title="var">state</span>))) <span class="id" title="var">eqn</span>:<span class="id" title="var">balance_addr2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">erewrite</span> <span class="id" title="var">sumN_permutation</span> <span class="id" title="tactic">by</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">eapply</span> <span class="id" title="var">Permutation_sym</span>, (<span class="id" title="var">fin_maps.map_to_list_delete</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">t</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">setoid_rewrite</span> <span class="id" title="var">FMap.find_remove_ne</span> <span class="id" title="tactic">in</span> <span class="id" title="var">balance_addr2</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">setoid_rewrite</span> <span class="id" title="var">balance_addr2</span>. <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">setoid_rewrite</span> <span class="id" title="var">FMap.find_remove_ne</span> <span class="id" title="tactic">in</span> <span class="id" title="var">balance_addr2</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">setoid_rewrite</span> <span class="id" title="var">balance_addr2</span>. <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">N.le_0_l</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">rewrite</span> <span class="id" title="var">N.sub_0_r</span>. <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">balance_le_sum_balances</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">Z_div_mult</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> <span class="id" title="var">p</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">p</span> &lt;&gt; 0 -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">n</span> * <span class="id" title="var">p</span> = <span class="id" title="var">m</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">n</span> = <span class="id" title="var">m</span> / <span class="id" title="var">p</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z_div_mult_full</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><a class="idref" href="ConCert.Utils.Extras.html#sumZ"><span class="id" title="definition">sumZ</span></a></span> over balances is always positive 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">sum_balances_positive</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bstate</span> <span class="id" title="var">accounts</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">reachable</span> <span class="id" title="var">bstate</span> -&gt;<br/>
+&nbsp;&nbsp;0 &lt;= <span class="id" title="var">sumZ</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">acc</span> : <span class="id" title="var">Address</span> =&gt; <span class="id" title="var">env_account_balances</span> <span class="id" title="var">bstate</span> <span class="id" title="var">acc</span>) <span class="id" title="var">accounts</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> * <span class="id" title="var">reach</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">sumZ_nonnegative</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">account</span> <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Z.ge_le</span>, <span class="id" title="var">account_balance_nonnegative</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Sums balances of a list of accounts 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">total_balance</span> <span class="id" title="var">bstate</span> <span class="id" title="var">accounts</span> : <span class="id" title="var">Amount</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">account_balance</span> := <span class="id" title="var">env_account_balances</span> <span class="id" title="var">bstate</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sumZ</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">acc</span> =&gt; <span class="id" title="var">account_balance</span> <span class="id" title="var">acc</span>) <span class="id" title="var">accounts</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Sum of balances is always positive 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">total_balance_positive</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bstate</span> <span class="id" title="var">accounts</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">reachable</span> <span class="id" title="var">bstate</span> -&gt; <br/>
+&nbsp;&nbsp;0 &lt;= <span class="id" title="var">total_balance</span> <span class="id" title="var">bstate</span> <span class="id" title="var">accounts</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> * <span class="id" title="var">reach</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">sum_balances_positive</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">Local Close</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">total_balance_distr</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">state</span> <span class="id" title="var">h</span> <span class="id" title="var">t</span> <span class="id" title="var">x</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">reachable</span> <span class="id" title="var">state</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">Z.to_N</span> (<span class="id" title="var">total_balance</span> <span class="id" title="var">state</span> (<span class="id" title="var">h</span> :: <span class="id" title="var">t</span>)) * <span class="id" title="var">x</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Z.to_N</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">state</span> <span class="id" title="var">h</span>) * <span class="id" title="var">x</span> +<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Z.to_N</span> (<span class="id" title="var">total_balance</span> <span class="id" title="var">state</span> <span class="id" title="var">t</span>) * <span class="id" title="var">x</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> * <span class="id" title="var">reach</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z2N.inj_add</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">N.mul_add_distr_r</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Z.ge_le</span>, <span class="id" title="var">account_balance_nonnegative</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">sum_balances_positive</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Total balance equality if all accounts have equal balance 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">total_balance_eq</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">env1</span> <span class="id" title="var">env2</span> <span class="id" title="var">accounts</span>,<br/>
+&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">a</span> <span class="id" title="var">accounts</span> -&gt; <span class="id" title="var">env_account_balances</span> <span class="id" title="var">env1</span> <span class="id" title="var">a</span> = <span class="id" title="var">env_account_balances</span> <span class="id" title="var">env2</span> <span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">total_balance</span> <span class="id" title="var">env1</span> <span class="id" title="var">accounts</span> = <span class="id" title="var">total_balance</span> <span class="id" title="var">env2</span> <span class="id" title="var">accounts</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">sumZ_eq</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">total_balance_le</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">env1</span> <span class="id" title="var">env2</span> <span class="id" title="var">accounts</span>,<br/>
+&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">a</span> <span class="id" title="var">accounts</span> -&gt; <span class="id" title="var">env_account_balances</span> <span class="id" title="var">env1</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">env_account_balances</span> <span class="id" title="var">env2</span> <span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">total_balance</span> <span class="id" title="var">env1</span> <span class="id" title="var">accounts</span> &lt;= <span class="id" title="var">total_balance</span> <span class="id" title="var">env2</span> <span class="id" title="var">accounts</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">sumZ_le</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Pending usage is the total balance that an account has allocated
+    in the pending actions.
+    Does not count actions with negative amount and caps the usage
+    at the balance limit of the account. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">pending_usage</span> <span class="id" title="var">bstate</span> <span class="id" title="var">account</span> : <span class="id" title="var">Amount</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Z.min</span> (<span class="id" title="var">sumZ</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">act</span> =&gt; <span class="id" title="keyword">if</span> <span class="id" title="var">address_eqb</span> <span class="id" title="var">act</span>.(<span class="id" title="var">act_from</span>) <span class="id" title="var">account</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">Z.max</span> 0 (<span class="id" title="var">act_amount</span> <span class="id" title="var">act</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> 0) <span class="id" title="var">bstate</span>.(<span class="id" title="var">chain_state_queue</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">env_account_balances</span> <span class="id" title="var">bstate</span> <span class="id" title="var">account</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Spendable blance is the balance of an account minus their pending
+    usage, i.e. the minimum amount that the account is guaranteed to have
+    available for usage next block. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">spendable_balance</span> (<span class="id" title="var">bstate</span> : <span class="id" title="var">ChainState</span>) <span class="id" title="var">accounts</span> : <span class="id" title="var">Amount</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">account_balance</span> := <span class="id" title="var">env_account_balances</span> <span class="id" title="var">bstate</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sumZ</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">acc</span> =&gt; <span class="id" title="var">account_balance</span> <span class="id" title="var">acc</span> - <span class="id" title="var">pending_usage</span> <span class="id" title="var">bstate</span> <span class="id" title="var">acc</span>) <span class="id" title="var">accounts</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Spendable balance is equal to total balance if there is no
+    pending actions left in the current block. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">spendable_eq_total_balance</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bstate</span> <span class="id" title="var">accounts</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">reachable</span> <span class="id" title="var">bstate</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">chain_state_queue</span> <span class="id" title="var">bstate</span> = [] -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">spendable_balance</span> <span class="id" title="var">bstate</span> <span class="id" title="var">accounts</span> = <span class="id" title="var">total_balance</span> <span class="id" title="var">bstate</span> <span class="id" title="var">accounts</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> * <span class="id" title="var">reach</span> <span class="id" title="var">queue</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">spendable_balance</span>, <span class="id" title="var">total_balance</span>, <span class="id" title="var">pending_usage</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">queue</span>. <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">erewrite</span> <span class="id" title="var">sumZ_eq</span>. <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.min_l</span>, <span class="id" title="var">Z.sub_0_r</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Z.ge_le</span>, <span class="id" title="var">account_balance_nonnegative</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Spendable balance cannot decrease when consuming or discarding
+    actions from the queue. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">spendable_consume_act</span> : <span class="id" title="keyword">forall</span> (<span class="id" title="var">bstate1</span> <span class="id" title="var">bstate2</span> : <span class="id" title="var">ChainState</span>) <span class="id" title="var">accounts</span> <span class="id" title="var">act</span> <span class="id" title="var">acts</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">env_account_balances</span> <span class="id" title="var">bstate1</span> <span class="id" title="var">act</span>.(<span class="id" title="var">act_from</span>) &lt;= <span class="id" title="var">env_account_balances</span> <span class="id" title="var">bstate2</span> <span class="id" title="var">act</span>.(<span class="id" title="var">act_from</span>) + (<span class="id" title="var">Z.max</span> 0 (<span class="id" title="var">act_amount</span> <span class="id" title="var">act</span>)) -&gt;<br/>
+&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">a</span> <span class="id" title="var">accounts</span> -&gt; <span class="id" title="var">a</span> &lt;&gt; <span class="id" title="var">act</span>.(<span class="id" title="var">act_from</span>) -&gt; <span class="id" title="var">env_account_balances</span> <span class="id" title="var">bstate1</span> <span class="id" title="var">a</span> &lt;= <span class="id" title="var">env_account_balances</span> <span class="id" title="var">bstate2</span> <span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">chain_state_queue</span> <span class="id" title="var">bstate1</span> = <span class="id" title="var">act</span> :: <span class="id" title="var">acts</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">chain_state_queue</span> <span class="id" title="var">bstate2</span> = <span class="id" title="var">acts</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">spendable_balance</span> <span class="id" title="var">bstate1</span> <span class="id" title="var">accounts</span> &lt;= <span class="id" title="var">spendable_balance</span> <span class="id" title="var">bstate2</span> <span class="id" title="var">accounts</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> * <span class="id" title="var">act_balance</span> <span class="id" title="var">other_balances</span> <span class="id" title="var">queue_from</span> <span class="id" title="var">queue_to</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">accounts</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">apply</span> <span class="id" title="var">Z.le_refl</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Z.add_le_mono</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">edestruct</span> <span class="id" title="var">address_eqdec</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">from_eq</span> | <span class="id" title="var">from_neq</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">pending_usage</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">queue_from</span>, <span class="id" title="var">queue_to</span>; <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">rewrite</span> <span class="id" title="var">from_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">address_eq_refl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">rewrite</span> <span class="id" title="var">address_eq_ne</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">other_balances</span> <span class="id" title="tactic">in</span> <span class="id" title="var">from_neq</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">in_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">apply</span> <span class="id" title="var">IHaccounts</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">other_balances</span>; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">in_cons</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Spendable balance is always positive 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">spendable_balance_positive</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">bstate</span> <span class="id" title="var">accounts</span>,<br/>
+&nbsp;&nbsp;0 &lt;= <span class="id" title="var">spendable_balance</span> <span class="id" title="var">bstate</span> <span class="id" title="var">accounts</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">sumZ_nonnegative</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">pending_usage</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">Z.sub_max_distr_l</span>, <span class="id" title="var">Z.sub_diag</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Z.le_max_r</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">Local Close</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Function that generated create_token actions.
+    Will keep generating action untill all accounts given have been emptied of balance
+    or the token goal is hit. Also ensures that we do not hit the token creation cap
+    by only creation just enough to go over the token goal. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">create_token_acts</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) <span class="id" title="var">caddr</span> <span class="id" title="var">accounts</span> <span class="id" title="var">tokens_left</span> <span class="id" title="var">exchange_rate</span>:=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">create_tokens_act</span> <span class="id" title="var">sender</span> <span class="id" title="var">amount</span> := <span class="id" title="var">build_act</span> <span class="id" title="var">sender</span> <span class="id" title="var">sender</span> (<span class="id" title="var">act_call</span> <span class="id" title="var">caddr</span> <span class="id" title="var">amount</span> <span class="id" title="var">create_tokens</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">accounts</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; []<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">acc</span> :: <span class="id" title="var">accounts'</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+Dont produce any action for this account if tokens_left = 0 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> 0 &lt;? <span class="id" title="var">tokens_left</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">amount</span> := 1 + ((<span class="id" title="var">tokens_left</span> / <span class="id" title="var">exchange_rate</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+Choose the minimum amount of balance needed to hit tokens_left = 0 or all balance
+            if the account does not have enough balance to hit goal 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">amount</span> := <span class="id" title="var">N.min</span> <span class="id" title="var">amount</span> (<span class="id" title="var">Z.to_N</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">env</span> <span class="id" title="var">acc</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">create_tokens_act</span> <span class="id" title="var">acc</span> (<span class="id" title="var">Z.of_N</span> <span class="id" title="var">amount</span>)) ::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">create_token_acts</span> <span class="id" title="var">env</span> <span class="id" title="var">caddr</span> <span class="id" title="var">accounts'</span> (<span class="id" title="var">N.sub</span> <span class="id" title="var">tokens_left</span> (<span class="id" title="var">amount</span> * <span class="id" title="var">exchange_rate</span>)) <span class="id" title="var">exchange_rate</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">create_token_acts</span> <span class="id" title="var">env</span> <span class="id" title="var">caddr</span> <span class="id" title="var">accounts'</span> <span class="id" title="var">tokens_left</span> <span class="id" title="var">exchange_rate</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">create_token_acts_cons</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">caddr</span> <span class="id" title="var">env</span> <span class="id" title="var">acc</span> <span class="id" title="var">accounts</span> <span class="id" title="var">tokens_left</span> <span class="id" title="var">exchange_rate</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">create_tokens_act</span> <span class="id" title="var">sender</span> <span class="id" title="var">amount</span> := <span class="id" title="var">build_act</span> <span class="id" title="var">sender</span> <span class="id" title="var">sender</span> (<span class="id" title="var">act_call</span> <span class="id" title="var">caddr</span> <span class="id" title="var">amount</span> <span class="id" title="var">create_tokens</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">amount'</span> := 1 + ((<span class="id" title="var">tokens_left</span> / <span class="id" title="var">exchange_rate</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">amount</span> := <span class="id" title="var">N.min</span> <span class="id" title="var">amount'</span> (<span class="id" title="var">Z.to_N</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">env</span> <span class="id" title="var">acc</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">act</span> := <span class="id" title="var">create_tokens_act</span> <span class="id" title="var">acc</span> (<span class="id" title="var">Z.of_N</span> <span class="id" title="var">amount</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;0 &lt; <span class="id" title="var">tokens_left</span>-&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">create_token_acts</span> <span class="id" title="var">env</span> <span class="id" title="var">caddr</span> (<span class="id" title="var">acc</span> :: <span class="id" title="var">accounts</span>) <span class="id" title="var">tokens_left</span> <span class="id" title="var">exchange_rate</span> =<br/>
+&nbsp;&nbsp;<span class="id" title="var">act</span> :: (<span class="id" title="var">create_token_acts</span> <span class="id" title="var">env</span> <span class="id" title="var">caddr</span> <span class="id" title="var">accounts</span> (<span class="id" title="var">tokens_left</span> - (<span class="id" title="var">amount</span> * <span class="id" title="var">exchange_rate</span>))) <span class="id" title="var">exchange_rate</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">destruct_match</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">Htokens_left</span>; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">N.ltb_nlt</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Htokens_left</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">create_token_acts_eq</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">caddr</span> <span class="id" title="var">env1</span> <span class="id" title="var">env2</span> <span class="id" title="var">accounts</span> <span class="id" title="var">tokens_left</span> <span class="id" title="var">exchange_rate</span>,<br/>
+&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">In</span> <span class="id" title="var">a</span> <span class="id" title="var">accounts</span> -&gt; <span class="id" title="var">env_account_balances</span> <span class="id" title="var">env1</span> <span class="id" title="var">a</span> = <span class="id" title="var">env_account_balances</span> <span class="id" title="var">env2</span> <span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">create_token_acts</span> <span class="id" title="var">env1</span> <span class="id" title="var">caddr</span> <span class="id" title="var">accounts</span> <span class="id" title="var">tokens_left</span> <span class="id" title="var">exchange_rate</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">create_token_acts</span> <span class="id" title="var">env2</span> <span class="id" title="var">caddr</span> <span class="id" title="var">accounts</span> <span class="id" title="var">tokens_left</span> <span class="id" title="var">exchange_rate</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">accounts</span>; <span class="id" title="tactic">intros</span> * <span class="id" title="var">env_eq</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">env_eq</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">in_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">do</span> 2 <span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">IHaccounts</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">intros</span>; <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">env_eq</span>, <span class="id" title="var">in_cons</span>).<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+All actions produced by create_token_acts are from accounts 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">create_token_acts_is_account</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">caddr</span> <span class="id" title="var">env</span> <span class="id" title="var">accounts</span> <span class="id" title="var">tokens_left</span> <span class="id" title="var">exchange_rate</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">Forall</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">acc</span> : <span class="id" title="var">Address</span> =&gt; <span class="id" title="var">address_is_contract</span> <span class="id" title="var">acc</span> = <span class="id" title="var">false</span>) <span class="id" title="var">accounts</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> : <span class="id" title="var">Action</span>, <span class="id" title="var">In</span> <span class="id" title="var">x</span> (<span class="id" title="var">create_token_acts</span> <span class="id" title="var">env</span> <span class="id" title="var">caddr</span> <span class="id" title="var">accounts</span> <span class="id" title="var">tokens_left</span> <span class="id" title="var">exchange_rate</span>) -&gt; <span class="id" title="var">act_is_from_account</span> <span class="id" title="var">x</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">accounts</span>; <span class="id" title="tactic">intros</span> * <span class="id" title="var">is_address</span> <span class="id" title="var">act</span> <span class="id" title="var">HIn</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">inversion</span> <span class="id" title="var">HIn</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> <span class="id" title="var">HIn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">list.Forall_cons</span> <span class="id" title="tactic">in</span> <span class="id" title="var">is_address</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">is_address</span> <span class="id" title="var">is_address'</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">destruct_match</span> <span class="id" title="tactic">in</span> <span class="id" title="var">HIn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">HIn</span>; <span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">all</span>: <span class="id" title="tactic">eauto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+All actions produced by create_token_acts have same sender and origin 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">create_token_acts_origin_correct</span>: <span class="id" title="keyword">forall</span> <span class="id" title="var">accounts</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) <span class="id" title="var">caddr</span> <span class="id" title="var">tokens_left</span> <span class="id" title="var">exchange_rate</span>,<br/>
+&nbsp;&nbsp;<span class="id" title="var">Forall</span> <span class="id" title="var">act_origin_is_eq_from</span> (<span class="id" title="var">create_token_acts</span> <span class="id" title="var">env</span> <span class="id" title="var">caddr</span> <span class="id" title="var">accounts</span> <span class="id" title="var">tokens_left</span> <span class="id" title="var">exchange_rate</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">accounts</span>; <span class="id" title="tactic">intros</span> *.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">now</span> <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">destruct_match</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">list.Forall_cons</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intuition</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">address_eq_refl</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">Close</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">N_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">BATCommon</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Definitions from EIP20Token 
+</div>
+<div class="code">
+<span class="id" title="keyword">Notation</span> &quot;'sum_balances' s" := (<span class="id" title="var">EIP20Token.sum_balances</span> (<span class="id" title="var">token_state</span> <span class="id" title="var">s</span>)) (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 60).<br/>
+<span class="id" title="keyword">Notation</span> <span class="id" title="var">get_allowance</span> := <span class="id" title="var">EIP20Token.get_allowance</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

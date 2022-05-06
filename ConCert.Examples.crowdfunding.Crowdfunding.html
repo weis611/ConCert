@@ -1,0 +1,832 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.crowdfunding.Crowdfunding</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+ We develop a deep embedding of a crowdfunding contract and prove some of its functional correctness properties using the corresponding shallow embedding 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Ast</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Notations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">PCUICTranslate</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Prelude</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">SimpleBlockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">TranslationUtils</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Crowdfunding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">CrowdfundingData</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Automation</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ssrbool</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Lia</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">BaseTypes</span> <span class="id" title="var">StdLib</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">list</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Prelude.Maps</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Note that we define the deep embedding (abstract syntax trees) of the data structures and programs using notations. These notations are defined in  <span class="inlinecode"><span class="id" title="var">Ast.v</span></span> and make use of the "custom entries" feature. 
+<div class="paragraph"> </div>
+
+ Brackets like <span class="inlinecode">[\</span> <span class="inlinecode">\]</span> delimit the scope of data type definitions and like <span class="inlinecode">[|</span> <span class="inlinecode">|]</span> the scope of programs 
+<div class="paragraph"> </div>
+
+<a name="lab227"></a><h1 class="section">The crowdfunding contract</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">CrowdfundingContract</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">AcornBlockchain</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab228"></a><h2 class="section">AST of the <span class="inlinecode"><a class="idref" href="ConCert.Execution.Blockchain.html#init"><span class="id" title="projection">init</span></a></span> function</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Module</span> <span class="id" title="var">Init</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Notations</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">crowdfunding_init</span> : <span class="id" title="var">expr</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[| \<span class="id" title="var">c</span> : <span class="id" title="var">SCtx</span> =&gt; \<span class="id" title="var">dl</span> : <span class="id" title="var">Nat</span> =&gt; \<span class="id" title="var">g</span> : <span class="id" title="var">Money</span> =&gt; <span class="id" title="var">mkState</span> 0<span class="id" title="var">z</span> <span class="id" title="var">MNil</span> <span class="id" title="var">dl</span> (<span class="id" title="var">ctx_from</span> <span class="id" title="var">c</span>) <span class="id" title="var">False</span> <span class="id" title="var">g</span> |].<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Unquote</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">init</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">expr_to_tc</span> <span class="id" title="var">Σ'</span> (<span class="id" title="var">indexify</span> <span class="id" title="var">nil</span> <span class="id" title="var">crowdfunding_init</span>)).<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Check</span> <span class="id" title="var">init</span>.<br/>
+&nbsp;<span class="id" title="keyword">End</span> <span class="id" title="var">Init</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab229"></a><h2 class="section">AST of the <span class="inlinecode"><a class="idref" href="ConCert.Execution.Blockchain.html#receive"><span class="id" title="projection">receive</span></a></span> function</h2>
+
+</div>
+<div class="code">
+&nbsp;<span class="id" title="keyword">Module</span> <span class="id" title="var">Receive</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Notations</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We specialise some polymorphic constructors to avoid writing types all the time 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'#Just' a" := [| {<span class="id" title="var">eConstr</span> (<span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">option</span> %&gt;) "Some"}  {<span class="id" title="var">eTy</span> [! <span class="id" title="var">Result</span>!]} {<span class="id" title="var">a</span>}|]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">a</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 1).<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'#Pair' a b" := [| {<span class="id" title="var">eConstr</span> <span class="id" title="var">Prod</span> "pair"}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<span class="id" title="var">eTy</span> (<span class="id" title="var">tyInd</span> <span class="id" title="var">State</span>)}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<span class="id" title="var">eTy</span> <span class="id" title="var">actions_ty</span>} {<span class="id" title="var">a</span>} {<span class="id" title="var">b</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">a</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">b</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 1).<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'#Nothing'" := (<span class="id" title="var">eApp</span> (<span class="id" title="var">eConstr</span> (<span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">option</span> %&gt;) "None") (<span class="id" title="var">eTy</span> [!<span class="id" title="var">Result</span>!]))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">SCtx</span> := <span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">SimpleContractCallContext_coq</span> %&gt;.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">SChain</span> := <span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">SimpleChain_coq</span> %&gt;.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">crowdfunding</span> : <span class="id" title="var">expr</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| \<span class="id" title="var">chain</span> : <span class="id" title="var">SChain</span> =&gt;  \<span class="id" title="var">c</span> : <span class="id" title="var">SCtx</span> =&gt; \<span class="id" title="var">m</span> : <span class="id" title="var">Msg</span> =&gt; \<span class="id" title="var">s</span> : <span class="id" title="var">State</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">bal</span> : <span class="id" title="var">Money</span> := <span class="id" title="var">balance</span> <span class="id" title="var">s</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">now</span> : <span class="id" title="var">Nat</span> := <span class="id" title="var">cur_time</span> <span class="id" title="var">chain</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">tx_amount</span> : <span class="id" title="var">Money</span> := <span class="id" title="var">amount</span> <span class="id" title="var">c</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">sender</span> : <span class="id" title="var">Address</span> := <span class="id" title="var">ctx_from</span> <span class="id" title="var">c</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">own</span> : <span class="id" title="var">Address</span> := <span class="id" title="var">owner</span> <span class="id" title="var">s</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">accs</span> : <span class="id" title="var">Map</span> := <span class="id" title="var">donations</span> <span class="id" title="var">s</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">case</span> <span class="id" title="var">m</span> : <span class="id" title="var">Msg</span> <span class="id" title="keyword">return</span> <span class="id" title="var">Maybe</span> <span class="id" title="var">Result</span> <span class="id" title="keyword">of</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">GetFunds</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">own</span> ==<span class="id" title="var">n</span> <span class="id" title="var">sender</span>) &amp;&amp; (<span class="id" title="var">deadline</span> <span class="id" title="var">s</span> &lt;<span class="id" title="var">n</span> <span class="id" title="var">now</span>) &amp;&amp; (<span class="id" title="keyword">goal</span> <span class="id" title="var">s</span> &lt;= <span class="id" title="var">bal</span>)  <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#<span class="id" title="var">Just</span> (#<span class="id" title="var">Pair</span> (<span class="id" title="var">mkState</span> 0<span class="id" title="var">z</span> <span class="id" title="var">accs</span> <span class="id" title="var">own</span> (<span class="id" title="var">deadline</span> <span class="id" title="var">s</span>) <span class="id" title="var">True</span> (<span class="id" title="keyword">goal</span> <span class="id" title="var">s</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id" title="var">Transfer</span> <span class="id" title="var">bal</span> <span class="id" title="var">sender</span>])<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> #<span class="id" title="var">Nothing</span> : <span class="id" title="var">Maybe</span> <span class="id" title="var">Result</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Donate</span> -&gt; <span class="id" title="keyword">if</span> <span class="id" title="var">now</span> &lt;=<span class="id" title="var">n</span> <span class="id" title="var">deadline</span> <span class="id" title="var">s</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">case</span> (<span class="id" title="var">mfind</span> <span class="id" title="var">accs</span> <span class="id" title="var">sender</span>) : <span class="id" title="var">Maybe</span> <span class="id" title="var">Money</span> <span class="id" title="keyword">return</span> <span class="id" title="var">Maybe</span> <span class="id" title="var">Result</span> <span class="id" title="keyword">of</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Just</span> <span class="id" title="var">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">newmap</span> : <span class="id" title="var">Map</span> := <span class="id" title="var">madd</span> <span class="id" title="var">sender</span> (<span class="id" title="var">v</span> + <span class="id" title="var">tx_amount</span>) <span class="id" title="var">accs</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#<span class="id" title="var">Just</span> (#<span class="id" title="var">Pair</span> (<span class="id" title="var">mkState</span> (<span class="id" title="var">tx_amount</span> + <span class="id" title="var">bal</span>) <span class="id" title="var">newmap</span> <span class="id" title="var">own</span> (<span class="id" title="var">deadline</span> <span class="id" title="var">s</span>) (<span class="id" title="var">done</span> <span class="id" title="var">s</span>) (<span class="id" title="keyword">goal</span> <span class="id" title="var">s</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Nil</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Nothing</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">newmap</span> : <span class="id" title="var">Map</span> := <span class="id" title="var">madd</span> <span class="id" title="var">sender</span> <span class="id" title="var">tx_amount</span> <span class="id" title="var">accs</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#<span class="id" title="var">Just</span> (#<span class="id" title="var">Pair</span> (<span class="id" title="var">mkState</span> (<span class="id" title="var">tx_amount</span> + <span class="id" title="var">bal</span>) <span class="id" title="var">newmap</span> <span class="id" title="var">own</span> (<span class="id" title="var">deadline</span> <span class="id" title="var">s</span>) (<span class="id" title="var">done</span> <span class="id" title="var">s</span>) (<span class="id" title="keyword">goal</span> <span class="id" title="var">s</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Nil</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> #<span class="id" title="var">Nothing</span> : <span class="id" title="var">Maybe</span> <span class="id" title="var">Result</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Claim</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">deadline</span> <span class="id" title="var">s</span> &lt;<span class="id" title="var">n</span> <span class="id" title="var">now</span>) &amp;&amp; (<span class="id" title="var">bal</span> &lt; <span class="id" title="keyword">goal</span> <span class="id" title="var">s</span>) &amp;&amp; (~ <span class="id" title="var">done</span> <span class="id" title="var">s</span>) <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">case</span> (<span class="id" title="var">mfind</span> <span class="id" title="var">accs</span> <span class="id" title="var">sender</span>) : <span class="id" title="var">Maybe</span> <span class="id" title="var">Money</span> <span class="id" title="keyword">return</span> <span class="id" title="var">Maybe</span> <span class="id" title="var">Result</span> <span class="id" title="keyword">of</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Just</span> <span class="id" title="var">v</span> -&gt; <span class="id" title="keyword">let</span> <span class="id" title="var">newmap</span> : <span class="id" title="var">Map</span> := <span class="id" title="var">madd</span> <span class="id" title="var">sender</span> 0<span class="id" title="var">z</span> <span class="id" title="var">accs</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#<span class="id" title="var">Just</span> (#<span class="id" title="var">Pair</span> (<span class="id" title="var">mkState</span> (<span class="id" title="var">bal</span>-<span class="id" title="var">v</span>) <span class="id" title="var">newmap</span> <span class="id" title="var">own</span> (<span class="id" title="var">deadline</span> <span class="id" title="var">s</span>) (<span class="id" title="var">done</span> <span class="id" title="var">s</span>) (<span class="id" title="keyword">goal</span> <span class="id" title="var">s</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id" title="var">Transfer</span> <span class="id" title="var">v</span> <span class="id" title="var">sender</span>])<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Nothing</span> -&gt; #<span class="id" title="var">Nothing</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> #<span class="id" title="var">Nothing</span> : <span class="id" title="var">Maybe</span> <span class="id" title="var">Result</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Unquote</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">receive</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">expr_to_tc</span> <span class="id" title="var">Σ'</span> (<span class="id" title="var">indexify</span> <span class="id" title="var">nil</span> <span class="id" title="var">crowdfunding</span>)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">End</span> <span class="id" title="var">Receive</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CrowdfundingContract</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">CrowdfundingContract</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab230"></a><h1 class="section">Properties of the crowdfunding contract</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">CrowdfundingProperties</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">AcornBlockchain</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Ltac</span> <span class="id" title="var">inv_andb</span> <span class="id" title="var">H</span> := <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Ltac</span> <span class="id" title="var">split_andb</span> := <span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.andb_true_iff</span>;<span class="id" title="tactic">split</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">nat</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Lia</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">deadline_passed</span> <span class="id" title="var">now</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State_coq</span>) := <span class="id" title="var">s</span>.(<span class="id" title="var">deadline_coq</span>) &lt;? <span class="id" title="var">now</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">goal_reached</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State_coq</span>) := (<span class="id" title="var">s</span>.(<span class="id" title="var">goal_coq</span>) &lt;=? <span class="id" title="var">s</span>.(<span class="id" title="var">balance_coq</span>))%<span class="id" title="var">Z</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">funded</span> <span class="id" title="var">now</span> (<span class="id" title="var">s</span> : <span class="id" title="var">State_coq</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">deadline_passed</span> <span class="id" title="var">now</span> <span class="id" title="var">s</span> &amp;&amp; <span class="id" title="var">goal_reached</span> <span class="id" title="var">s</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">not_leb</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> : ~~ (<span class="id" title="var">n</span> &lt;=? <span class="id" title="var">m</span>) -&gt; <span class="id" title="var">m</span> &lt;? <span class="id" title="var">n</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">Nat.ltb</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_true</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.negb_true_iff</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.leb_gt</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.leb_le</span> <span class="id" title="tactic">in</span> *. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">not_ltb</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> : ~~ (<span class="id" title="var">n</span> &lt;? <span class="id" title="var">m</span>) -&gt; <span class="id" title="var">m</span> &lt;=? <span class="id" title="var">n</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">Nat.ltb</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_true</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.negb_true_iff</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.leb_gt</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.leb_le</span> <span class="id" title="tactic">in</span> *. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">Znot_leb</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> : ~~ (<span class="id" title="var">n</span> &lt;=? <span class="id" title="var">m</span>)%<span class="id" title="var">Z</span> -&gt; (<span class="id" title="var">m</span> &lt;? <span class="id" title="var">n</span>)%<span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_true</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.negb_true_iff</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.leb_gt</span> <span class="id" title="tactic">in</span> *. <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.ltb_lt</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">Znot_ltb</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> : ~~ (<span class="id" title="var">n</span> &lt;? <span class="id" title="var">m</span>)%<span class="id" title="var">Z</span> -&gt; (<span class="id" title="var">m</span> &lt;=? <span class="id" title="var">n</span>)%<span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_true</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.negb_true_iff</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.ltb_nlt</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.leb_le</span> <span class="id" title="tactic">in</span> *. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This lemma states that the only relevant part of the blockchain state is the current slot, because we check if the deadline have passed by comparing the deadline recoded in the internal state with the current slot number.
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">receive_blockchain_state</span> <span class="id" title="var">height1</span> <span class="id" title="var">height2</span> <span class="id" title="var">cur_slot</span> <span class="id" title="var">fheight1</span> <span class="id" title="var">fheight2</span> <span class="id" title="var">msg</span> <span class="id" title="var">st</span> <span class="id" title="var">ctx</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Receive.receive</span> (<span class="id" title="var">Build_chain_coq</span> <span class="id" title="var">height1</span> <span class="id" title="var">cur_slot</span> <span class="id" title="var">fheight1</span>) <span class="id" title="var">ctx</span> <span class="id" title="var">msg</span> <span class="id" title="var">st</span>  =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Receive.receive</span> (<span class="id" title="var">Build_chain_coq</span> <span class="id" title="var">height2</span> <span class="id" title="var">cur_slot</span> <span class="id" title="var">fheight2</span>) <span class="id" title="var">ctx</span> <span class="id" title="var">msg</span> <span class="id" title="var">st</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">match</span> <span class="id" title="keyword">goal</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [ |- <span class="id" title="keyword">context</span>[(<span class="id" title="keyword">if</span> ?<span class="id" title="var">x</span> <span class="id" title="keyword">then</span> <span class="id" title="var">_</span> <span class="id" title="keyword">else</span> <span class="id" title="var">_</span> )] ] =&gt; <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">Hx</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>);<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This function is a simplistic execution environment that performs one step of execution 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">run</span> (<span class="id" title="var">receive</span> : <span class="id" title="var">State_coq</span> -&gt; <span class="id" title="var">option</span> (<span class="id" title="var">State_coq</span> * <span class="id" title="var">list</span> <span class="id" title="var">SimpleActionBody_coq</span>) ) (<span class="id" title="var">init</span> : <span class="id" title="var">State_coq</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">State_coq</span> * <span class="id" title="var">list</span> <span class="id" title="var">SimpleActionBody_coq</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">receive</span> <span class="id" title="var">init</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">fin</span>, <span class="id" title="var">out</span>) =&gt; (<span class="id" title="var">fin</span>, <span class="id" title="var">out</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; (<span class="id" title="var">init</span>, []) <span class="comment">(*&nbsp;if&nbsp;an&nbsp;error&nbsp;occurs,&nbsp;the&nbsp;state&nbsp;remains&nbsp;the&nbsp;same&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A wrapper for the assertions about the contract execution 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">assertion</span> (<span class="id" title="var">pre</span> : <span class="id" title="var">State_coq</span> -&gt; <span class="id" title="keyword">Prop</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">entry</span> : <span class="id" title="var">State_coq</span> -&gt; <span class="id" title="var">option</span> (<span class="id" title="var">State_coq</span> * <span class="id" title="var">list</span> <span class="id" title="var">SimpleActionBody_coq</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">post</span> : <span class="id" title="var">State_coq</span> -&gt; <span class="id" title="var">list</span> <span class="id" title="var">SimpleActionBody_coq</span> -&gt; <span class="id" title="keyword">Prop</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">init</span>, <span class="id" title="var">pre</span> <span class="id" title="var">init</span> -&gt; <span class="id" title="tactic">exists</span> <span class="id" title="var">fin</span> <span class="id" title="var">out</span>, <span class="id" title="var">run</span> <span class="id" title="var">entry</span> <span class="id" title="var">init</span> = (<span class="id" title="var">fin</span>, <span class="id" title="var">out</span>) /\ <span class="id" title="var">post</span> <span class="id" title="var">fin</span> <span class="id" title="var">out</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;{{ P }} c {{ Q }}" := (<span class="id" title="var">assertion</span> <span class="id" title="var">P</span> <span class="id" title="var">c</span> <span class="id" title="var">Q</span>)( <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 50).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The donations can be paid back to the backers if the goal is not
+reached within a deadline 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">get_money_back_guarantee</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">BC</span> (<span class="id" title="var">sender</span> := <span class="id" title="var">CallCtx</span>.(<span class="id" title="var">Ctx_from</span>)) <span class="id" title="var">v</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;pre-condition&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">init</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">deadline_passed</span> <span class="id" title="var">BC</span>.(<span class="id" title="var">Current_slot</span>) <span class="id" title="var">init</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ ~~ (<span class="id" title="var">goal_reached</span> <span class="id" title="var">init</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ ~~ <span class="id" title="var">init</span>.(<span class="id" title="var">done_coq</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">lookup_map</span> <span class="id" title="var">init</span>.(<span class="id" title="var">donations_coq</span>) <span class="id" title="var">sender</span> = <span class="id" title="var">Some</span> <span class="id" title="var">v</span> }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;contract&nbsp;call&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Receive.receive</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">Claim_coq</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;post-condition&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">fin</span> <span class="id" title="var">out</span> =&gt; <span class="id" title="var">lookup_map</span> <span class="id" title="var">fin</span>.(<span class="id" title="var">donations_coq</span>) <span class="id" title="var">sender</span> = <span class="id" title="var">Some</span> 0%<span class="id" title="var">Z</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">In</span> (<span class="id" title="var">Act_transfer</span> <span class="id" title="var">sender</span> <span class="id" title="var">v</span>) <span class="id" title="var">out</span>}}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">assertion</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">init</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hdl</span> [<span class="id" title="var">Hgoal</span> [<span class="id" title="var">Hndone</span> <span class="id" title="var">Hlook</span>]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">deadline_passed</span>,<span class="id" title="var">goal_reached</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">balance_coq</span> <span class="id" title="var">init</span> &lt;? <span class="id" title="var">goal_coq</span> <span class="id" title="var">init</span> = <span class="id" title="var">true</span>)%<span class="id" title="var">Z</span> <span class="id" title="tactic">by</span> <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Znot_leb</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>)%<span class="id" title="var">Z</span>;<span class="id" title="var">tryfalse</span>. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (~~ <span class="id" title="var">done_coq</span> <span class="id" title="var">_</span>)%<span class="id" title="var">bool</span>;<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">lookup_map</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hlook</span>;<span class="id" title="tactic">subst</span>;<span class="id" title="tactic">clear</span> <span class="id" title="var">Hlook</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">split</span>;<span class="id" title="var">cbn</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">lookup_map_add</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">constructor</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+New donations are recorded correctly in the contract's state 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">new_donation_correct</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">BC</span> (<span class="id" title="var">sender</span> := <span class="id" title="var">CallCtx</span>.(<span class="id" title="var">Ctx_from</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">donation</span> := <span class="id" title="var">CallCtx</span>.(<span class="id" title="var">Ctx_amount</span>)) :<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">init</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sender</span> ∉ <span class="id" title="var">init</span>.(<span class="id" title="var">donations_coq</span>) <span class="comment">(*&nbsp;the&nbsp;sender&nbsp;have&nbsp;not&nbsp;donated&nbsp;before&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ ~~ <span class="id" title="var">deadline_passed</span> <span class="id" title="var">BC</span>.(<span class="id" title="var">Current_slot</span>) <span class="id" title="var">init</span> }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;contract&nbsp;call&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Receive.receive</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">Donate_coq</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">fin</span> <span class="id" title="var">out</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;nothing&nbsp;gets&nbsp;transferred&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">out</span> = []<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;donation&nbsp;has&nbsp;been&nbsp;accepted&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">lookup_map</span> <span class="id" title="var">fin</span>.(<span class="id" title="var">donations_coq</span>) <span class="id" title="var">sender</span> = <span class="id" title="var">Some</span> <span class="id" title="var">donation</span>  }}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">assertion</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">init</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hnew_sender</span> <span class="id" title="var">Hdl</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">deadline_passed</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">apply</span> <span class="id" title="var">not_ltb</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hdl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;=? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">inmap_map</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">lookup_map</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">split</span>;<span class="id" title="tactic">eauto</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">lookup_map_add</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Existing donations are updated correctly in the contract's state 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">existing_donation_correct</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> (<span class="id" title="var">sender</span> := <span class="id" title="var">CallCtx</span>.(<span class="id" title="var">Ctx_from</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">new_don</span> := <span class="id" title="var">CallCtx</span>.(<span class="id" title="var">Ctx_amount</span>)) <span class="id" title="var">old_don</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">init</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;sender&nbsp;has&nbsp;already&nbsp;donated&nbsp;before&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lookup_map</span> <span class="id" title="var">init</span>.(<span class="id" title="var">donations_coq</span>) <span class="id" title="var">sender</span> = <span class="id" title="var">Some</span> <span class="id" title="var">old_don</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ ~~ <span class="id" title="var">deadline_passed</span> <span class="id" title="var">BC</span>.(<span class="id" title="var">Current_slot</span>) <span class="id" title="var">init</span> }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Receive.receive</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">Donate_coq</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">fin</span> <span class="id" title="var">out</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;nothing&nbsp;gets&nbsp;transferred&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">out</span> = []<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;donation&nbsp;has&nbsp;been&nbsp;added&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">lookup_map</span> <span class="id" title="var">fin</span>.(<span class="id" title="var">donations_coq</span>) <span class="id" title="var">sender</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">old_don</span> + <span class="id" title="var">new_don</span>)%<span class="id" title="var">Z</span> }}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">assertion</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">init</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">sender</span> <span class="id" title="var">new_don</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hsender</span> <span class="id" title="var">Hdl</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">deadline_passed</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eexists</span>. <span class="id" title="tactic">eexists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">apply</span> <span class="id" title="var">not_ltb</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hdl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;=? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">lookup_map</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hsender</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">split</span>;<span class="id" title="tactic">simpl</span>;<span class="id" title="tactic">eauto</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">lookup_map_add</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">sum_map</span> (<span class="id" title="var">m</span> : <span class="id" title="var">addr_map_coq</span>) : <span class="id" title="var">Z</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">mnil</span> =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">mcons</span> <span class="id" title="var">_</span> <span class="id" title="var">v</span> <span class="id" title="var">m'</span> =&gt; <span class="id" title="var">v</span> + <span class="id" title="var">sum_map</span> <span class="id" title="var">m'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">all_non_neg_sum_map</span> <span class="id" title="var">m</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">map_forallb</span> (<span class="id" title="var">Z.leb</span> 0) <span class="id" title="var">m</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">sum_map</span> <span class="id" title="var">m</span> &gt;= 0)%<span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">m</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">simpl</span>;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="var">inv_andb</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">IHm</span> <span class="id" title="var">H0</span>). <span class="id" title="var">propify</span>. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">sum_map_add_in</span> <span class="id" title="var">m</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n0</span> (<span class="id" title="var">v'</span> <span class="id" title="var">v</span> : <span class="id" title="var">Z</span>) <span class="id" title="var">k</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lookup_map</span> <span class="id" title="var">m</span> <span class="id" title="var">k</span> = <span class="id" title="var">Some</span> <span class="id" title="var">n0</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_map</span> <span class="id" title="var">m</span> = <span class="id" title="var">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_map</span> (<span class="id" title="var">add_map</span> <span class="id" title="var">k</span> (<span class="id" title="var">n0</span>+<span class="id" title="var">v'</span>) <span class="id" title="var">m</span>) = (<span class="id" title="var">v'</span> + <span class="id" title="var">v</span>)%<span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">n0</span>. <span class="id" title="var">revert</span> <span class="id" title="var">v'</span> <span class="id" title="var">k</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">m</span>;<span class="id" title="tactic">intros</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">k</span> =? <span class="id" title="var">n</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hkn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">subst</span>. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">IHm</span>;<span class="id" title="tactic">auto</span>. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">sum_map_add_not_in</span> <span class="id" title="var">m</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">v'</span> <span class="id" title="var">v</span> <span class="id" title="var">k</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lookup_map</span> <span class="id" title="var">m</span> <span class="id" title="var">k</span> = <span class="id" title="var">None</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_map</span> <span class="id" title="var">m</span> = <span class="id" title="var">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_map</span> (<span class="id" title="var">add_map</span> <span class="id" title="var">k</span> <span class="id" title="var">v'</span> <span class="id" title="var">m</span>) = (<span class="id" title="var">v'</span> + <span class="id" title="var">v</span>)%<span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">k</span>. <span class="id" title="var">revert</span> <span class="id" title="var">v'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">m</span>;<span class="id" title="tactic">intros</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">k</span> =? <span class="id" title="var">n</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hkn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">IHm</span>;<span class="id" title="tactic">auto</span>. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">sum_map_sub_in</span> <span class="id" title="var">m</span> <span class="id" title="var">k</span> <span class="id" title="var">z</span> <span class="id" title="var">v</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lookup_map</span> <span class="id" title="var">m</span> <span class="id" title="var">k</span> = <span class="id" title="var">Some</span> <span class="id" title="var">z</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_map</span> <span class="id" title="var">m</span> = <span class="id" title="var">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_map</span> (<span class="id" title="var">add_map</span> <span class="id" title="var">k</span> 0 <span class="id" title="var">m</span>) = (<span class="id" title="var">v</span> - <span class="id" title="var">z</span>)%<span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">k</span>. <span class="id" title="var">revert</span> <span class="id" title="var">z</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">m</span>;<span class="id" title="tactic">intros</span>;<span class="id" title="tactic">subst</span>;<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">k</span> =? <span class="id" title="var">n</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hkn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">simpl</span>. <span class="id" title="var">now</span> <span class="id" title="var">erewrite</span> <span class="id" title="var">IHm</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The contract does no leak funds: the overall balance before the deadline is always equal to the sum of individual donations 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">consistent_balance_deadline</span> <span class="id" title="var">current_slot</span> <span class="id" title="var">state</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~~ <span class="id" title="var">deadline_passed</span> <span class="id" title="var">current_slot</span> <span class="id" title="var">state</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">sum_map</span> (<span class="id" title="var">donations_coq</span> <span class="id" title="var">state</span>) = <span class="id" title="var">balance_coq</span> <span class="id" title="var">state</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This lemma holds for any message  
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">contract_backed</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">msg</span> :<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="var">consistent_balance_deadline</span> (<span class="id" title="var">Current_slot</span> <span class="id" title="var">BC</span>) }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Receive.receive</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">msg</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">fin</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">consistent_balance_deadline</span> (<span class="id" title="var">Current_slot</span> <span class="id" title="var">BC</span>) <span class="id" title="var">fin</span> }}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">init</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;destruct&nbsp;H&nbsp;as&nbsp;<span class="inlinecode"><span class="id" title="var">Hdl</span></span> <span class="inlinecode"><span class="id" title="var">Hsum</span></span>.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;Donate&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;specialize&nbsp;Hdl&nbsp;as&nbsp;Hdl'.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">consistent_balance_deadline</span>,<span class="id" title="var">deadline_passed</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>,<span class="id" title="var">consistent_balance_deadline</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;apply&nbsp;not_ltb&nbsp;in&nbsp;Hdl.&nbsp;&nbsp;simpl.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;=? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">destruct</span> (<span class="id" title="var">lookup_map</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hlook</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">intro</span> <span class="id" title="var">Hdl</span>;<span class="id" title="tactic">eauto</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">sum_map_add_in</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">intro</span> <span class="id" title="var">Hdl</span>;<span class="id" title="tactic">eauto</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">sum_map_add_not_in</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">intro</span> <span class="id" title="var">Hdl</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;GetFunds&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">consistent_balance_deadline</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">deadline_passed</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">deadline_coq</span> <span class="id" title="var">init</span> &lt;? <span class="id" title="var">Current_slot</span> <span class="id" title="var">BC</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hdl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**  <span class="comment">(*&nbsp;it&nbsp;is&nbsp;not&nbsp;possible&nbsp;to&nbsp;get&nbsp;funds&nbsp;before&nbsp;the&nbsp;deadline,&nbsp;so&nbsp;the&nbsp;state&nbsp;is&nbsp;not&nbsp;modified&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">match</span> <span class="id" title="keyword">goal</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [ |- <span class="id" title="keyword">context</span>[(<span class="id" title="keyword">if</span> ?<span class="id" title="var">x</span> <span class="id" title="keyword">then</span> <span class="id" title="var">_</span> <span class="id" title="keyword">else</span> <span class="id" title="var">_</span> )] ] =&gt; <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">Hx</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>);<span class="id" title="tactic">eauto</span>; <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">intros</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.andb_false_r</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;Claim&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">consistent_balance_deadline</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">deadline_passed</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">deadline_coq</span> <span class="id" title="var">init</span> &lt;? <span class="id" title="var">Current_slot</span> <span class="id" title="var">BC</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hdl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**  <span class="comment">(*&nbsp;it&nbsp;is&nbsp;not&nbsp;possible&nbsp;to&nbsp;get&nbsp;funds&nbsp;before&nbsp;the&nbsp;deadline,&nbsp;so&nbsp;the&nbsp;state&nbsp;is&nbsp;not&nbsp;modified&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">match</span> <span class="id" title="keyword">goal</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [ |- <span class="id" title="keyword">context</span>[(<span class="id" title="keyword">if</span> ?<span class="id" title="var">x</span> <span class="id" title="keyword">then</span> <span class="id" title="var">_</span> <span class="id" title="keyword">else</span> <span class="id" title="var">_</span> )] ] =&gt; <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">Hx</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">try</span> <span class="id" title="tactic">destruct</span> (<span class="id" title="var">lookup_map</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>);<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">eauto</span>; <span class="id" title="tactic">intros</span>;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.andb_false_l</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">consistent_balance</span> <span class="id" title="var">state</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~~ <span class="id" title="var">state</span>.(<span class="id" title="var">done_coq</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">sum_map</span> (<span class="id" title="var">donations_coq</span> <span class="id" title="var">state</span>) = <span class="id" title="var">balance_coq</span> <span class="id" title="var">state</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This lemma holds for any message  
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">contract_state_consistent</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">msg</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="var">consistent_balance</span> }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Receive.receive</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">msg</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">fin</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">consistent_balance</span> <span class="id" title="var">fin</span> }}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">init</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;destruct&nbsp;H&nbsp;as&nbsp;<span class="inlinecode"><span class="id" title="var">Hdl</span></span> <span class="inlinecode"><span class="id" title="var">Hsum</span></span>.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;Donate&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;specialize&nbsp;Hdl&nbsp;as&nbsp;Hdl'.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">consistent_balance</span>,<span class="id" title="var">deadline_passed</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>,<span class="id" title="var">consistent_balance</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;apply&nbsp;not_ltb&nbsp;in&nbsp;Hdl.&nbsp;&nbsp;simpl.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;=? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">destruct</span> (<span class="id" title="var">lookup_map</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hlook</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">intro</span> <span class="id" title="var">Hdl</span>;<span class="id" title="tactic">eauto</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">sum_map_add_in</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">intro</span> <span class="id" title="var">Hdl</span>;<span class="id" title="tactic">eauto</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">sum_map_add_not_in</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">intro</span> <span class="id" title="var">Hdl</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;GetFunds&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">consistent_balance</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">match</span> <span class="id" title="keyword">goal</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [ |- <span class="id" title="keyword">context</span>[(<span class="id" title="keyword">if</span> ?<span class="id" title="var">x</span> <span class="id" title="keyword">then</span> <span class="id" title="var">_</span> <span class="id" title="keyword">else</span> <span class="id" title="var">_</span> )] ] =&gt; <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">Hx</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>);<span class="id" title="tactic">eauto</span>; <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">intros</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;Claim&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">consistent_balance</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">deadline_passed</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">done_coq</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hdone</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.andb_false_r</span>. <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">done_coq</span> <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* (<span class="id" title="keyword">match</span> <span class="id" title="keyword">goal</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [ |- <span class="id" title="keyword">context</span>[(<span class="id" title="keyword">if</span> ?<span class="id" title="var">x</span> <span class="id" title="keyword">then</span> <span class="id" title="var">_</span> <span class="id" title="keyword">else</span> <span class="id" title="var">_</span> )] ] =&gt; <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">Hx</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">try</span> <span class="id" title="tactic">destruct</span> (<span class="id" title="var">lookup_map</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hlook</span>;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">eauto</span>; <span class="id" title="tactic">intros</span>;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">sum_map_sub_in</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">donations_non_neg</span> <span class="id" title="var">init</span> := <span class="id" title="var">map_forallb</span> (<span class="id" title="var">Z.leb</span> 0%<span class="id" title="var">Z</span>) <span class="id" title="var">init</span>.(<span class="id" title="var">donations_coq</span>) = <span class="id" title="var">true</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">non_neg_add_in</span> <span class="id" title="var">m</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n0</span> (<span class="id" title="var">v'</span> : <span class="id" title="var">Z</span>) <span class="id" title="var">k</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;= <span class="id" title="var">v'</span>)%<span class="id" title="var">Z</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lookup_map</span> <span class="id" title="var">m</span> <span class="id" title="var">k</span> = <span class="id" title="var">Some</span> <span class="id" title="var">n0</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">map_forallb</span> (<span class="id" title="var">Z.leb</span> 0%<span class="id" title="var">Z</span>) <span class="id" title="var">m</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">map_forallb</span> (<span class="id" title="var">Z.leb</span> 0%<span class="id" title="var">Z</span>) (<span class="id" title="var">add_map</span> <span class="id" title="var">k</span> (<span class="id" title="var">n0</span>+<span class="id" title="var">v'</span>) <span class="id" title="var">m</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">n0</span>. <span class="id" title="var">revert</span> <span class="id" title="var">k</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">m</span>;<span class="id" title="tactic">intros</span> <span class="id" title="var">k</span> <span class="id" title="var">n0</span> <span class="id" title="var">Hlook</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">inversion</span> <span class="id" title="var">Hlook</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">k</span> =? <span class="id" title="var">n</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hkn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">inversion</span> <span class="id" title="var">Hlook</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">inv_andb</span> <span class="id" title="var">H1</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>;<span class="id" title="var">split_andb</span>;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">propify</span>;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">inv_andb</span> <span class="id" title="var">H1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="var">propify</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">non_neg_add_not_in</span> <span class="id" title="var">m</span> : <span class="id" title="keyword">forall</span> (<span class="id" title="var">v'</span> : <span class="id" title="var">Z</span>) <span class="id" title="var">k</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;= <span class="id" title="var">v'</span>)%<span class="id" title="var">Z</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lookup_map</span> <span class="id" title="var">m</span> <span class="id" title="var">k</span> = <span class="id" title="var">None</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">map_forallb</span> (<span class="id" title="var">Z.leb</span> 0%<span class="id" title="var">Z</span>) <span class="id" title="var">m</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">map_forallb</span> (<span class="id" title="var">Z.leb</span> 0%<span class="id" title="var">Z</span>) (<span class="id" title="var">add_map</span> <span class="id" title="var">k</span> <span class="id" title="var">v'</span> <span class="id" title="var">m</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">m</span>;<span class="id" title="tactic">intros</span> ? ? <span class="id" title="var">Hnneg</span> <span class="id" title="var">Hlook</span> <span class="id" title="var">H</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="var">split_andb</span>;<span class="id" title="var">now</span> <span class="id" title="var">propify</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">k</span> =? <span class="id" title="var">n</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hkn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">inv_andb</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.eqb_eq</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>;<span class="id" title="var">split_andb</span>;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">propify</span>;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">inv_andb</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="var">propify</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">non_neg_add_0</span> <span class="id" title="var">m</span> <span class="id" title="var">k</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">map_forallb</span> (<span class="id" title="var">Z.leb</span> 0%<span class="id" title="var">Z</span>) <span class="id" title="var">m</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">map_forallb</span> (<span class="id" title="var">Z.leb</span> 0%<span class="id" title="var">Z</span>) (<span class="id" title="var">add_map</span> <span class="id" title="var">k</span> 0 <span class="id" title="var">m</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">m</span>;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">easy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">k</span> =? <span class="id" title="var">n</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hkn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="var">inv_andb</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">inv_andb</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="var">propify</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+All the entries in the table of contributions contain non-negative amounts  
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">contract_state_donation_non_neg</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">msg</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;= <span class="id" title="var">CallCtx</span>.(<span class="id" title="var">Ctx_amount</span>))%<span class="id" title="var">Z</span> -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="var">donations_non_neg</span> }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Receive.receive</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">msg</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">fin</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">donations_non_neg</span> <span class="id" title="var">fin</span> }}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">Hamount</span> <span class="id" title="var">init</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;Donate&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;specialize&nbsp;Hdl&nbsp;as&nbsp;Hdl'.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">consistent_balance</span>,<span class="id" title="var">deadline_passed</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>,<span class="id" title="var">consistent_balance</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;apply&nbsp;not_ltb&nbsp;in&nbsp;Hdl.&nbsp;&nbsp;simpl.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;=? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">destruct</span> (<span class="id" title="var">lookup_map</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hlook</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (0 &lt;=? <span class="id" title="var">z</span>)%<span class="id" title="var">Z</span> <span class="id" title="tactic">by</span> <span class="id" title="var">now</span> <span class="id" title="tactic">eapply</span> <span class="id" title="var">map_forallb_lookup_map</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">donations_non_neg</span>. <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">non_neg_add_in</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">donations_non_neg</span>. <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">non_neg_add_not_in</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;GetFunds&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">donations_non_neg</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">match</span> <span class="id" title="keyword">goal</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [ |- <span class="id" title="keyword">context</span>[(<span class="id" title="keyword">if</span> ?<span class="id" title="var">x</span> <span class="id" title="keyword">then</span> <span class="id" title="var">_</span> <span class="id" title="keyword">else</span> <span class="id" title="var">_</span> )] ] =&gt; <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">Hx</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>);<span class="id" title="tactic">eauto</span>; <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">intros</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;Claim&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">donations_non_neg</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">match</span> <span class="id" title="keyword">goal</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [ |- <span class="id" title="keyword">context</span>[(<span class="id" title="keyword">if</span> ?<span class="id" title="var">x</span> <span class="id" title="keyword">then</span> <span class="id" title="var">_</span> <span class="id" title="keyword">else</span> <span class="id" title="var">_</span> )] ] =&gt; <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">Hx</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">try</span> <span class="id" title="tactic">destruct</span> (<span class="id" title="var">lookup_map</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hlook</span>;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">eexists</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">non_neg_add_0</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The owner gets the money after the deadline, if the goal is reached 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">GetFunds_correct</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> (<span class="id" title="var">OwnerAddr</span> := <span class="id" title="var">CallCtx</span>.(<span class="id" title="var">Ctx_from</span>)) (<span class="id" title="var">funds</span> : <span class="id" title="var">Z</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">init</span> =&gt; <span class="id" title="var">funded</span> <span class="id" title="var">BC</span>.(<span class="id" title="var">Current_slot</span>) <span class="id" title="var">init</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">init</span>.(<span class="id" title="var">owner_coq</span>) =? <span class="id" title="var">OwnerAddr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">balance_coq</span> <span class="id" title="var">init</span> = <span class="id" title="var">funds</span> }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Receive.receive</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">GetFunds_coq</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">fin</span> <span class="id" title="var">out</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;money&nbsp;are&nbsp;sent&nbsp;back&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> (<span class="id" title="var">Act_transfer</span> <span class="id" title="var">OwnerAddr</span> <span class="id" title="var">funds</span>) <span class="id" title="var">out</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;set&nbsp;balance&nbsp;to&nbsp;0&nbsp;after&nbsp;withdrawing&nbsp;by&nbsp;the&nbsp;owner&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\  <span class="id" title="var">fin</span>.(<span class="id" title="var">balance_coq</span>) = 0%<span class="id" title="var">Z</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;set&nbsp;the&nbsp;"done"&nbsp;flag&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">fin</span>.(<span class="id" title="var">done_coq</span>) = <span class="id" title="var">true</span>}}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">assertion</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">init</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hfunded</span> [<span class="id" title="var">Hown</span> <span class="id" title="var">Hbalance</span>]]. <span class="id" title="tactic">unfold</span> <span class="id" title="var">funded</span>,<span class="id" title="var">goal_reached</span>,<span class="id" title="var">deadline_passed</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">subst</span> <span class="id" title="var">OwnerAddr</span>. <span class="id" title="tactic">eexists</span>. <span class="id" title="tactic">eexists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>. <span class="id" title="tactic">destruct</span> ( <span class="id" title="var">_</span> =? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;=? <span class="id" title="var">_</span>)%<span class="id" title="var">Z</span>;<span class="id" title="var">tryfalse</span>. <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">split</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">constructor</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Backers cannot claim their money if the campaign have succeed (but owner haven't claimed the money yet, so the "done" flag is not set to <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a></span>) 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">no_claim_if_succeeded</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">the_state</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">init</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">funded</span> <span class="id" title="var">BC</span>.(<span class="id" title="var">Current_slot</span>) <span class="id" title="var">init</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ ~~ <span class="id" title="var">init</span>.(<span class="id" title="var">done_coq</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">init</span> = <span class="id" title="var">the_state</span> }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Receive.receive</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">Claim_coq</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Nothing&nbsp;happens&nbsp;-&nbsp;the&nbsp;stated&nbsp;stays&nbsp;the&nbsp;same&nbsp;and&nbsp;no&nbsp;outgoing&nbsp;transfers&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">fin</span> <span class="id" title="var">out</span> =&gt; <span class="id" title="var">fin</span> = <span class="id" title="var">the_state</span> /\ <span class="id" title="var">out</span> = [] }}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">assertion</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">init</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">funded</span>,<span class="id" title="var">deadline_passed</span>,<span class="id" title="var">goal_reached</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hdl</span> [<span class="id" title="var">Hgoal</span> <span class="id" title="var">Hst</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">inv_andb</span> <span class="id" title="var">Hdl</span>. <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">the_state</span>. <span class="id" title="tactic">eexists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">the_state</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">i_balance</span> <span class="id" title="var">i_dons</span> <span class="id" title="var">i_own</span> <span class="id" title="var">i_dl</span> <span class="id" title="var">i_done</span> <span class="id" title="var">i_goal</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">CallCtx</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">replace</span> (<span class="id" title="var">i_balance</span> &lt;? <span class="id" title="var">i_goal</span>)%<span class="id" title="var">Z</span> <span class="id" title="keyword">with</span> <span class="id" title="var">false</span> <span class="id" title="tactic">by</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">symmetry</span>;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.ltb_ge</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.leb_le</span> <span class="id" title="tactic">in</span> *;<span class="id" title="var">lia</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Backers cannot claim their money if the contract is marked as "done" 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">no_claim_after_done</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">the_state</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">init</span> =&gt; <span class="id" title="var">init</span>.(<span class="id" title="var">done_coq</span>) /\ <span class="id" title="var">init</span> = <span class="id" title="var">the_state</span> }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Receive.receive</span> <span class="id" title="var">BC</span> <span class="id" title="var">CallCtx</span> <span class="id" title="var">Claim_coq</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Nothing&nbsp;happens&nbsp;-&nbsp;the&nbsp;stated&nbsp;stays&nbsp;the&nbsp;same&nbsp;and&nbsp;no&nbsp;outgoing&nbsp;transfers&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="keyword">fun</span> <span class="id" title="var">fin</span> <span class="id" title="var">out</span> =&gt; <span class="id" title="var">fin</span> = <span class="id" title="var">the_state</span> /\ <span class="id" title="var">out</span> = [] }}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">assertion</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">init</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">funded</span>,<span class="id" title="var">deadline_passed</span>,<span class="id" title="var">goal_reached</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">the_state</span>. <span class="id" title="tactic">eexists</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">run</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">done_coq</span> <span class="id" title="var">_</span>);<span class="id" title="var">tryfalse</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Bool.andb_false_r</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CrowdfundingProperties</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

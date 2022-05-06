@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.counter.embedding.CounterEmbed</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Utils</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Notations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Ast</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">PCUICTranslate</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">TranslationUtils</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">SimpleBlockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Prelude</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Liquidity</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">PreludeExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Env</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Counter</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">AcornBlockchain</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">list</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Generating names for the data structures  
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">mp_</span> &lt;- <span class="id" title="var">tmCurrentModPath</span> <span class="id" title="var">tt</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">mp</span> := (<span class="id" title="var">PCUICTranslate.string_of_modpath</span> <span class="id" title="var">mp_</span> ++ "@")%<span class="id" title="var">string</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">mkNames</span> <span class="id" title="var">mp</span> ["state" ; "MkState" ; "owner" ; "msg" ] "_coq").<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Variable names and constructor names 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">mkNames</span> "" ["m" ;"n"; "own"; "st" ; "new_st" ; "addr" ; "new_balance"; "Inc" ; "Dec"] "_coq").<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab231"></a><h2 class="section">Definitions of data structures for the contract</h2>
+
+<div class="paragraph"> </div>
+
+ The contract's state. We use the product type directly, because records are not yet supported by extraction 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="comment">(*&nbsp;TODO:&nbsp;make&nbsp;address&nbsp;a&nbsp;separate&nbsp;data&nbsp;type&nbsp;(say,&nbsp;a&nbsp;wrapper&nbsp;around&nbsp;nat)&nbsp;to&nbsp;be&nbsp;able&nbsp;to&nbsp;recognise&nbsp;it&nbsp;in&nbsp;the&nbsp;extraction&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'CounterState'" := [! <span class="id" title="var">money</span> × <span class="id" title="var">address</span> !] (<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="keyword">type</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'balance' a" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| <span class="id" title="tactic">first</span> <span class="id" title="var">money</span> <span class="id" title="var">address</span> {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'owner' a" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| <span class="id" title="var">second</span> <span class="id" title="var">money</span> <span class="id" title="var">address</span> {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Messages 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">msg_syn</span> :=<br/>
+&nbsp;&nbsp;[\ <span class="id" title="var">data</span> <span class="id" title="var">msg</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Inc</span> [<span class="id" title="var">money</span>,<span class="id" title="var">_</span>]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Dec</span> [<span class="id" title="var">money</span>,<span class="id" title="var">_</span>] \].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Σ'</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">StdLib.Σ</span> ++ [ <span class="id" title="var">Prelude.AcornMaybe</span>; <span class="id" title="var">msg_syn</span>])%<span class="id" title="var">list</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">update_balance_syn</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| \<span class="id" title="var">st</span> : <span class="id" title="var">money</span> × <span class="id" title="var">address</span> =&gt; \<span class="id" title="var">new_balance</span> : <span class="id" title="var">money</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Pair</span> <span class="id" title="var">money</span> <span class="id" title="var">address</span> (<span class="id" title="var">balance</span> <span class="id" title="var">st</span> + <span class="id" title="var">new_balance</span>) (<span class="id" title="var">owner</span> <span class="id" title="var">st</span>) |].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Unquote</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">_update_balance</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">expr_to_tc</span> <span class="id" title="var">Σ'</span> (<span class="id" title="var">indexify</span> <span class="id" title="var">nil</span> <span class="id" title="var">update_balance_syn</span>)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'update_balance' a b" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| {<span class="id" title="var">eConst</span> (<span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">_update_balance</span> %&gt;)} {<span class="id" title="var">a</span>} {<span class="id" title="var">b</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">a</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">b</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 1).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The main functionality 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">counter_syn</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| \<span class="id" title="var">m</span> : <span class="id" title="var">msg</span> =&gt; \<span class="id" title="var">st</span> : <span class="id" title="var">CounterState</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">case</span> <span class="id" title="var">m</span> : <span class="id" title="var">msg</span> <span class="id" title="keyword">return</span> <span class="id" title="var">Maybe</span> ((<span class="id" title="var">List</span> <span class="id" title="var">SimpleActionBody</span>) ×  <span class="id" title="var">CounterState</span>) <span class="id" title="keyword">of</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Inc</span> <span class="id" title="var">n</span> -&gt; $<span class="id" title="var">Just</span>$<span class="id" title="var">Maybe</span> [: <span class="id" title="var">List</span> <span class="id" title="var">SimpleActionBody</span> × <span class="id" title="var">CounterState</span>]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Pair</span> (<span class="id" title="var">List</span> <span class="id" title="var">SimpleActionBody</span>) <span class="id" title="var">CounterState</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Nil</span> <span class="id" title="var">SimpleActionBody</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">update_balance</span> <span class="id" title="var">st</span> <span class="id" title="var">n</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Dec</span> <span class="id" title="var">n</span> -&gt; $<span class="id" title="var">Nothing</span>$<span class="id" title="var">Maybe</span> [: <span class="id" title="var">List</span> <span class="id" title="var">SimpleActionBody</span> × <span class="id" title="var">CounterState</span>] |].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Packing together the data type definitions and functions 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">CounterModule</span> : <span class="id" title="var">LiquidityModule</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">datatypes</span> := [<span class="id" title="var">msg_syn</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">storage</span> := [! <span class="id" title="var">CounterState</span> !];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">init</span> := [| \<span class="id" title="var">n</span> : <span class="id" title="var">money</span> =&gt; \<span class="id" title="var">addr</span> : <span class="id" title="var">address</span> =&gt; \"c" : <span class="id" title="var">CallCtx</span>  =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$<span class="id" title="var">Just</span>$<span class="id" title="var">Maybe</span> [: <span class="id" title="var">money</span> × <span class="id" title="var">address</span>] <span class="id" title="var">Pair</span> <span class="id" title="var">money</span> <span class="id" title="var">address</span> <span class="id" title="var">n</span> <span class="id" title="var">addr</span>  |];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">message</span> := [! <span class="id" title="var">msg</span> !];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">functions</span> := [("_update_balance", <span class="id" title="var">update_balance_syn</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("counter", <span class="id" title="var">counter_syn</span>)];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">main</span> := "counter";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">main_extra_args</span> := []|}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Unquote</span> <span class="id" title="keyword">Inductive</span> (<span class="id" title="var">global_to_tc</span> <span class="id" title="var">msg_syn</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Unquote</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">counter</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">expr_to_tc</span> <span class="id" title="var">Σ'</span> (<span class="id" title="var">indexify</span> <span class="id" title="var">nil</span> <span class="id" title="var">counter_syn</span>)).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Counter</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table for types
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TTty</span> : <span class="id" title="var">env</span> <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;[(<span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">address_coq</span> %&gt;, "address");<br/>
+&nbsp;&nbsp;&nbsp;(<span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">time_coq</span> %&gt;, "timestamp");<br/>
+&nbsp;&nbsp;&nbsp;(<span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">Z</span> %&gt;, "tez");<br/>
+&nbsp;&nbsp;&nbsp;(<span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">nat</span> %&gt;, "nat")].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table for primitive binary operations 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT</span> : <span class="id" title="var">env</span> <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;[(<span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">Z.add</span> %&gt;, "addTez")].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The output has been tested in the online Liquidity editor: https://www.liquidity-lang.org/edit/ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Compute</span> <span class="id" title="var">liquidifyModule</span> <span class="id" title="var">TT</span> <span class="id" title="var">TTty</span> <span class="id" title="var">Counter.CounterModule</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+An attempt of extraction from the shallow embedding using the "native" Coq extraction mechanism 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="var">Language</span> <span class="id" title="var">OCaml</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <span class="id" title="var">list</span> =&gt; "list" [ "[]" "(::)" ].<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <span class="id" title="var">prod</span> =&gt; "(*)"  [ "(,)" ].<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <span class="id" title="var">Z</span> =&gt; "tez" ["0DUN" "id" "negate"].<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Inlined</span> <span class="id" title="var">Constant</span> <span class="id" title="var">Z.add</span> =&gt; "addTez".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+In Liquidify, <span class="inlinecode">+</span> is overloaded and thus requires type annotations. We can overcome this issue by un-overloading the operations and providing specialised versions (not infix anymore). 
+<div class="paragraph"> </div>
+
+ Essentially, we need to prepend the follwing "prelude" before our contracts:  let<span class="inlinecode">@<a class="idref" href="ConCert.Extraction.CertifyingInlining.html#inline"><span class="id" title="definition">inline</span></a></span> fst (p : 'a * 'b) : 'a = p.(0)
+    let<span class="inlinecode">@<a class="idref" href="ConCert.Extraction.CertifyingInlining.html#inline"><span class="id" title="definition">inline</span></a></span> snd (p : 'a * 'b) : 'b = p.(1)
+    let<span class="inlinecode">@<a class="idref" href="ConCert.Extraction.CertifyingInlining.html#inline"><span class="id" title="definition">inline</span></a></span> addN (n : nat) (m : nat) = n + m
+    let<span class="inlinecode">@<a class="idref" href="ConCert.Extraction.CertifyingInlining.html#inline"><span class="id" title="definition">inline</span></a></span> addTez (n : tez) (m : tez) = n + m 
+<div class="paragraph"> </div>
+
+ It seems there are some syntactic and semantic differences from OCaml. E.g. it's not possible to pattern-match on tuples in Liquidity, a special form of <span class="inlinecode"><span class="id" title="keyword">let</span></span> or projections must be used instead. That's why our "prelude" features the <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#fst"><span class="id" title="definition">fst</span></a></span> and <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#snd"><span class="id" title="definition">snd</span></a></span> functions. We use them explicitly instead of destructing pairs. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="var">Counter._update_balance</span>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="var">Counter.counter</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

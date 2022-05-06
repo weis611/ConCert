@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.escrow.tests.EscrowGens</h1>
+
+<div class="code">
+<span class="comment">(*&nbsp;Generators&nbsp;for&nbsp;the&nbsp;Escrow&nbsp;contract,&nbsp;to&nbsp;be&nbsp;used&nbsp;for&nbsp;QuickChick&nbsp;testing.<br/>
+&nbsp;&nbsp;&nbsp;Main&nbsp;functions&nbsp;of&nbsp;interest:&nbsp;gEscrowMsg&nbsp;and&nbsp;gEscrowMsgBetter.<br/>
+*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">QCTest</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Escrow</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Escrow</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>. <span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Type</span> <span class="id" title="var">EscrowGensInfo</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">contract_addr</span> : <span class="id" title="var">Address</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">EscrowGensInfo</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">EscrowGens</span> (<span class="id" title="var">Info</span> : <span class="id" title="var">EscrowGensInfo</span>).<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Info</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">Env</span> := <span class="id" title="var">Environment</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Try&nbsp;to&nbsp;generate&nbsp;an&nbsp;account&nbsp;which&nbsp;has&nbsp;balance&nbsp;&gt;&nbsp;0.&nbsp;Returns&nbsp;None&nbsp;whenever&nbsp;no&nbsp;such&nbsp;address&nbsp;could&nbsp;be&nbsp;found.&nbsp;&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gAccountWithBalance</span> (<span class="id" title="var">e</span> : <span class="id" title="var">Env</span>) (<span class="id" title="var">gAccOpt</span> : <span class="id" title="var">GOpt</span> <span class="id" title="var">Address</span>) : <span class="id" title="var">GOpt</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Amount</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">addr</span> &lt;- <span class="id" title="var">suchThatMaybeOpt</span> <span class="id" title="var">gAccOpt</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">addr</span> =&gt; 0 &lt;? <span class="id" title="var">e</span>.(<span class="id" title="var">env_account_balances</span>) <span class="id" title="var">addr</span>) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> (<span class="id" title="var">addr</span>, <span class="id" title="var">e</span>.(<span class="id" title="var">env_account_balances</span>) <span class="id" title="var">addr</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gEscrowMsg</span> (<span class="id" title="var">e</span> : <span class="id" title="var">Env</span>) : <span class="id" title="var">GOpt</span> <span class="id" title="var">Action</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">call</span> <span class="id" title="var">caller</span> <span class="id" title="var">amount</span> <span class="id" title="var">msg</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_origin</span> := <span class="id" title="var">caller</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_from</span> := <span class="id" title="var">caller</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_body</span> := <span class="id" title="var">act_call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">amount</span> (@<span class="id" title="var">serialize</span> <span class="id" title="var">Escrow.Msg</span> <span class="id" title="var">_</span> <span class="id" title="var">msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">state</span> &lt;- <span class="id" title="var">returnGen</span> (<span class="id" title="var">get_contract_state</span> <span class="id" title="var">Escrow.State</span> <span class="id" title="var">e</span> <span class="id" title="var">contract_addr</span>) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">buyer</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">buyer</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">seller</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">seller</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;pick&nbsp;one&nbsp;generator&nbsp;uniformly&nbsp;at&nbsp;random&nbsp;from&nbsp;the&nbsp;given&nbsp;list.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;backtrack&nbsp;if&nbsp;one&nbsp;fails.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">backtrack</span> [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;commit&nbsp;money&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(1%<span class="id" title="var">nat</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;amount&nbsp;&lt;-&nbsp;choose&nbsp;(0*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">e</span>.(<span class="id" title="var">env_account_balances</span>) <span class="id" title="var">buyer</span> &lt;? 2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">returnGen</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">buyer</span> 2 <span class="id" title="var">commit_money</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;confirm&nbsp;received&nbsp;item&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(1%<span class="id" title="var">nat</span>, <span class="id" title="var">call</span> <span class="id" title="var">buyer</span> 0 <span class="id" title="var">confirm_item_received</span>) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;withdraw&nbsp;money&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(1%<span class="id" title="var">nat</span>, <span class="id" title="var">addr</span> &lt;- <span class="id" title="var">elems</span> [<span class="id" title="var">seller</span>; <span class="id" title="var">buyer</span>] ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">addr</span> 0 <span class="id" title="var">withdraw</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+<span class="comment">(*&nbsp;This&nbsp;generator&nbsp;uses&nbsp;the&nbsp;'next_step'&nbsp;state&nbsp;of&nbsp;the&nbsp;Escrow&nbsp;contract&nbsp;to&nbsp;determine&nbsp;which&nbsp;message&nbsp;to&nbsp;generate.<br/>
+&nbsp;&nbsp;&nbsp;This&nbsp;should&nbsp;lead&nbsp;to&nbsp;much&nbsp;fewer&nbsp;discards&nbsp;during&nbsp;testing,&nbsp;but&nbsp;at&nbsp;the&nbsp;cost&nbsp;of&nbsp;the&nbsp;generator&nbsp;being&nbsp;more&nbsp;complex<br/>
+&nbsp;&nbsp;&nbsp;and&nbsp;less&nbsp;"blackbox-like"&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gEscrowMsgBetter</span> (<span class="id" title="var">e</span> : <span class="id" title="var">Env</span>) : <span class="id" title="var">GOpt</span> <span class="id" title="var">Action</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">call</span> <span class="id" title="var">caller</span> <span class="id" title="var">amount</span> <span class="id" title="var">msg</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_origin</span> := <span class="id" title="var">caller</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_from</span> := <span class="id" title="var">caller</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_body</span> := <span class="id" title="var">act_call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">amount</span> (@<span class="id" title="var">serialize</span> <span class="id" title="var">Escrow.Msg</span> <span class="id" title="var">_</span> <span class="id" title="var">msg</span>)<br/>
+&nbsp;&nbsp;|} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">state</span> &lt;- <span class="id" title="var">returnGen</span> (<span class="id" title="var">get_contract_state</span> <span class="id" title="var">Escrow.State</span> <span class="id" title="var">e</span> <span class="id" title="var">contract_addr</span>) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">buyer</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">buyer</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">seller</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">seller</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">state</span>.(<span class="id" title="var">next_step</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Waiting&nbsp;for&nbsp;buyer&nbsp;to&nbsp;commit&nbsp;itemvalue&nbsp;*&nbsp;2.&nbsp;In&nbsp;this&nbsp;state,&nbsp;the&nbsp;seller&nbsp;can&nbsp;also&nbsp;choose&nbsp;to&nbsp;withdraw&nbsp;their&nbsp;deposit&nbsp;*)</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">buyer_commit</span> =&gt; <span class="id" title="var">backtrack</span> [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(2%<span class="id" title="var">nat</span>, <span class="id" title="keyword">if</span> <span class="id" title="var">e</span>.(<span class="id" title="var">env_account_balances</span>) <span class="id" title="var">buyer</span> &lt;? 2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">returnGen</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">buyer</span> 2 <span class="id" title="var">commit_money</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1%<span class="id" title="var">nat</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">seller</span> 0 <span class="id" title="var">withdraw</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
+&nbsp;&nbsp;| <span class="id" title="var">buyer_confirm</span> =&gt; <span class="id" title="var">call</span> <span class="id" title="var">buyer</span> 0 <span class="id" title="var">confirm_item_received</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="keyword">if</span> 0 &lt;? <span class="id" title="var">state</span>.(<span class="id" title="var">buyer_withdrawable</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">buyer</span> 0 <span class="id" title="var">withdraw</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> 0 &lt;? <span class="id" title="var">state</span>.(<span class="id" title="var">seller_withdrawable</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">seller</span> 0 <span class="id" title="var">withdraw</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">returnGen</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Close</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gEscrowTrace</span> <span class="id" title="var">cb</span> <span class="id" title="var">length</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">max_act_depth</span> := 1 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">max_acts_per_block</span> := 1 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">gChain</span> <span class="id" title="var">cb</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">e</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">gEscrowMsg</span> <span class="id" title="var">e</span>) <span class="id" title="var">length</span> <span class="id" title="var">max_act_depth</span> <span class="id" title="var">max_acts_per_block</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gEscrowTraceBetter</span> <span class="id" title="var">cb</span> <span class="id" title="var">length</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">max_act_depth</span> := 1 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">max_acts_per_block</span> := 1 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">gChain</span> <span class="id" title="var">cb</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">e</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">gEscrowMsgBetter</span> <span class="id" title="var">e</span>) <span class="id" title="var">length</span> <span class="id" title="var">max_act_depth</span> <span class="id" title="var">max_acts_per_block</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">forAllEscrowChainBuilder</span> `{<span class="id" title="keyword">Show</span> <span class="id" title="var">ChainBuilder</span>} <span class="id" title="var">gEscrowTrace</span> <span class="id" title="var">length</span> (<span class="id" title="var">cb</span> : <span class="id" title="var">ChainBuilder</span>) := <br/>
+&nbsp;&nbsp;<span class="id" title="var">forAllChainBuilder</span> <span class="id" title="var">length</span> <span class="id" title="var">cb</span> <span class="id" title="var">gEscrowTrace</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">EscrowGens</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

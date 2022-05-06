@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.crowdfunding.CrowdfundingData</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab220"></a><h1 class="section">Data types for the crowdfunding contract</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Ast</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Notations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">PCUICTranslate</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Prelude</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">SimpleBlockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Utils</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">TranslationUtils</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">BaseTypes</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">list</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">AcornBlockchain</span> <span class="id" title="var">Prelude.Maps</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Note that we define the deep embedding (abstract syntax trees) of the data structures and programs using notations. These notations are defined in  <span class="inlinecode"><span class="id" title="var">Ast.v</span></span> and make use of the "custom entries" feature. 
+<div class="paragraph"> </div>
+
+ Brackets like <span class="inlinecode">[\</span> <span class="inlinecode">\]</span> delimit the scope of data type definitions and like <span class="inlinecode">[|</span> <span class="inlinecode">|]</span> the scope of programs 
+<div class="paragraph"> </div>
+
+ Generating names for the data structures. We also add a prefix, corresponsing ti the current module path.  
+</div>
+<div class="code">
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( <span class="id" title="var">mp_</span> &lt;- <span class="id" title="var">tmCurrentModPath</span> <span class="id" title="var">tt</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">mp</span> := (<span class="id" title="var">PCUICTranslate.string_of_modpath</span> <span class="id" title="var">mp_</span> ++ "@")%<span class="id" title="var">string</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">mkNames</span> <span class="id" title="var">mp</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;["State" ; "mkState"; "balance" ; "donations" ; "owner";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"deadline"; "goal"; "done";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Res" ; "Error";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Msg"; "Donate"; "GetFunds"; "Claim";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Action"; "Transfer"; "Empty" ] "_coq").<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab221"></a><h2 class="section">Definitions of data structures for the contract</h2>
+
+<div class="paragraph"> </div>
+
+ The internal state of the contract 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">state_syn</span> : <span class="id" title="var">global_dec</span> :=<br/>
+&nbsp;&nbsp;[\ <span class="id" title="var">record</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">mkState</span> { <span class="id" title="var">balance</span> : <span class="id" title="var">Money</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">donations</span> : <span class="id" title="var">Map</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">owner</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">deadline</span> : <span class="id" title="var">Nat</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">done</span> : <span class="id" title="var">Bool</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">goal</span> : <span class="id" title="var">Money</span> } \].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We can print actual AST by switching off the notations 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Unset</span> <span class="id" title="keyword">Printing</span> <span class="id" title="var">Notations</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;state_syn&nbsp;=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;gdInd&nbsp;State&nbsp;O<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rec_constr&nbsp;State<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;(pair&nbsp;(nNamed&nbsp;balance)&nbsp;(tyInd&nbsp;Money))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;(pair&nbsp;(nNamed&nbsp;donations)&nbsp;(tyInd&nbsp;Map))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;(pair&nbsp;(nNamed&nbsp;owner)&nbsp;(tyInd&nbsp;Money))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;(pair&nbsp;(nNamed&nbsp;deadline)&nbsp;(tyInd&nbsp;Nat))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cons&nbsp;(pair&nbsp;(nNamed&nbsp;goal)&nbsp;(tyInd&nbsp;Money))&nbsp;nil))))))&nbsp;nil)&nbsp;true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;global_dec&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="keyword">Printing</span> <span class="id" title="var">Notations</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Unquoting the definition of a record 
+</div>
+<div class="code">
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Nonrecursive</span> <span class="id" title="var">Elimination</span> <span class="id" title="var">Schemes</span>.<br/>
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Unquote</span> <span class="id" title="keyword">Inductive</span> (<span class="id" title="var">global_to_tc</span> <span class="id" title="var">state_syn</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+As a result, we get a new Coq record <span class="inlinecode"><span class="id" title="record">State_coq</span></span> 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">msg_syn</span> :=<br/>
+&nbsp;&nbsp;[\ <span class="id" title="var">data</span> <span class="id" title="var">Msg</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Donate</span> [<span class="id" title="var">_</span>]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">GetFunds</span> [<span class="id" title="var">_</span>]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Claim</span> [<span class="id" title="var">_</span>] \].<br/>
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Unquote</span> <span class="id" title="keyword">Inductive</span> (<span class="id" title="var">global_to_tc</span> <span class="id" title="var">msg_syn</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Custom notations for patterns, projections and constructors 
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Notations</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'ctx_from' a" := [| {<span class="id" title="var">eConst</span> (<span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">Ctx_from</span> %&gt;)} {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'ctx_contract_address' a" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| {<span class="id" title="var">eConst</span> (<span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">Ctx_contract_address</span> %&gt;)} {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'amount' a" := [| {<span class="id" title="var">eConst</span> (<span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">Ctx_amount</span> %&gt;)} {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Projections 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'balance' a" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| {<span class="id" title="var">eConst</span> <span class="id" title="var">balance</span>} {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'donations' a" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| {<span class="id" title="var">eConst</span> <span class="id" title="var">donations</span>} {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'owner' a" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| {<span class="id" title="var">eConst</span> <span class="id" title="var">owner</span>} {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'deadline' a" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| {<span class="id" title="var">eConst</span> <span class="id" title="var">deadline</span>} {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'goal' a" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| {<span class="id" title="var">eConst</span> <span class="id" title="keyword">goal</span>} {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'done' a" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| {<span class="id" title="var">eConst</span> <span class="id" title="var">done</span>} {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'Nil'" := [| {<span class="id" title="var">eConstr</span> <span class="id" title="var">List</span> "nil"} {<span class="id" title="var">eTy</span> (<span class="id" title="var">tyInd</span> <span class="id" title="var">SActionBody</span>)} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot; x ::: xs" := [| {<span class="id" title="var">eConstr</span> <span class="id" title="var">List</span> "cons"} {<span class="id" title="var">eTy</span> (<span class="id" title="var">tyInd</span> <span class="id" title="var">SActionBody</span>)} {<span class="id" title="var">x</span>} {<span class="id" title="var">xs</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( <span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;[ x ]" := [| {<span class="id" title="var">eConstr</span> <span class="id" title="var">List</span> "cons"} {<span class="id" title="var">eTy</span> (<span class="id" title="var">tyInd</span> <span class="id" title="var">SActionBody</span>)} {<span class="id" title="var">x</span>} <span class="id" title="var">Nil</span> |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( <span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">x</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 1).<br/>
+</div>
+
+<div class="doc">
+Constructors. <span class="inlinecode"><span class="id" title="var">Res</span></span> is an abbreviation for <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a></span> <span class="inlinecode">(<a class="idref" href="ConCert.Embedding.Extraction.Liquidity.html#st"><span class="id" title="variable">st</span></a>,</span> <span class="inlinecode">[<span class="id" title="definition">action</span>])</span> <span class="inlinecode">:</span> <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a></span> <span class="inlinecode">(<span class="id" title="record">State</span></span> <span class="inlinecode">*</span> <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a></span> <span class="inlinecode"><a class="idref" href="ConCert.Execution.Blockchain.html#ActionBody"><span class="id" title="inductive">ActionBody</span></a>)</span> 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">actions_ty</span> := [! <span class="id" title="var">List</span> <span class="id" title="var">SActionBody</span> !].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'Result'" := [! <span class="id" title="var">Prod</span> <span class="id" title="var">State</span> (<span class="id" title="var">List</span> <span class="id" title="var">SActionBody</span>) !]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="keyword">type</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 2).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">mk_res</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> := [| {<span class="id" title="var">eConstr</span> "option" "Some"}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<span class="id" title="var">eTy</span> [! <span class="id" title="var">Result</span> !]}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;({<span class="id" title="var">eConstr</span> <span class="id" title="var">Prod</span> "pair"} {<span class="id" title="var">eTy</span> (<span class="id" title="var">tyInd</span> <span class="id" title="var">State</span>)}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<span class="id" title="var">eTy</span> <span class="id" title="var">actions_ty</span>} {<span class="id" title="var">a</span>} {<span class="id" title="var">b</span>}) |].<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'Res' a b" := (<span class="id" title="var">mk_res</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">a</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 4,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">b</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 4).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'mkState' a b" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| {<span class="id" title="var">eConstr</span> <span class="id" title="var">State</span> <span class="id" title="var">mkState</span>} {<span class="id" title="var">a</span>} {<span class="id" title="var">b</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">a</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">b</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 1).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'Transfer' a b" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[| {<span class="id" title="var">eConstr</span> <span class="id" title="var">SActionBody</span> "Act_transfer"} {<span class="id" title="var">b</span>} {<span class="id" title="var">a</span>} |]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">a</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">b</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 1).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'Empty'" := (<span class="id" title="var">eConstr</span> <span class="id" title="var">Action</span> <span class="id" title="var">Empty</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 0).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+New global context with the constants defined above (in addition to the ones defined in the Oak's "StdLib") 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Maps</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Σ'</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">StdLib.Σ</span> ++ [ <span class="id" title="var">Prelude.AcornMaybe</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">state_syn</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">msg_syn</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">addr_map_acorn</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">AcornBlockchain.SimpleChainAcorn</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">AcornBlockchain.SimpleContractCallContextAcorn</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">AcornBlockchain.SimpleActionBodyAcorn</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">gdInd</span> "Z" 0 [("Z0", []); ("Zpos", [(<span class="id" title="var">None</span>,<span class="id" title="var">tyInd</span> "positive")]);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("Zneg", [(<span class="id" title="var">None</span>,<span class="id" title="var">tyInd</span> "positive")])] <span class="id" title="var">false</span>].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">End</span> <span class="id" title="var">Notations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Prelude</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Generating string constants for variable names 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">mkNames</span> "" ["c";"s";"e";"m";"v";"dl"; "g"; "chain";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tx_amount"; "bal"; "sender"; "own"; "isdone" ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"accs"; "now";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"newstate"; "newmap"; "cond"] "").<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A shortcut for <span class="inlinecode"><span class="id" title="keyword">if</span></span> <span class="inlinecode">..</span> <span class="inlinecode"><span class="id" title="keyword">then</span></span> <span class="inlinecode">..</span> <span class="inlinecode"><span class="id" title="keyword">else</span></span> <span class="inlinecode">..</span>  
+</div>
+<div class="code">
+<span class="id" title="keyword">Notation</span> &quot;'if' cond 'then' b1 'else' b2 : ty" :=<br/>
+&nbsp;&nbsp;(<span class="id" title="var">eCase</span> (<span class="id" title="var">Bool</span>,[]) <span class="id" title="var">ty</span> <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(<span class="id" title="var">pConstr</span> <span class="id" title="var">true_name</span> [],<span class="id" title="var">b1</span>);(<span class="id" title="var">pConstr</span> <span class="id" title="var">false_name</span> [],<span class="id" title="var">b2</span>)])<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">in</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 4,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cond</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 4,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ty</span> <span class="id" title="var">custom</span> <span class="id" title="keyword">type</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 4,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">b1</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 4,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">b2</span> <span class="id" title="var">custom</span> <span class="id" title="var">expr</span> <span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 4).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">SCtx</span> := <span class="id" title="var">to_string_name</span> &lt;% <span class="id" title="var">SimpleContractCallContext_coq</span> %&gt;.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

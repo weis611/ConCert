@@ -1,0 +1,323 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Extraction.Tests.CameLIGOExtractionTests</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab329"></a><h1 class="section">Extraction of various contracts to CameLIGO</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.micromega.Lia.html#"><span class="id" title="library">Lia</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#"><span class="id" title="library">List</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#"><span class="id" title="library">String</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">All</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Common.html#"><span class="id" title="library">Common</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.CameLIGOPretty.html#"><span class="id" title="library">CameLIGOPretty</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.CameLIGOExtract.html#"><span class="id" title="library">CameLIGOExtract</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+
+<br/>
+<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">PrintConfShortNames.PrintWithShortNames</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="bindOptCont"><span class="id" title="definition">bindOptCont</span></a> {<span class="id" title="var">A</span> <span class="id" title="var">B</span>} (<span class="id" title="var">a</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a>) (<span class="id" title="var">f</span> : <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#B"><span class="id" title="variable">B</span></a>) : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#B"><span class="id" title="variable">B</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#a"><span class="id" title="variable">a</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <span class="id" title="var">a</span> =&gt; <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#f"><span class="id" title="variable">f</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#a"><span class="id" title="variable">a</span></a><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="BoolRect"><span class="id" title="module">BoolRect</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Previously, this example extracted wrong, because some name
+      annotations of the <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bool_rect"><span class="id" title="definition">bool_rect</span></a></span> are thse same, leading to
+      shadowing in the resulting code  
+<div class="paragraph"> </div>
+
+ One can see the variable names by quoting and printing the AST, as below 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">bool_rect_quoted</span> := <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bool_rect"><span class="id" title="definition">bool_rect</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> <span class="id" title="definition">lookup_env</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#BoolRect.bool_rect_quoted"><span class="id" title="definition">bool_rect_quoted</span></a><span class="id" title="notation">.1</span> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">&lt;%%</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bool_rect"><span class="id" title="definition">bool_rect</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">%%&gt;</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This is, of course meaningless in eager languages, so usually we
+      inline such definitions, but here we keep is as it is for the
+      sake of testing 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="BoolRect.my_stupid_if"><span class="id" title="definition">my_stupid_if</span></a> {<span class="id" title="var">A</span> : <span class="id" title="keyword">Type</span>} (<span class="id" title="var">cond</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bool"><span class="id" title="inductive">bool</span></a>) (<span class="id" title="var">t_branch</span> <span class="id" title="var">f_branch</span> : <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bool_rect"><span class="id" title="definition">bool_rect</span></a> <span class="id" title="var">_</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#t_branch"><span class="id" title="variable">t_branch</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#f_branch"><span class="id" title="variable">f_branch</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#cond"><span class="id" title="variable">cond</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="BoolRect.max_nat"><span class="id" title="definition">max_nat</span></a> (<span class="id" title="var">n</span> <span class="id" title="var">m</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) := <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#BoolRect.my_stupid_if"><span class="id" title="definition">my_stupid_if</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Nat.html#leb"><span class="id" title="definition">Nat.leb</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#m"><span class="id" title="variable">m</span></a>) <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#n"><span class="id" title="variable">n</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="BoolRect.harness"><span class="id" title="definition">harness</span></a> (<span class="id" title="var">func</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>) : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"let main (st : unit * nat option) : operation list * (nat option)  = (([]: operation list), Some ( " <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#169ad156fbc6036a53a0338819a2b301"><span class="id" title="notation">++</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#func"><span class="id" title="variable">func</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#169ad156fbc6036a53a0338819a2b301"><span class="id" title="notation">++</span></a> " 2n 3n))".<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">t</span> <span class="id" title="notation">&lt;-</span> <a class="idref" href="ConCert.Extraction.CameLIGOExtract.html#CameLIGO_extract_single"><span class="id" title="definition">CameLIGO_extract_single</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.CameLIGOExtract.html#TT_rename_ctors_default"><span class="id" title="definition">TT_rename_ctors_default</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"let lebN (a : nat ) (b : nat ) = a &lt;= b"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#BoolRect.harness"><span class="id" title="definition">harness</span></a> "max_nat")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#BoolRect.max_nat"><span class="id" title="definition">max_nat</span></a> <span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">tmDefinition</span> "cameligo_max" <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#t"><span class="id" title="variable">t</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Extraction results in fully functional CameLIGO code 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "tests/extracted-code/cameligo-extract/max.mligo"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="constructor">tmMsg</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#BoolRect.cameligo_max"><span class="id" title="definition">cameligo_max</span></a>).<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#BoolRect"><span class="id" title="module">BoolRect</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="FoldLeft"><span class="id" title="module">FoldLeft</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We test how the annotation machinery passes the context with erased variables to
+      the annotate the type of the fixpoint, which doesn't abstract over the type
+      parameters itself. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="FoldLeft.foldL"><span class="id" title="definition">foldL</span></a> {<span class="id" title="var">A</span> <span class="id" title="var">B</span> : <span class="id" title="keyword">Type</span>} (<span class="id" title="var">f</span> : <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#B"><span class="id" title="variable">B</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a>) : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#B"><span class="id" title="variable">B</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fix</span> <span class="id" title="var">foldL</span> (<span class="id" title="var">l</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#B"><span class="id" title="variable">B</span></a>) (<span class="id" title="var">a0</span> : <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a>) {<span class="id" title="keyword">struct</span> <span class="id" title="var">l</span>} : <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> =&gt; <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#a0"><span class="id" title="variable">a0</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">b</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#cbcf67aac0c2a85b8d93d37de9969adf"><span class="id" title="notation">::</span></a> <span class="id" title="var">t</span> =&gt; <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#foldL"><span class="id" title="variable">foldL</span></a> <span class="id" title="var">t</span> (<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#f"><span class="id" title="variable">f</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#a0"><span class="id" title="variable">a0</span></a> <span class="id" title="var">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="FoldLeft.sum"><span class="id" title="definition">sum</span></a> (<span class="id" title="var">xs</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) := <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#FoldLeft.foldL"><span class="id" title="definition">foldL</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Nat.html#add"><span class="id" title="definition">Nat.add</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#xs"><span class="id" title="variable">xs</span></a> 0.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="FoldLeft.harness"><span class="id" title="definition">harness</span></a> (<span class="id" title="var">sum_func</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>) : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"let main (st : unit * nat option) : operation list * (nat option)  = (([]: operation list), Some ( " <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#169ad156fbc6036a53a0338819a2b301"><span class="id" title="notation">++</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#sum_func"><span class="id" title="variable">sum_func</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#169ad156fbc6036a53a0338819a2b301"><span class="id" title="notation">++</span></a> "([1n;2n;3n])))".<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">t</span> <span class="id" title="notation">&lt;-</span> <a class="idref" href="ConCert.Extraction.CameLIGOExtract.html#CameLIGO_extract_single"><span class="id" title="definition">CameLIGO_extract_single</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.CameLIGOExtract.html#TT_rename_ctors_default"><span class="id" title="definition">TT_rename_ctors_default</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"let addN (n : nat) (m : nat) = n + m"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#FoldLeft.harness"><span class="id" title="definition">harness</span></a> "sum")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#FoldLeft.sum"><span class="id" title="definition">sum</span></a> <span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">tmDefinition</span> "cameligo_sum" <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#t"><span class="id" title="variable">t</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Extraction results in fully functional CameLIGO code 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "tests/extracted-code/cameligo-extract/FoldL.mligo"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="constructor">tmMsg</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#FoldLeft.cameligo_sum"><span class="id" title="definition">cameligo_sum</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This definition is different from <span class="inlinecode"><a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#FoldLeft.foldL"><span class="id" title="definition">foldL</span></a></span>. The type abstractions are part of the
+      fixpoint, and not binded by lambdas. Therefore, the type parameters are not
+      eliminated by optimisations. We test here another property, however, namely, how
+      the annotation machinery handles polymophism when the node has a polymoprhic type. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <a name="FoldLeft.foldLAlt"><span class="id" title="definition">foldLAlt</span></a> {<span class="id" title="var">A</span> <span class="id" title="var">B</span> : <span class="id" title="keyword">Type</span>} (<span class="id" title="var">f</span> : <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#B"><span class="id" title="variable">B</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a>) (<span class="id" title="var">l</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#B"><span class="id" title="variable">B</span></a>) (<span class="id" title="var">a0</span> : <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a>) : <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#A"><span class="id" title="variable">A</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> =&gt; <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#a0"><span class="id" title="variable">a0</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">b</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#cbcf67aac0c2a85b8d93d37de9969adf"><span class="id" title="notation">::</span></a> <span class="id" title="var">t</span> =&gt; <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#foldLAlt"><span class="id" title="definition">foldLAlt</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#f"><span class="id" title="variable">f</span></a> <span class="id" title="var">t</span> (<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#f"><span class="id" title="variable">f</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#a0"><span class="id" title="variable">a0</span></a> <span class="id" title="var">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="FoldLeft.sumAlt"><span class="id" title="definition">sumAlt</span></a> (<span class="id" title="var">xs</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) := <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#FoldLeft.foldLAlt"><span class="id" title="definition">foldLAlt</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Nat.html#add"><span class="id" title="definition">Nat.add</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#xs"><span class="id" title="variable">xs</span></a> 0.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">t</span> <span class="id" title="notation">&lt;-</span> <a class="idref" href="ConCert.Extraction.CameLIGOExtract.html#CameLIGO_extract_single"><span class="id" title="definition">CameLIGO_extract_single</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.CameLIGOExtract.html#TT_rename_ctors_default"><span class="id" title="definition">TT_rename_ctors_default</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"let addN (n : nat) (m : nat) = n + m"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#FoldLeft.harness"><span class="id" title="definition">harness</span></a> "sumAlt")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#FoldLeft.sumAlt"><span class="id" title="definition">sumAlt</span></a> <span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">tmDefinition</span> "cameligo_sumAlt" <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#t"><span class="id" title="variable">t</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Extraction results in fully functional CameLIGO code 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "tests/extracted-code/cameligo-extract/FoldLAlt.mligo"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="constructor">tmMsg</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#FoldLeft.cameligo_sumAlt"><span class="id" title="definition">cameligo_sumAlt</span></a>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#FoldLeft"><span class="id" title="module">FoldLeft</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="SafeHead"><span class="id" title="module">SafeHead</span></a>.<br/>
+</div>
+
+<div class="doc">
+This module shows how one can extract programs containing <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#False_rect"><span class="id" title="definition">False_rect</span></a></span> 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">list</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">nat</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We cannot make <span class="inlinecode"><a class="idref" href="ConCert.Extraction.Tests.RustExtractTests.html#SafeHead.safe_head"><span class="id" title="definition">safe_head</span></a></span> polymoprhic due to CameLIGO restrictions 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Program Definition</span> <a name="SafeHead.safe_head"><span class="id" title="definition">safe_head</span></a> (<span class="id" title="var">l</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) (<span class="id" title="var">non_empty</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#length"><span class="id" title="abbreviation">List.length</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#l"><span class="id" title="variable">l</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Peano.html#7f2a7ef2c63af7359b22787a9daf336e"><span class="id" title="notation">&gt;</span></a> 0) : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#l"><span class="id" title="variable">l</span></a> <span class="id" title="keyword">as</span> <span class="id" title="var">l'</span> <span class="id" title="keyword">return</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#l'"><span class="id" title="variable">l'</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#l"><span class="id" title="variable">l</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>  <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> =&gt; <span class="comment">(*&nbsp;this&nbsp;is&nbsp;an&nbsp;impossible&nbsp;case&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;NOTE:&nbsp;we&nbsp;use&nbsp;<span class="inlinecode"><span class="id" title="var">False_rect</span></span>&nbsp;to&nbsp;have&nbsp;more&nbsp;control&nbsp;over&nbsp;the&nbsp;extracted&nbsp;code.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Leaving&nbsp;a&nbsp;hole&nbsp;for&nbsp;the&nbsp;whole&nbsp;branch&nbsp;potentially&nbsp;leads&nbsp;to&nbsp;polymoprhic&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;in&nbsp;the&nbsp;extracted&nbsp;code&nbsp;and&nbsp;type&nbsp;like&nbsp;<span class="inlinecode"><span class="id" title="var">eq</span></span>,&nbsp;since&nbsp;we&nbsp;would&nbsp;have&nbsp;to&nbsp;leave&nbsp;the&nbsp;whole&nbsp;goal&nbsp;branch&nbsp;transparent&nbsp;(use&nbsp;<span class="inlinecode"><span class="id" title="keyword">Defined</span></span>&nbsp;instead&nbsp;of&nbsp;<span class="inlinecode"><span class="id" title="keyword">Qed</span></span>&nbsp;).&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;In&nbsp;this&nbsp;case,&nbsp;one&nbsp;has&nbsp;to&nbsp;inspect&nbsp;the&nbsp;extracted&nbsp;code&nbsp;and&nbsp;inline&nbsp;such&nbsp;definitions&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#False_rect"><span class="id" title="definition">False_rect</span></a> <span class="id" title="var">_</span> <span class="id" title="var">_</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">hd</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#cbcf67aac0c2a85b8d93d37de9969adf"><span class="id" title="notation">::</span></a> <span class="id" title="var">tl</span> =&gt; <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">hd</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#eq_refl"><span class="id" title="constructor">eq_refl</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Next</span> <span class="id" title="keyword">Obligation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">inversion</span> <span class="id" title="var">non_empty</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Program Definition</span> <a name="SafeHead.head_of_list_2"><span class="id" title="definition">head_of_list_2</span></a> (<span class="id" title="var">xs</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) := <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#SafeHead.safe_head"><span class="id" title="definition">safe_head</span></a> (0 <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#cbcf67aac0c2a85b8d93d37de9969adf"><span class="id" title="notation">::</span></a> 0 <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#cbcf67aac0c2a85b8d93d37de9969adf"><span class="id" title="notation">::</span></a> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#xs"><span class="id" title="variable">xs</span></a>)  <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Next</span> <span class="id" title="keyword">Obligation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="var">cbn</span>. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We inline <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#False_rect"><span class="id" title="definition">False_rect</span></a></span> and <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#False_rec"><span class="id" title="definition">False_rec</span></a></span> to make sure that no polymoprhic definitions are left 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="SafeHead.safe_head_inline"><span class="id" title="definition">safe_head_inline</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">[</span></a><a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">&lt;%%</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#False_rect"><span class="id" title="definition">False_rect</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">%%&gt;</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">&lt;%%</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#False_rec"><span class="id" title="definition">False_rec</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">%%&gt;</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">]</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="SafeHead.TT_consts"><span class="id" title="definition">TT_consts</span></a> := <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a> <a class="idref" href="ConCert.Extraction.Common.html#remap"><span class="id" title="definition">remap</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">&lt;%%</span></a> @<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#hd_error"><span class="id" title="definition">hd_error</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">%%&gt;</span></a> "List.head_opt" <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="SafeHead.TT_ctors"><span class="id" title="definition">TT_ctors</span></a> := <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a>"O"<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a>"0n"<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="SafeHead.harness"><span class="id" title="definition">harness</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"let main (st : unit * nat option) : operation list * (nat option)  = (([]: operation list), Some (head_of_list_2 ([] : nat list)))".<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">t</span> <span class="id" title="notation">&lt;-</span> <a class="idref" href="ConCert.Extraction.CameLIGOExtract.html#CameLIGO_extract_single"><span class="id" title="definition">CameLIGO_extract_single</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#SafeHead.safe_head_inline"><span class="id" title="definition">safe_head_inline</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#SafeHead.TT_consts"><span class="id" title="definition">TT_consts</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#SafeHead.TT_ctors"><span class="id" title="definition">TT_ctors</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c6"><span class="id" title="notation">++</span></a> <a class="idref" href="ConCert.Extraction.CameLIGOExtract.html#TT_rename_ctors_default"><span class="id" title="definition">TT_rename_ctors_default</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;""<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#SafeHead.harness"><span class="id" title="definition">harness</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#SafeHead.head_of_list_2"><span class="id" title="definition">head_of_list_2</span></a> <span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">tmDefinition</span> "cameligo_safe_head" <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#t"><span class="id" title="variable">t</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Extraction results in fully functional CameLIGO code 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "tests/extracted-code/cameligo-extract/SafeHead.mligo"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="constructor">tmMsg</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#SafeHead.cameligo_safe_head"><span class="id" title="definition">cameligo_safe_head</span></a>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Extraction.Tests.CameLIGOExtractionTests.html#SafeHead"><span class="id" title="module">SafeHead</span></a>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

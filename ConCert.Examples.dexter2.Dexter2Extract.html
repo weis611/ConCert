@@ -1,0 +1,518 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.dexter2.Dexter2Extract</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+Extraction of Dexter 2 to CameLIGO 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Common</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">CameLIGOPretty</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">CameLIGOExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">ContractCommon</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Dexter2</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">Dexter2CPMM</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Dexter2</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">Dexter2FA12</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">RecordUpdate</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">StringExtra</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Printing configuration 
+<div class="paragraph"> </div>
+
+ We print long names for data types and constructors to avoid clashes, but keep constants' names short (no module name added) 
+</div>
+<div class="code">
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">dexter2_print_config</span> : <span class="id" title="var">CameLIGOPrintConfig</span> :=<br/>
+&nbsp;&nbsp;{| <span class="id" title="var">print_ctor_name</span> := <span class="id" title="var">PrintConfAddModuleNames.print_ctor_name_</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">print_type_name</span> := <span class="id" title="var">PrintConfAddModuleNames.print_ind_type_name_</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">print_const_name</span> := <span class="id" title="var">snd</span> |}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab172"></a><h1 class="section">Common extraction setup</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">call_to_token_ligo</span> : <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;&lt;$ "let call_to_token (type msg) (addr : address) (amt : nat) (msg : msg) : operation =" ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"  let token_ : msg contract =";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"  match (Tezos.get_contract_opt (addr) : msg contract option) with";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"    Some contract -&gt; contract";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"  | None -&gt; (failwith ""Contract not found."" : msg contract) in";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"  Tezos.transaction msg (natural_to_mutez amt) token_" $&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">mk_callback_ligo</span> : <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;"[@inline] let mk_callback (type msg)(addr : address) (msg : msg) : operation = call_to_token addr 0n msg".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Next two definition are borrowed from the actual Dexter 2 implementation
+     https://gitlab.com/dexter2tz/dexter2tz/-/blob/1cec9d9333eba756603d6cd90ea9c70d482a5d3d/dexter.mligo 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">natural_to_mutez_ligo</span> : <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;"[@inline] let natural_to_mutez (a: nat): tez = a * 1mutez".<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">mutez_to_natural_ligo</span> : <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;"[@inline] let mutez_to_natural (a: tez): nat = a / 1mutez".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We change the signature of the original definition slightly, so it takes a <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a></span> and converts
+    in to <span class="inlinecode"><span class="id" title="var">tez</span></span>. We also return <span class="inlinecode"><span class="id" title="definition">operation</span></span> <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a></span> instead of failing 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">xtz_transfer_ligo</span> : <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;&lt;$ "let xtz_transfer (to_ : address) (amount_ : nat) : operation option =";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"  match (Tezos.get_contract_opt to_ : unit contract option) with";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"    | None -&gt; None";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"    | Some c -&gt; Some (Tezos.transaction () (natural_to_mutez amount_) c)" $&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">subNatTruncated_ligo</span> : <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;"let subNTruncated (n : nat) (m : nat) : nat = if n &lt; m then 0n else abs (n-m)".<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">edivNatTrancated_ligo</span> : <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;"let edivTruncated (a : nat) (b : nat) = match ediv a b with Some v -&gt; v | None -&gt; (0n,0n)".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Remapping arithmetic operations.  We override the default remappings of aritmetic operations since it remaps <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a></span> to
+    <span class="inlinecode"><span class="id" title="var">tez</span></span>, and <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Numbers.BinNums.html#N"><span class="id" title="inductive">N</span></a></span> to <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Decimal.html#int"><span class="id" title="inductive">int</span></a></span>, which is not sutable for our purposes. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap_arith</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+[   <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z</span> %%&gt; "int"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N</span> %%&gt; "nat"<br/>
+<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.add</span> %%&gt; "addN"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.sub</span> %%&gt; "subNTruncated"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.mul</span> %%&gt; "multN"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.leb</span> %%&gt; "lebN"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.ltb</span> %%&gt; "ltbN"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.eqb</span> %%&gt; "eqN"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.modulo</span> %%&gt; "moduloN"<br/>
+<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.add</span> %%&gt; "addInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.sub</span> %%&gt; "subInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.mul</span> %%&gt; "multInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.leb</span> %%&gt; "leInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.ltb</span> %%&gt; "ltInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.eqb</span> %%&gt; "eqInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.gtb</span> %%&gt; "gtbInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.even</span> %%&gt; "evenInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.abs_N</span> %%&gt; "abs"<br/>
+<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.of_N</span> %%&gt; "z_of_N"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.to_N</span> %%&gt; "abs"<br/>
+].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Remapping key-value maps 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap_dexter2</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ContractCallContext</span> %%&gt; <span class="id" title="var">CameLIGO_call_ctx_type_name</span><br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">FMap</span> %%&gt; "map"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ContractCommon.AddressMap.add</span> %%&gt; "Map.add"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ContractCommon.AddressMap.find</span> %%&gt; "Map.find_opt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ContractCommon.AddressMap.empty</span> %%&gt; "Map.empty"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ContractCommon.AddressMap.update</span> %%&gt; "Map.update"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">FMap.add</span> %%&gt; "Map.add"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">FMap.find</span> %%&gt; "Map.find_opt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">FMap.empty</span> %%&gt; "Map.empty"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">FMap.update</span> %%&gt; "Map.update"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">address_eqb</span> %%&gt; "eq_addr"<br/>
+&nbsp;&nbsp;&nbsp;].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Definitions to inline 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_inlines_dexter2</span> : <span class="id" title="var">list</span> <span class="id" title="var">kername</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% <span class="id" title="var">Monads.Monad_option</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.bind</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.ret</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Extras.with_default</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">option_map</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">SetterFromGetter</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Dexter2CPMM.setter_from_getter_State_tokenPool</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Dexter2CPMM.setter_from_getter_State_selfIsUpdatingTokenPool</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Dexter2CPMM.setter_from_getter_State_xtzPool</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Dexter2CPMM.setter_from_getter_State_lqtTotal</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Dexter2CPMM.setter_from_getter_State_freezeBaker</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Dexter2CPMM.setter_from_getter_State_manager</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Dexter2CPMM.setter_from_getter_State_lqtAddress</span> %%&gt; ].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab173"></a><h1 class="section">Extracting Liquidity Token</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Dexter2LqtExtraction</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Serialisation plays no role in the extraction result, therfore we defining instances
+      using the opaque ascription of module types to speedup the extraction 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Module</span> <span class="id" title="var">DLqtSInstancesOpaque</span> : <span class="id" title="var">Dexter2FA12.Dexter2LqtSerializable</span> := <span class="id" title="var">Dexter2FA12.D2LqtSInstances</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Module</span> <span class="id" title="var">DEX2LQTExtract</span> := <span class="id" title="var">Dexter2FA12.Dexter2Lqt</span> <span class="id" title="var">DLqtSInstancesOpaque</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">DEX2LQTExtract</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Dexter2FA12</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Section</span> <span class="id" title="var">D2LqtE</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> `{<span class="id" title="var">ChainBase</span>}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">extra_ignore</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[ &lt;%% @<span class="id" title="var">Serializable</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">DLqtSInstancesOpaque.setup_serializable</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">unit_serializable</span> %%&gt; ].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_Dexter2_Lqt</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[ <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">mk_callback</span> %%&gt; "mk_callback"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">non_zero_amount</span> %%&gt; "(fun (x : tez) -&gt; 0tez &lt; x)"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">update_allowance</span> %%&gt; "Map.update"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">find_allowance</span> %%&gt; "Map.find_opt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">empty_allowance</span> %%&gt; "Map.empty"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">init</span> (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">setup</span> : <span class="id" title="var">Setup</span>) : <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ctx_</span> := <span class="id" title="var">ctx</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokens</span> := <span class="id" title="var">ContractCommon.AddressMap.add</span> <span class="id" title="var">setup</span>.(<span class="id" title="var">lqt_provider</span>) <span class="id" title="var">setup</span>.(<span class="id" title="var">initial_pool</span>) <span class="id" title="var">ContractCommon.AddressMap.empty</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">allowances</span> := <span class="id" title="var">empty_allowance</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">admin</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">admin_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">total_supply</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">initial_pool</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive_</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">maybe_msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">Dexter2FA12.Msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span> * <span class="id" title="var">State</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">DEX2LQTExtract.receive_lqt</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">maybe_msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">x</span> =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">x</span>.2, <span class="id" title="var">x</span>.1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap_all</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">TT_remap_arith</span> ++ <span class="id" title="var">TT_remap_dexter2</span> ++ <span class="id" title="var">TT_Dexter2_Lqt</span>)%<span class="id" title="var">list</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">LIGO_DEXTER2LQT_MODULE</span> : <span class="id" title="var">CameLIGOMod</span> <span class="id" title="var">Msg</span> <span class="id" title="var">ContractCallContext</span> <span class="id" title="var">Setup</span> <span class="id" title="var">State</span> <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "cameLIGO_dexter2lqt" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;pairs&nbsp;and&nbsp;ints&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> := <span class="id" title="var">CameLIGOPrelude</span> ++ <span class="id" title="var">nl</span> ++ <span class="id" title="var">nl</span> ++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;$ <span class="id" title="var">call_to_token_ligo</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">mk_callback_ligo</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">natural_to_mutez_ligo</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">mutez_to_natural_ligo</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">xtz_transfer_ligo</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">subNatTruncated_ligo</span> $&gt;;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;initial&nbsp;storage&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">init</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;NOTE:&nbsp;printed&nbsp;as&nbsp;local&nbsp;<span class="inlinecode"><span class="id" title="keyword">let</span></span>-bound&nbsp;definitions&nbsp;in&nbsp;the&nbsp;init&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> := "";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;TODO:&nbsp;maybe&nbsp;not&nbsp;needed,&nbsp;<span class="inlinecode"><span class="id" title="var">lmd_prelude</span></span>&nbsp;should&nbsp;be&nbsp;enough&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive_prelude</span> := "";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;main&nbsp;functionality&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">receive_</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> := <span class="id" title="var">print_default_entry_point</span> &lt;%% @<span class="id" title="var">State</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% @<span class="id" title="var">receive_</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% @<span class="id" title="var">Msg</span> %%&gt; |}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;(<span class="id" title="var">CameLIGO_prepare_extraction</span> <span class="id" title="var">TT_inlines_dexter2</span> <span class="id" title="var">TT_remap_all</span> <span class="id" title="var">TT_rename_ctors_default</span> <span class="id" title="var">extra_ignore</span> "cctx_instance" <span class="id" title="var">LIGO_DEXTER2LQT_MODULE</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">cameLIGO_dexter2lqt</span> := <span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <span class="id" title="var">cameLIGO_dexter2lqt_prepared</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">cameLIGO_dexter2lqt</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We redirect the extraction result for later processing and compiling with the CameLIGO compiler 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "../extraction/tests/extracted-code/cameligo-extract/dexter2fa12.mligo"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">cameLIGO_dexter2lqt</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">End</span> <span class="id" title="var">D2LqtE</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Dexter2LqtExtraction</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab174"></a><h1 class="section">Extracting the Main Contract</h1>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Dexter2Extraction</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Serialisation plays no role in the extraction result, therfore we defining instances
+    using the opaque ascription of module types to speedup the extraction 
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <span class="id" title="var">DSInstancesOpaque</span> : <span class="id" title="var">Dexter2CPMM.Dexter2Serializable</span> := <span class="id" title="var">Dexter2CPMM.DSInstances</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">DEX2Extract</span> := <span class="id" title="var">Dexter2CPMM.Dexter2</span> <span class="id" title="var">DSInstancesOpaque</span> <span class="id" title="var">Dexter2CPMM.NullAddressAxiom</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">DEX2Extract</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Dexter2CPMM</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">D2E</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">BaseTypes</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">extra_ignore</span> :=<br/>
+&nbsp;&nbsp;&nbsp;[ &lt;%% @<span class="id" title="var">Serializable</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">DSInstancesOpaque.DexterMsg_serializable</span> %%&gt; ].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_Dexter2_CPMM</span> :=<br/>
+&nbsp;&nbsp;&nbsp;[ <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">call_to_token</span> %%&gt; "call_to_token"<br/>
+&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">call_to_other_token</span> %%&gt; "call_to_token"<br/>
+&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">xtz_transfer</span> %%&gt; "xtz_transfer"<br/>
+&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">call_liquidity_token</span> %%&gt; "call_to_token"<br/>
+&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">token_id</span> %%&gt; "nat"<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">null_address</span> %%&gt; "(""tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU"" : address)"<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N_to_amount</span> %%&gt; "natural_to_mutez"<br/>
+&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">amount_to_N</span> %%&gt; "mutez_to_natural"<br/>
+&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">div</span> %%&gt; "divN_opt"<br/>
+&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">non_zero_amount</span> %%&gt; "(fun (x : tez) -&gt; 0tez &lt; x)"<br/>
+&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">baker_address</span> %%&gt; "key_hash option"<br/>
+&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">set_delegate_call</span> %%&gt; "(fun (x : key_hash option) -&gt; [Tezos.set_delegate x])" ].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap_all</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">TT_remap_arith</span> ++ <span class="id" title="var">TT_remap_dexter2</span> ++ <span class="id" title="var">TT_Dexter2_CPMM</span>)%<span class="id" title="var">list</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">init</span> (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">setup</span> : <span class="id" title="var">Setup</span>) : <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ctx_</span> := <span class="id" title="var">ctx</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenPool</span> := 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">xtzPool</span> := 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lqtTotal</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">lqtTotal_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">selfIsUpdatingTokenPool</span> := <span class="id" title="var">false</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">freezeBaker</span> := <span class="id" title="var">false</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">manager</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">manager_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenAddress</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">tokenAddress_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenId</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">tokenId_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lqtAddress</span> := <span class="id" title="var">null_address</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive_</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">maybe_msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">Dexter2CPMM.Msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span> * <span class="id" title="var">State</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">DEX2Extract.receive_cpmm</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">maybe_msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">x</span> =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">x</span>.2, <span class="id" title="var">x</span>.1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">LIGO_DEXTER2_MODULE</span> : <span class="id" title="var">CameLIGOMod</span> <span class="id" title="var">Msg</span> <span class="id" title="var">ContractCallContext</span> <span class="id" title="var">Setup</span> <span class="id" title="var">State</span> <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "cameLIGO_dexter2" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;pairs&nbsp;and&nbsp;ints&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> := <span class="id" title="var">CameLIGOPrelude</span> ++ <span class="id" title="var">nl</span> ++ <span class="id" title="var">nl</span> ++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;$ <span class="id" title="var">call_to_token_ligo</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">natural_to_mutez_ligo</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">mutez_to_natural_ligo</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">xtz_transfer_ligo</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">subNatTruncated_ligo</span> $&gt;;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;initial&nbsp;storage&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">init</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;NOTE:&nbsp;printed&nbsp;as&nbsp;local&nbsp;<span class="inlinecode"><span class="id" title="keyword">let</span></span>-bound&nbsp;definitions&nbsp;in&nbsp;the&nbsp;init&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> := "";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;TODO:&nbsp;maybe&nbsp;not&nbsp;needed,&nbsp;<span class="inlinecode"><span class="id" title="var">lmd_prelude</span></span>&nbsp;should&nbsp;be&nbsp;enough&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive_prelude</span> := "";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;main&nbsp;functionality&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">receive_</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> := <span class="id" title="var">print_default_entry_point</span> &lt;%% @<span class="id" title="var">State</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% @<span class="id" title="var">receive_</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% @<span class="id" title="var">Msg</span> %%&gt; |}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;(<span class="id" title="var">CameLIGO_prepare_extraction</span> <span class="id" title="var">TT_inlines_dexter2</span> <span class="id" title="var">TT_remap_all</span> <span class="id" title="var">TT_rename_ctors_default</span> <span class="id" title="var">extra_ignore</span> "cctx_instance" <span class="id" title="var">LIGO_DEXTER2_MODULE</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">cameLIGO_dexter2</span> := <span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <span class="id" title="var">cameLIGO_dexter2_prepared</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">cameLIGO_dexter2</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We redirect the extraction result for later processing and compiling with the CameLIGO compiler 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "../extraction/tests/extracted-code/cameligo-extract/dexter2CertifiedExtraction.mligo"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">cameLIGO_dexter2</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">D2E</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Dexter2Extraction</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

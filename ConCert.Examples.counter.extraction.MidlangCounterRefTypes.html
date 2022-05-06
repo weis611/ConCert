@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.counter.extraction.MidlangCounterRefTypes</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab234"></a><h1 class="section">Extraction of a counter contract with refinement types to Midllang</h1>
+
+<div class="paragraph"> </div>
+
+ The contract uses refinement types to specify some functional correctness properties 
+</div>
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Common</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ElmExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Extraction</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">PrettyPrinterMonad</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ResultMonad</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Kernames</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">MidlangBoxes</span> : <span class="id" title="var">ElmPrintConfig</span> :=<br/>
+&nbsp;&nbsp;{| <span class="id" title="var">term_box_symbol</span> := "()";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">type_box_symbol</span> := "()";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">any_type_symbol</span> := "()";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">false_elim_def</span> := "false_rec ()";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">print_full_names</span> := <span class="id" title="var">false</span> |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">midlang_translation_map</span> :=<br/>
+&nbsp;&nbsp;[(&lt;%% @<span class="id" title="var">current_slot</span> %%&gt;, "current_slot");<br/>
+&nbsp;&nbsp;(&lt;%% @<span class="id" title="var">address_eqb</span> %%&gt;, "address_eq");<br/>
+&nbsp;&nbsp;(&lt;%% @<span class="id" title="var">ctx_amount</span> %%&gt;, "amount");<br/>
+&nbsp;&nbsp;(&lt;%% @<span class="id" title="var">ctx_from</span> %%&gt;, "from");<br/>
+&nbsp;&nbsp;(&lt;%% @<span class="id" title="var">Chain</span> %%&gt;, "ConCertChain");<br/>
+&nbsp;&nbsp;(&lt;%% @<span class="id" title="var">ContractCallContext</span> %%&gt;, "ConCertCallContext");<br/>
+&nbsp;&nbsp;(&lt;%% @<span class="id" title="var">ConCert.Execution.Blockchain.ActionBody</span> %%&gt;, "ConCertAction");<br/>
+&nbsp;&nbsp;(&lt;%% @<span class="id" title="var">ChainBase</span> %%&gt;, "ChainBaseWTF");<br/>
+&nbsp;&nbsp;(&lt;%% @<span class="id" title="var">ctx_contract_address</span> %%&gt;, "contract_address")].<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">midlang_translate</span> (<span class="id" title="var">name</span> : <span class="id" title="var">kername</span>) : <span class="id" title="var">option</span> <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">find</span> (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">key</span>, <span class="id" title="var">_</span>) =&gt; <span class="id" title="var">eq_kername</span> <span class="id" title="var">key</span> <span class="id" title="var">name</span>) <span class="id" title="var">midlang_translation_map</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">_</span>, <span class="id" title="var">val</span>) =&gt; <span class="id" title="var">Some</span> <span class="id" title="var">val</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">CounterRefinmentTypes</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">storage</span> := <span class="id" title="var">Z</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Inductive</span> <span class="id" title="var">msg</span> := <span class="id" title="var">Inc</span> (<span class="id" title="var">_</span> : <span class="id" title="var">Z</span>) | <span class="id" title="var">Dec</span> (<span class="id" title="var">_</span> : <span class="id" title="var">Z</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Lia</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Program Definition</span> <span class="id" title="var">inc_counter</span> (<span class="id" title="var">st</span> : <span class="id" title="var">storage</span>) (<span class="id" title="var">inc</span> : {<span class="id" title="var">z</span> : <span class="id" title="var">Z</span> | 0 &lt;? <span class="id" title="var">z</span>}) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{<span class="id" title="var">new_st</span> : <span class="id" title="var">storage</span> | <span class="id" title="var">st</span> &lt;? <span class="id" title="var">new_st</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">st</span> + <span class="id" title="var">proj1_sig</span> <span class="id" title="var">inc</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Next</span> <span class="id" title="keyword">Obligation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_true</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">Zlt_is_lt_bool</span> <span class="id" title="tactic">in</span> *;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Program Definition</span> <span class="id" title="var">dec_counter</span> (<span class="id" title="var">st</span> : <span class="id" title="var">storage</span>) (<span class="id" title="var">dec</span> : {<span class="id" title="var">z</span> : <span class="id" title="var">Z</span> | 0 &lt;? <span class="id" title="var">z</span>}) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{<span class="id" title="var">new_st</span> : <span class="id" title="var">storage</span> | <span class="id" title="var">new_st</span> &lt;? <span class="id" title="var">st</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">st</span> - <span class="id" title="var">proj1_sig</span> <span class="id" title="var">dec</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Next</span> <span class="id" title="keyword">Obligation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">is_true</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">Zlt_is_lt_bool</span> <span class="id" title="tactic">in</span> *;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">my_bool_dec</span> := <span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Bool.bool_dec</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Inductive</span> <span class="id" title="var">SimpleActionBody</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Act_transfer</span> : <span class="id" title="var">nat</span> -&gt; <span class="id" title="var">Z</span> -&gt; <span class="id" title="var">SimpleActionBody</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Transaction</span> := <span class="id" title="var">list</span> <span class="id" title="var">SimpleActionBody</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Transaction_none</span> : <span class="id" title="var">Transaction</span> := [].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">counter</span> (<span class="id" title="var">msg</span> : <span class="id" title="var">msg</span>) (<span class="id" title="var">st</span> : <span class="id" title="var">storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">Transaction</span> * <span class="id" title="var">storage</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Inc</span> <span class="id" title="var">i</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> (<span class="id" title="var">my_bool_dec</span> (0 &lt;? <span class="id" title="var">i</span>) <span class="id" title="var">true</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="tactic">left</span> <span class="id" title="var">h</span> =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">Transaction_none</span>, <span class="id" title="var">proj1_sig</span> (<span class="id" title="var">inc_counter</span> <span class="id" title="var">st</span> (<span class="id" title="var">exist</span> <span class="id" title="var">i</span> <span class="id" title="var">h</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="tactic">right</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Dec</span> <span class="id" title="var">i</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> (<span class="id" title="var">my_bool_dec</span> (0 &lt;? <span class="id" title="var">i</span>) <span class="id" title="var">true</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="tactic">left</span> <span class="id" title="var">h</span> =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">Transaction_none</span>, <span class="id" title="var">proj1_sig</span> (<span class="id" title="var">dec_counter</span> <span class="id" title="var">st</span> (<span class="id" title="var">exist</span> <span class="id" title="var">i</span> <span class="id" title="var">h</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="tactic">right</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CounterRefinmentTypes</span>.<br/>
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">p</span> &lt;- <span class="id" title="var">tmQuoteRecTransp</span> (<span class="id" title="var">CounterRefinmentTypes.counter</span>) <span class="id" title="var">false</span>;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tmDefinition</span> "counter_env" <span class="id" title="var">p</span>.1).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">counter_name</span> := &lt;%% <span class="id" title="var">CounterRefinmentTypes.counter</span> %%&gt;.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table for various constants we want to rename 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) := <span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.add</span> %%&gt; "add"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.sub</span> %%&gt; "sub"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.leb</span> %%&gt; "le"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.ltb</span> %%&gt; "lt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z</span> %%&gt; "Int"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; ((&lt;%% <span class="id" title="var">Z</span> %%&gt;.1, "Z0"),"0")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">nat</span> %%&gt; "AccountAddress"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">CounterRefinmentTypes.Transaction</span> %%&gt; "Transaction"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">CounterRefinmentTypes.Transaction_none</span> %%&gt; "Transaction.none"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">bool</span> %%&gt; "Bool" ].<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">midlang_counter_translate</span> (<span class="id" title="var">name</span> : <span class="id" title="var">kername</span>) : <span class="id" title="var">option</span> <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">find</span> (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">key</span>, <span class="id" title="var">_</span>) =&gt; <span class="id" title="var">eq_kername</span> <span class="id" title="var">key</span> <span class="id" title="var">name</span>) (<span class="id" title="var">TT</span> ++ <span class="id" title="var">midlang_translation_map</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">_</span>, <span class="id" title="var">val</span>) =&gt; <span class="id" title="var">Some</span> <span class="id" title="var">val</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">ignored_concert_types</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&lt;%% @<span class="id" title="var">ActionBody</span> %%&gt;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% @<span class="id" title="var">Address</span> %%&gt;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% @<span class="id" title="var">Amount</span> %%&gt;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% @<span class="id" title="var">ChainBase</span> %%&gt;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% @<span class="id" title="var">Chain</span> %%&gt;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% @<span class="id" title="var">ContractCallContext</span> %%&gt;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% @<span class="id" title="var">SerializedValue</span> %%&gt;].<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">counter_extract</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">extract_template_env_within_coq</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">counter_env</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">KernameSet.singleton</span> <span class="id" title="var">counter_name</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">kn</span> =&gt; <span class="id" title="var">List.existsb</span> (<span class="id" title="var">eq_kername</span> <span class="id" title="var">kn</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ignored_concert_types</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">map</span> <span class="id" title="var">fst</span> <span class="id" title="var">midlang_translation_map</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">map</span> <span class="id" title="var">fst</span> <span class="id" title="var">TT</span>)).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">counter_result</span>:= <span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">env</span> &lt;- <span class="id" title="var">counter_extract</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'(<span class="id" title="var">_</span>, <span class="id" title="var">lines</span>) &lt;- <span class="id" title="var">finish_print_lines</span> (<span class="id" title="var">print_env</span> <span class="id" title="var">env</span> <span class="id" title="var">midlang_counter_translate</span>);;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ret</span> <span class="id" title="var">lines</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">wrap_in_delimiters</span> <span class="id" title="var">s</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">String.concat</span> <span class="id" title="var">nl</span> ["";"{-START-} "; <span class="id" title="var">s</span>; "{-END-}"].<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">midlang_prelude</span> :=<br/>
+&nbsp;&nbsp;&nbsp;["import Basics exposing (..)";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"import Blockchain exposing (..)";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"import Bool exposing (..)";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"import Int exposing (..)";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"import Maybe exposing (..)";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"import Order exposing (..)";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"import Transaction exposing (..)";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"import Tuple exposing (..)"].<br/>
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="keyword">match</span> <span class="id" title="var">counter_result</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Ok</span> <span class="id" title="var">s</span> =&gt; <span class="id" title="var">tmMsg</span> "Extraction of counter succeeded"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Err</span> <span class="id" title="var">err</span> =&gt; <span class="id" title="var">tmFail</span> <span class="id" title="var">err</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">midlang_counter</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">counter_result</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Ok</span> <span class="id" title="var">s</span> =&gt; <span class="id" title="var">monad_map</span> <span class="id" title="var">tmMsg</span> (<span class="id" title="var">midlang_prelude</span> ++ <span class="id" title="var">s</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Err</span> <span class="id" title="var">s</span> =&gt; <span class="id" title="var">tmFail</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="var">Redirect</span> "../extraction/tests/extracted-code/midlang-extract/MidlangCounterRefTypes.midlang" <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> <span class="id" title="var">midlang_counter</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

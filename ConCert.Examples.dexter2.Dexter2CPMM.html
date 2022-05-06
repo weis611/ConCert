@@ -1,0 +1,776 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.dexter2.Dexter2CPMM</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab141"></a><h1 class="section">Dexter 2 CPMM contract</h1>
+ This file contains an implementation of the Dexter2 CPMM contract
+    https://gitlab.com/dexter2tz/dexter2tz/-/blob/1cec9d9333eba756603d6cd90ea9c70d482a5d3d/dexter.mligo
+    In addition this file contains proof of functional correctness w.r.t the
+    informal specification https://gitlab.com/dexter2tz/dexter2tz/-/blob/1cec9d9333eba756603d6cd90ea9c70d482a5d3d/docs/informal-spec/dexter2-cpmm.md
+
+<div class="paragraph"> </div>
+
+    This contract is an implementation of a Constant Product Market Maker (CPMM).
+    When paired with a FA1.2 or FA2 token contract and a Dexter2 liquidity contract,
+    this contract serves as a decentralized exchange allowing users to trade between
+    XTZ and tokens. Additionally users can also add or withdraw funds from the
+    exchanges trading reserves. Traders pay a 0.3
+</div>
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">RecordUpdate</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Monads</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ContractCommon</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.FA2</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">FA2Token</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.FA2</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">FA2Interface</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Dexter2</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Dexter2FA12</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith_base</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>. <span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab142"></a><h1 class="section">Contract types</h1>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Section</span> <span class="id" title="var">DexterTypes</span>.<br/>
+<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>}.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Primitive</span> <span class="id" title="var">Projections</span>.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Nonrecursive</span> <span class="id" title="var">Elimination</span> <span class="id" title="var">Schemes</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">N_scope</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab143"></a><h2 class="section">Type synonyms</h2>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">update_token_pool_internal_</span> := <span class="id" title="var">list</span> <span class="id" title="var">FA2Interface.balance_of_response</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">token_id</span> := <span class="id" title="var">FA2Interface.token_id</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">token_contract_transfer</span> := <span class="id" title="var">FA2Interface.transfer</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">balance_of</span> := <span class="id" title="var">FA2Interface.balance_of_response</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">mintOrBurn</span> := <span class="id" title="var">Dexter2FA12.mintOrBurn_param</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">baker_address</span> := <span class="id" title="var">option</span> <span class="id" title="var">Address</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab144"></a><h2 class="section">Entrypoint types</h2>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">add_liquidity_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_add_liquidity_param</span>{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">owner</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">minLqtMinted</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">maxTokensDeposited</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">add_deadline</span> : <span class="id" title="var">nat</span><br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">remove_liquidity_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_remove_liquidity_param</span>{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">liquidity_to</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lqtBurned</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">minXtzWithdrawn</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">minTokensWithdrawn</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remove_deadline</span> : <span class="id" title="var">nat</span><br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">xtz_to_token_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_xtz_to_token_param</span>{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokens_to</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">minTokensBought</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">xtt_deadline</span> : <span class="id" title="var">nat</span><br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">token_to_xtz_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_token_to_xtz_param</span>{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">xtz_to</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokensSold</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">minXtzBought</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ttx_deadline</span> : <span class="id" title="var">nat</span><br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">token_to_token_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_token_to_token_param</span>{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">outputDexterContract</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">to_</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">minTokensBought_</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokensSold_</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ttt_deadline</span> : <span class="id" title="var">nat</span><br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">set_baker_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_set_baker_param</span>{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">baker</span> : <span class="id" title="var">baker_address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">freezeBaker_</span> : <span class="id" title="var">bool</span><br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">DexterMsg</span> :=<br/>
+| <span class="id" title="var">AddLiquidity</span> : <span class="id" title="var">add_liquidity_param</span> -&gt; <span class="id" title="var">DexterMsg</span><br/>
+| <span class="id" title="var">RemoveLiquidity</span> : <span class="id" title="var">remove_liquidity_param</span> -&gt; <span class="id" title="var">DexterMsg</span><br/>
+| <span class="id" title="var">XtzToToken</span> : <span class="id" title="var">xtz_to_token_param</span> -&gt; <span class="id" title="var">DexterMsg</span><br/>
+| <span class="id" title="var">TokenToXtz</span> : <span class="id" title="var">token_to_xtz_param</span> -&gt; <span class="id" title="var">DexterMsg</span><br/>
+| <span class="id" title="var">SetBaker</span> : <span class="id" title="var">set_baker_param</span> -&gt; <span class="id" title="var">DexterMsg</span><br/>
+| <span class="id" title="var">SetManager</span> : <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">DexterMsg</span><br/>
+| <span class="id" title="var">SetLqtAddress</span> : <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">DexterMsg</span><br/>
+| <span class="id" title="var">UpdateTokenPool</span> : <span class="id" title="var">DexterMsg</span><br/>
+| <span class="id" title="var">TokenToToken</span> : <span class="id" title="var">token_to_token_param</span> -&gt; <span class="id" title="var">DexterMsg</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">Msg</span> := @<span class="id" title="var">FA2Token.FA2ReceiverMsg</span> <span class="id" title="var">_</span> <span class="id" title="var">DexterMsg</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab145"></a><h2 class="section">Storage types</h2>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_state</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenPool</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">xtzPool</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lqtTotal</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">selfIsUpdatingTokenPool</span> : <span class="id" title="var">bool</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">freezeBaker</span> : <span class="id" title="var">bool</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">manager</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenAddress</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenId</span> : <span class="id" title="var">token_id</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lqtAddress</span> : <span class="id" title="var">Address</span><br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">Setup</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_setup</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lqtTotal_</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">manager_</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenAddress_</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenId_</span> : <span class="id" title="var">token_id</span><br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">DexterTypes</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Type</span> <span class="id" title="var">Dexter2Serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Section</span> <span class="id" title="var">DS</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Context</span> `{<span class="id" title="var">ChainBase</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">add_liquidity_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">add_liquidity_param</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">add_liquidity_param_serializable</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">remove_liquidity_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">remove_liquidity_param</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">remove_liquidity_param_serializable</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">xtz_to_token_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">xtz_to_token_param</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">xtz_to_token_param_serializable</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">token_to_xtz_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">token_to_xtz_param</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">token_to_xtz_param_serializable</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">set_baker_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">set_baker_param</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">set_baker_param_serializable</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">token_to_token_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">token_to_token_param</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">token_to_token_param_serializable</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">DexterMsg_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">DexterMsg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">DexterMsg_serializable</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">Dexter2FA12_Msg_serialize</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">Dexter2FA12.Msg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">Dexter2FA12_Msg_serialize</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">setup_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">Setup</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">setup_serializable</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">ClientMsg_serializable</span> : <span class="id" title="var">Serializable</span> (@<span class="id" title="var">FA2Token.FA2ReceiverMsg</span> <span class="id" title="var">_</span> <span class="id" title="var">DexterMsg</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">ClientMsg_serializable</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">state_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">State</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">state_serializable</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">FA2Token_Msg_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">FA2Token.Msg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">FA2Token_Msg_serializable</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">End</span> <span class="id" title="var">DS</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Dexter2Serializable</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Type</span> <span class="id" title="var">NullAddress</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Section</span> <span class="id" title="var">NullAddress</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">BaseTypes</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Null address that will newer contain contracts 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">null_address</span> : <span class="id" title="var">Address</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Place holder for tezos set delegate operation 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">set_delegate_call</span> : <span class="id" title="var">baker_address</span> -&gt; <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">delegate_call</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">addr</span>, <span class="id" title="var">Forall</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">action</span> =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">action</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">act_transfer</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">False</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">act_call</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">False</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">act_deploy</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">False</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>) (<span class="id" title="var">set_delegate_call</span> <span class="id" title="var">addr</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">End</span> <span class="id" title="var">NullAddress</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">NullAddress</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab146"></a><h1 class="section">Contract functions</h1>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Dexter2</span> (<span class="id" title="var">SI</span> : <span class="id" title="var">Dexter2Serializable</span>) (<span class="id" title="var">NAddr</span> : <span class="id" title="var">NullAddress</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">SI</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Export</span> <span class="id" title="var">NAddr</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">add_liquidity_param_serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">remove_liquidity_param_serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">xtz_to_token_param_serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">token_to_xtz_param_serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">set_baker_param_serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">token_to_token_param_serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">DexterMsg_serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">Dexter2FA12_Msg_serialize</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">setup_serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">ClientMsg_serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">state_serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">FA2Token_Msg_serializable</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">BaseTypes</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Section</span> <span class="id" title="var">DexterDefs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">N_scope</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab147"></a><h2 class="section">Helper functions</h2>
+
+<div class="paragraph"> </div>
+
+ <span class="inlinecode"><a class="idref" href="ConCert.Execution.Blockchain.html#Amount"><span class="id" title="definition">Amount</span></a></span> is defined as an alias to <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a></span>. We use these conversion function to mark
+        the places explicitly where the conversion from amounts happens. 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">amount_to_N</span> : <span class="id" title="var">Amount</span> -&gt; <span class="id" title="var">N</span> := <span class="id" title="var">Z.to_N</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">N_to_amount</span> : <span class="id" title="var">N</span> -&gt; <span class="id" title="var">Amount</span> := <span class="id" title="var">Z.of_N</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">result</span> : <span class="id" title="keyword">Type</span> := <span class="id" title="var">option</span> (<span class="id" title="var">State</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">sub</span> (<span class="id" title="var">n</span> <span class="id" title="var">m</span> : <span class="id" title="var">N</span>) : <span class="id" title="var">option</span> <span class="id" title="var">N</span> := <span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">n</span> &lt;? <span class="id" title="var">m</span>) ; <span class="id" title="var">Some</span> (<span class="id" title="var">n</span> - <span class="id" title="var">m</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">div</span> (<span class="id" title="var">n</span> <span class="id" title="var">m</span> : <span class="id" title="var">N</span>) : <span class="id" title="var">option</span> <span class="id" title="var">N</span> := <span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">m</span> =? 0) ; <span class="id" title="var">Some</span> (<span class="id" title="var">n</span> / <span class="id" title="var">m</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">ceildiv</span> (<span class="id" title="var">n</span> <span class="id" title="var">m</span> : <span class="id" title="var">N</span>) : <span class="id" title="var">option</span> <span class="id" title="var">N</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">N.modulo</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> =? 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">div</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="tactic">do</span> <span class="id" title="var">result</span> &lt;- <span class="id" title="var">div</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> ; <span class="id" title="var">Some</span> (<span class="id" title="var">result</span> + 1).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">ceildiv_</span> (<span class="id" title="var">n</span> <span class="id" title="var">m</span> : <span class="id" title="var">N</span>) : <span class="id" title="var">N</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">N.modulo</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> =? 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">n</span> / <span class="id" title="var">m</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> (<span class="id" title="var">n</span> / <span class="id" title="var">m</span>) + 1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Opaque</span> <span class="id" title="var">ceildiv</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Opaque</span> <span class="id" title="var">ceildiv_</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Opaque</span> <span class="id" title="var">div</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Opaque</span> <span class="id" title="var">sub</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">non_zero_amount</span> (<span class="id" title="var">amt</span> : <span class="id" title="var">Z</span>) : <span class="id" title="var">bool</span>:= (0 &lt;? <span class="id" title="var">amt</span>)%<span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Global</span> <span class="id" title="var">Arguments</span> <span class="id" title="var">non_zero_amount</span> <span class="id" title="var">_</span> /. <span class="comment">(*&nbsp;always&nbsp;unfold,&nbsp;if&nbsp;applied&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">call_liquidity_token</span> (<span class="id" title="var">addr</span> : <span class="id" title="var">Address</span>) (<span class="id" title="var">amt</span> : <span class="id" title="var">N</span>) (<span class="id" title="var">msg</span> : <span class="id" title="var">Dexter2FA12.Msg</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_call</span> <span class="id" title="var">addr</span> (<span class="id" title="var">N_to_amount</span> <span class="id" title="var">amt</span>) (<span class="id" title="var">serialize</span> <span class="id" title="var">msg</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Note that <span class="inlinecode"><span class="id" title="projection">quantity</span></span> is allowed to be negative. In this case it correspons to burning 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">mint_or_burn</span> (<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">target</span> : <span class="id" title="var">Address</span>) (<span class="id" title="var">quantitiy</span> : <span class="id" title="var">Z</span>) : <span class="id" title="var">option</span> <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">state</span>.(<span class="id" title="var">lqtAddress</span>) <span class="id" title="var">null_address</span>) ; <span class="comment">(*&nbsp;error&nbsp;lqtAddress&nbsp;not&nbsp;set&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">call_liquidity_token</span> <span class="id" title="var">state</span>.(<span class="id" title="var">lqtAddress</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Dexter2FA12.msg_mint_or_burn</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Dexter2FA12.build_mintOrBurn_param</span> <span class="id" title="var">quantitiy</span> <span class="id" title="var">target</span>))).<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">call_to_token</span> (<span class="id" title="var">token_addr</span> : <span class="id" title="var">Address</span>) (<span class="id" title="var">amt</span> : <span class="id" title="var">N</span>) (<span class="id" title="var">msg</span> : <span class="id" title="var">FA2Token.Msg</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_call</span> <span class="id" title="var">token_addr</span> (<span class="id" title="var">N_to_amount</span> <span class="id" title="var">amt</span>) (<span class="id" title="var">serialize</span> <span class="id" title="var">msg</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">token_transfer</span> (<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">from</span> <span class="id" title="var">to</span> : <span class="id" title="var">Address</span>) (<span class="id" title="var">amount</span> : <span class="id" title="var">N</span>) : <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call_to_token</span> <span class="id" title="var">state</span>.(<span class="id" title="var">tokenAddress</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">FA2Token.msg_transfer</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id" title="var">FA2Interface.build_transfer</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span> <span class="id" title="var">state</span>.(<span class="id" title="var">tokenId</span>) <span class="id" title="var">amount</span> <span class="id" title="var">None</span>]).<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">xtz_transfer</span> (<span class="id" title="var">to</span> : <span class="id" title="var">Address</span>) (<span class="id" title="var">amount</span> : <span class="id" title="var">N</span>) : <span class="id" title="var">option</span> <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">address_is_contract</span> <span class="id" title="var">to</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">None</span> <span class="comment">(*&nbsp;error_INVALID_TO_ADDRESS&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> (<span class="id" title="var">act_transfer</span> <span class="id" title="var">to</span> (<span class="id" title="var">N_to_amount</span> <span class="id" title="var">amount</span>)).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab148"></a><h2 class="section">Add liquidity</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">add_liquidity</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">param</span> : <span class="id" title="var">add_liquidity_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>) ; <span class="comment">(*&nbsp;error_SELF_IS_UPDATING_TOKEN_POOL_MUST_BE_FALSE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">param</span>.(<span class="id" title="var">add_deadline</span>) &lt;=? <span class="id" title="var">chain</span>.(<span class="id" title="var">current_slot</span>))%<span class="id" title="var">nat</span> ; <span class="comment">(*&nbsp;error_THE_CURRENT_TIME_MUST_BE_LESS_THAN_THE_DEADLINE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lqt_minted</span> &lt;- <span class="id" title="var">div</span> ((<span class="id" title="var">amount_to_N</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) * <span class="id" title="var">state</span>.(<span class="id" title="var">lqtTotal</span>)) <span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>) ; <span class="comment">(*&nbsp;error_DIV_by_0&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">tokens_deposited</span> &lt;- <span class="id" title="var">ceildiv</span> ((<span class="id" title="var">amount_to_N</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) * <span class="id" title="var">state</span>.(<span class="id" title="var">tokenPool</span>)) <span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>) ; <span class="comment">(*&nbsp;error_DIV_by_0&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">param</span>.(<span class="id" title="var">maxTokensDeposited</span>) &lt;? <span class="id" title="var">tokens_deposited</span>) ; <span class="comment">(*&nbsp;error_MAX_TOKENS_DEPOSITED_MUST_BE_GREATER_THAN_OR_EQUAL_TO_TOKENS_DEPOSITED&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">lqt_minted</span> &lt;? <span class="id" title="var">param</span>.(<span class="id" title="var">minLqtMinted</span>)) ; <span class="comment">(*&nbsp;error_LQT_MINTED_MUST_BE_GREATER_THAN_MIN_LQT_MINTED&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_state</span> := <span class="id" title="var">state</span>&lt;| <span class="id" title="var">lqtTotal</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">lqtTotal</span>) + <span class="id" title="var">lqt_minted</span> |&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;| <span class="id" title="var">tokenPool</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">tokenPool</span>) + <span class="id" title="var">tokens_deposited</span> |&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;| <span class="id" title="var">xtzPool</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>) + (<span class="id" title="var">amount_to_N</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>))|&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">op_token</span> := <span class="id" title="var">token_transfer</span> <span class="id" title="var">state</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_address</span>) <span class="id" title="var">tokens_deposited</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">op_lqt</span> &lt;- <span class="id" title="var">mint_or_burn</span> <span class="id" title="var">state</span> <span class="id" title="var">param</span>.(<span class="id" title="var">owner</span>) (<span class="id" title="var">Z.of_N</span> <span class="id" title="var">lqt_minted</span>) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">new_state</span>, [<span class="id" title="var">op_token</span>; <span class="id" title="var">op_lqt</span>]).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab149"></a><h2 class="section">Remove liquidity</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">remove_liquidity</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">param</span> : <span class="id" title="var">remove_liquidity_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>) ; <span class="comment">(*&nbsp;error_SELF_IS_UPDATING_TOKEN_POOL_MUST_BE_FALSE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">param</span>.(<span class="id" title="var">remove_deadline</span>) &lt;=? <span class="id" title="var">chain</span>.(<span class="id" title="var">current_slot</span>))%<span class="id" title="var">nat</span> ; <span class="comment">(*&nbsp;error_THE_CURRENT_TIME_MUST_BE_LESS_THAN_THE_DEADLINE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">non_zero_amount</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) ; <span class="comment">(*&nbsp;error_AMOUNT_MUST_BE_ZERO&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">xtz_withdrawn</span> &lt;-  <span class="id" title="var">div</span> (<span class="id" title="var">param</span>.(<span class="id" title="var">lqtBurned</span>) * <span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>)) <span class="id" title="var">state</span>.(<span class="id" title="var">lqtTotal</span>) ; <span class="comment">(*&nbsp;error_DIV_by_0&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">tokens_withdrawn</span> &lt;- <span class="id" title="var">div</span> (<span class="id" title="var">param</span>.(<span class="id" title="var">lqtBurned</span>) * <span class="id" title="var">state</span>.(<span class="id" title="var">tokenPool</span>)) <span class="id" title="var">state</span>.(<span class="id" title="var">lqtTotal</span>) ; <span class="comment">(*&nbsp;error_DIV_by_0&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">xtz_withdrawn</span> &lt;? <span class="id" title="var">param</span>.(<span class="id" title="var">minXtzWithdrawn</span>)) ; <span class="comment">(*&nbsp;error_THE_AMOUNT_OF_XTZ_WITHDRAWN_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_XTZ_WITHDRAWN&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">tokens_withdrawn</span> &lt;? <span class="id" title="var">param</span>.(<span class="id" title="var">minTokensWithdrawn</span>)) ; <span class="comment">(*&nbsp;error_THE_AMOUNT_OF_TOKENS_WITHDRAWN_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_WITHDRAWN&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">new_lqtPool</span> &lt;- <span class="id" title="var">sub</span> <span class="id" title="var">state</span>.(<span class="id" title="var">lqtTotal</span>) <span class="id" title="var">param</span>.(<span class="id" title="var">lqtBurned</span>) ; <span class="comment">(*&nbsp;error_CANNOT_BURN_MORE_THAN_THE_TOTAL_AMOUNT_OF_LQT&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">new_tokenPool</span> &lt;- <span class="id" title="var">sub</span> <span class="id" title="var">state</span>.(<span class="id" title="var">tokenPool</span>) <span class="id" title="var">tokens_withdrawn</span> ; <span class="comment">(*&nbsp;error_TOKEN_POOL_MINUS_TOKENS_WITHDRAWN_IS_NEGATIVE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">new_xtzPool</span> &lt;- <span class="id" title="var">sub</span> <span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>) <span class="id" title="var">xtz_withdrawn</span> ; <span class="comment">(*&nbsp;mutez&nbsp;subtraction&nbsp;run&nbsp;time&nbsp;error&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">op_lqt</span> &lt;- <span class="id" title="var">mint_or_burn</span> <span class="id" title="var">state</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) (0 - (<span class="id" title="var">Z.of_N</span> <span class="id" title="var">param</span>.(<span class="id" title="var">lqtBurned</span>)))%<span class="id" title="var">Z</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">op_token</span> := <span class="id" title="var">token_transfer</span> <span class="id" title="var">state</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_address</span>) <span class="id" title="var">param</span>.(<span class="id" title="var">liquidity_to</span>) <span class="id" title="var">tokens_withdrawn</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">opt_xtz</span> &lt;- <span class="id" title="var">xtz_transfer</span> <span class="id" title="var">param</span>.(<span class="id" title="var">liquidity_to</span>) <span class="id" title="var">xtz_withdrawn</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_state</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">tokenPool</span> :=  <span class="id" title="var">new_tokenPool</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">xtzPool</span> := <span class="id" title="var">new_xtzPool</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lqtTotal</span> := <span class="id" title="var">new_lqtPool</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">selfIsUpdatingTokenPool</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">freezeBaker</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">freezeBaker</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">manager</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">manager</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenAddress</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">tokenAddress</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenId</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">tokenId</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lqtAddress</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">lqtAddress</span>) |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">new_state</span>, [<span class="id" title="var">op_lqt</span>; <span class="id" title="var">op_token</span>; <span class="id" title="var">opt_xtz</span>]).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab150"></a><h2 class="section">XTZ to tokens</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">xtz_to_token</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">param</span> : <span class="id" title="var">xtz_to_token_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>) ; <span class="comment">(*&nbsp;error_SELF_IS_UPDATING_TOKEN_POOL_MUST_BE_FALSE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">param</span>.(<span class="id" title="var">xtt_deadline</span>) &lt;=? <span class="id" title="var">chain</span>.(<span class="id" title="var">current_slot</span>))%<span class="id" title="var">nat</span> ; <span class="comment">(*&nbsp;error_THE_CURRENT_TIME_MUST_BE_LESS_THAN_THE_DEADLINE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">tokens_bought</span> &lt;- <span class="id" title="var">div</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((<span class="id" title="var">amount_to_N</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) * 997 * <span class="id" title="var">state</span>.(<span class="id" title="var">tokenPool</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>) * 1000 + ((<span class="id" title="var">amount_to_N</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) * 997)) ; <span class="comment">(*&nbsp;error_DIV_by_0&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">tokens_bought</span> &lt;? <span class="id" title="var">param</span>.(<span class="id" title="var">minTokensBought</span>)) ; <span class="comment">(*&nbsp;error_TOKENS_BOUGHT_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_BOUGHT&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">new_tokenPool</span> &lt;- <span class="id" title="var">sub</span> <span class="id" title="var">state</span>.(<span class="id" title="var">tokenPool</span>) <span class="id" title="var">tokens_bought</span> ; <span class="comment">(*&nbsp;error_TOKEN_POOL_MINUS_TOKENS_BOUGHT_IS_NEGATIVE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_state</span> := <span class="id" title="var">state</span>&lt;| <span class="id" title="var">xtzPool</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>) + (<span class="id" title="var">amount_to_N</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) |&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;| <span class="id" title="var">tokenPool</span> := <span class="id" title="var">new_tokenPool</span> |&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">op</span> := <span class="id" title="var">token_transfer</span> <span class="id" title="var">state</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_address</span>) <span class="id" title="var">param</span>.(<span class="id" title="var">tokens_to</span>) <span class="id" title="var">tokens_bought</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">new_state</span>, [<span class="id" title="var">op</span>]).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab151"></a><h2 class="section">Tokes to XTZ</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">token_to_xtz</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">param</span> : <span class="id" title="var">token_to_xtz_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>) ; <span class="comment">(*&nbsp;error_SELF_IS_UPDATING_TOKEN_POOL_MUST_BE_FALSE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">param</span>.(<span class="id" title="var">ttx_deadline</span>) &lt;=? <span class="id" title="var">chain</span>.(<span class="id" title="var">current_slot</span>))%<span class="id" title="var">nat</span> ; <span class="comment">(*&nbsp;error_THE_CURRENT_TIME_MUST_BE_LESS_THAN_THE_DEADLINE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">non_zero_amount</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) ; <span class="comment">(*&nbsp;error_AMOUNT_MUST_BE_ZERO&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">xtz_bought</span> &lt;- <span class="id" title="var">div</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">param</span>.(<span class="id" title="var">tokensSold</span>) * 997 * <span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span>.(<span class="id" title="var">tokenPool</span>) * 1000 + (<span class="id" title="var">param</span>.(<span class="id" title="var">tokensSold</span>) * 997)) ; <span class="comment">(*&nbsp;error_DIV_by_0&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">xtz_bought</span> &lt;? <span class="id" title="var">param</span>.(<span class="id" title="var">minXtzBought</span>)) ; <span class="comment">(*&nbsp;error_XTZ_BOUGHT_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_XTZ_BOUGHT&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">new_xtzPool</span> &lt;- <span class="id" title="var">sub</span> <span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>) <span class="id" title="var">xtz_bought</span> ; <span class="comment">(*&nbsp;mutez&nbsp;subtraction&nbsp;run&nbsp;time&nbsp;error&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">op_token</span> := <span class="id" title="var">token_transfer</span> <span class="id" title="var">state</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_address</span>) <span class="id" title="var">param</span>.(<span class="id" title="var">tokensSold</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">op_tez</span> &lt;- <span class="id" title="var">xtz_transfer</span> <span class="id" title="var">param</span>.(<span class="id" title="var">xtz_to</span>) <span class="id" title="var">xtz_bought</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_state</span> := <span class="id" title="var">state</span>&lt;| <span class="id" title="var">tokenPool</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">tokenPool</span>) + <span class="id" title="var">param</span>.(<span class="id" title="var">tokensSold</span>) |&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;| <span class="id" title="var">xtzPool</span> := <span class="id" title="var">new_xtzPool</span> |&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">new_state</span>, [<span class="id" title="var">op_token</span>; <span class="id" title="var">op_tez</span>]).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab152"></a><h2 class="section">Default entrypoint</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">default_</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>) ; <span class="comment">(*&nbsp;error_SELF_IS_UPDATING_TOKEN_POOL_MUST_BE_FALSE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_state</span> := <span class="id" title="var">state</span>&lt;| <span class="id" title="var">xtzPool</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>) + <span class="id" title="var">amount_to_N</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>) |&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">new_state</span>, []).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab153"></a><h2 class="section">Set baker</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">set_baker</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">param</span> : <span class="id" title="var">set_baker_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>) ; <span class="comment">(*&nbsp;error_SELF_IS_UPDATING_TOKEN_POOL_MUST_BE_FALSE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">non_zero_amount</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) ; <span class="comment">(*&nbsp;error_AMOUNT_MUST_BE_ZERO&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="var">state</span>.(<span class="id" title="var">manager</span>))) ; <span class="comment">(*&nbsp;error_ONLY_MANAGER_CAN_SET_BAKER&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">state</span>.(<span class="id" title="var">freezeBaker</span>)) ; <span class="comment">(*&nbsp;error_BAKER_PERMANENTLY_FROZEN&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>&lt;| <span class="id" title="var">freezeBaker</span> := <span class="id" title="var">param</span>.(<span class="id" title="var">freezeBaker_</span>) |&gt;, <span class="id" title="var">set_delegate_call</span> <span class="id" title="var">param</span>.(<span class="id" title="var">baker</span>)).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab154"></a><h2 class="section">Set manager</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">set_manager</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">new_manager</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>) ; <span class="comment">(*&nbsp;error_SELF_IS_UPDATING_TOKEN_POOL_MUST_BE_FALSE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">non_zero_amount</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) ; <span class="comment">(*&nbsp;error_AMOUNT_MUST_BE_ZERO&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="var">state</span>.(<span class="id" title="var">manager</span>))) ; <span class="comment">(*&nbsp;error_ONLY_MANAGER_CAN_SET_MANAGER&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>&lt;| <span class="id" title="var">manager</span> := <span class="id" title="var">new_manager</span> |&gt;, []).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab155"></a><h2 class="section">Set liquidity address</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">set_lqt_address</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">new_lqt_address</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>) ; <span class="comment">(*&nbsp;error_SELF_IS_UPDATING_TOKEN_POOL_MUST_BE_FALSE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">non_zero_amount</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) ; <span class="comment">(*&nbsp;error_AMOUNT_MUST_BE_ZERO&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="var">state</span>.(<span class="id" title="var">manager</span>))) ; <span class="comment">(*&nbsp;error_ONLY_MANAGER_CAN_SET_LQT_ADRESS&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">state</span>.(<span class="id" title="var">lqtAddress</span>) <span class="id" title="var">null_address</span>)) ; <span class="comment">(*&nbsp;error_LQT_ADDRESS_ALREADY_SET&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>&lt;| <span class="id" title="var">lqtAddress</span> := <span class="id" title="var">new_lqt_address</span> |&gt;, []).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab156"></a><h2 class="section">Update token pool</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">update_token_pool</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_origin</span>))) ; <span class="comment">(*&nbsp;error_CALL_NOT_FROM_AN_IMPLICIT_ACCOUNT&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">non_zero_amount</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) ; <span class="comment">(*&nbsp;error_AMOUNT_MUST_BE_ZERO&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>) ; <span class="comment">(*&nbsp;error_UNEXPECTED_REENTRANCE_IN_UPDATE_TOKEN_POOL&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">balance_of_request</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">FA2Interface.Build_balance_of_request</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_address</span>) <span class="id" title="var">state</span>.(<span class="id" title="var">tokenId</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">balance_of_param</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">FA2Interface.Build_balance_of_param</span> [<span class="id" title="var">balance_of_request</span>] (<span class="id" title="var">FA2Interface.Build_callback</span> <span class="id" title="var">_</span> <span class="id" title="var">None</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_address</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">op</span> := <span class="id" title="var">call_to_token</span> <span class="id" title="var">state</span>.(<span class="id" title="var">tokenAddress</span>) 0 (<span class="id" title="var">FA2Token.msg_balance_of</span> <span class="id" title="var">balance_of_param</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>&lt;| <span class="id" title="var">selfIsUpdatingTokenPool</span> := <span class="id" title="var">true</span> |&gt;, [<span class="id" title="var">op</span>]).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab157"></a><h2 class="section">Update token pool internal</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">update_token_pool_internal</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">token_pool</span> : <span class="id" title="var">update_token_pool_internal_</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> ((<span class="id" title="var">negb</span> <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>)) ||<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="var">state</span>.(<span class="id" title="var">tokenAddress</span>)))) ; <span class="comment">(*&nbsp;error_THIS_ENTRYPOINT_MAY_ONLY_BE_CALLED_BY_GETBALANCE_OF_TOKENADDRESS&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">non_zero_amount</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) ; <span class="comment">(*&nbsp;error_AMOUNT_MUST_BE_ZERO&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">token_pool</span> &lt;-<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">token_pool</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; <span class="id" title="var">None</span> <span class="comment">(*&nbsp;error_INVALID_FA2_BALANCE_RESPONSE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">x</span> :: <span class="id" title="var">xs</span> =&gt; <span class="id" title="var">Some</span> <span class="id" title="var">x</span>.(<span class="id" title="var">balance</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_state</span> := <span class="id" title="var">state</span>&lt;| <span class="id" title="var">tokenPool</span> := <span class="id" title="var">token_pool</span> |&gt;&lt;| <span class="id" title="var">selfIsUpdatingTokenPool</span> := <span class="id" title="var">false</span> |&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">new_state</span>, []).<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">call_to_other_token</span> (<span class="id" title="var">token_addr</span> : <span class="id" title="var">Address</span>) (<span class="id" title="var">amount</span> : <span class="id" title="var">N</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">msg</span> : @<span class="id" title="var">FA2Token.FA2ReceiverMsg</span> <span class="id" title="var">_</span> <span class="id" title="var">DexterMsg</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_call</span> <span class="id" title="var">token_addr</span> (<span class="id" title="var">N_to_amount</span> <span class="id" title="var">amount</span>) (<span class="id" title="var">serialize</span> <span class="id" title="var">msg</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab158"></a><h2 class="section">Tokens to tokens</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">token_to_token</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">param</span> : <span class="id" title="var">token_to_token_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> <span class="id" title="var">state</span>.(<span class="id" title="var">selfIsUpdatingTokenPool</span>) ; <span class="comment">(*&nbsp;error_SELF_IS_UPDATING_TOKEN_POOL_MUST_BE_FALSE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">non_zero_amount</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>)) ; <span class="comment">(*&nbsp;error_AMOUNT_MUST_BE_ZERO&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">param</span>.(<span class="id" title="var">ttt_deadline</span>) &lt;=? <span class="id" title="var">chain</span>.(<span class="id" title="var">current_slot</span>))%<span class="id" title="var">nat</span> ; <span class="comment">(*&nbsp;error_THE_CURRENT_TIME_MUST_BE_LESS_THAN_THE_DEADLINE&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">xtz_bought</span> &lt;- <span class="id" title="var">div</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">param</span>.(<span class="id" title="var">tokensSold_</span>) * 997 * <span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span>.(<span class="id" title="var">tokenPool</span>) * 1000 + (<span class="id" title="var">param</span>.(<span class="id" title="var">tokensSold_</span>) * 997)) ; <span class="comment">(*&nbsp;error_DIV_by_0&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">new_xtzPool</span> &lt;- <span class="id" title="var">sub</span> <span class="id" title="var">state</span>.(<span class="id" title="var">xtzPool</span>) <span class="id" title="var">xtz_bought</span> ; <span class="comment">(*&nbsp;mutez&nbsp;subtraction&nbsp;run&nbsp;time&nbsp;error&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_state</span> := <span class="id" title="var">state</span>&lt;| <span class="id" title="var">tokenPool</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">tokenPool</span>) + <span class="id" title="var">param</span>.(<span class="id" title="var">tokensSold_</span>) |&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;| <span class="id" title="var">xtzPool</span> := <span class="id" title="var">new_xtzPool</span> |&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">op1</span> := <span class="id" title="var">token_transfer</span> <span class="id" title="var">state</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_address</span>) <span class="id" title="var">param</span>.(<span class="id" title="var">tokensSold_</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">op2</span> := <span class="id" title="var">call_to_other_token</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">param</span>.(<span class="id" title="var">outputDexterContract</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">xtz_bought</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">FA2Token.other_msg</span> (<span class="id" title="var">XtzToToken</span> {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokens_to</span> := <span class="id" title="var">param</span>.(<span class="id" title="var">to_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">minTokensBought</span> := <span class="id" title="var">param</span>.(<span class="id" title="var">minTokensBought_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">xtt_deadline</span> := <span class="id" title="var">param</span>.(<span class="id" title="var">ttt_deadline</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|})) <span class="id" title="tactic">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">new_state</span>, [<span class="id" title="var">op1</span>; <span class="id" title="var">op2</span>]).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab159"></a><h2 class="section">Receive</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive_cpmm</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">maybe_msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">Msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">result</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">maybe_msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">FA2Token.other_msg</span> (<span class="id" title="var">AddLiquidity</span> <span class="id" title="var">param</span>)) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">add_liquidity</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">FA2Token.other_msg</span> (<span class="id" title="var">RemoveLiquidity</span> <span class="id" title="var">param</span>)) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remove_liquidity</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">FA2Token.other_msg</span> (<span class="id" title="var">SetBaker</span> <span class="id" title="var">param</span>)) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">set_baker</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">FA2Token.other_msg</span> (<span class="id" title="var">SetManager</span> <span class="id" title="var">param</span>)) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">set_manager</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">FA2Token.other_msg</span> (<span class="id" title="var">SetLqtAddress</span> <span class="id" title="var">param</span>)) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">set_lqt_address</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">default_</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">FA2Token.other_msg</span> <span class="id" title="var">UpdateTokenPool</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">update_token_pool</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">FA2Token.other_msg</span> (<span class="id" title="var">XtzToToken</span> <span class="id" title="var">param</span>)) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">xtz_to_token</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">FA2Token.other_msg</span> (<span class="id" title="var">TokenToXtz</span> <span class="id" title="var">param</span>)) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_to_xtz</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">FA2Token.other_msg</span> (<span class="id" title="var">TokenToToken</span> <span class="id" title="var">param</span>)) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_to_token</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">FA2Token.receive_balance_of_param</span> <span class="id" title="var">responses</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">update_token_pool_internal</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">responses</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab160"></a><h2 class="section">Init</h2>
+
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">init_cpmm</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">setup</span> : <span class="id" title="var">Setup</span>) : <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenPool</span> := 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">xtzPool</span> := 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lqtTotal</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">lqtTotal_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">selfIsUpdatingTokenPool</span> := <span class="id" title="var">false</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">freezeBaker</span> := <span class="id" title="var">false</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">manager</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">manager_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenAddress</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">tokenAddress_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenId</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">tokenId_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lqtAddress</span> := <span class="id" title="var">null_address</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|}.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">contract</span> : <span class="id" title="var">Contract</span> <span class="id" title="var">Setup</span> <span class="id" title="var">Msg</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_contract</span> <span class="id" title="var">init_cpmm</span> <span class="id" title="var">receive_cpmm</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">End</span> <span class="id" title="var">DexterDefs</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Dexter2</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">DSInstances</span> &lt;: <span class="id" title="var">Dexter2Serializable</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Serialisation&nbsp;instances&nbsp;(omitted).<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOTE:&nbsp;we&nbsp;use&nbsp;<span class="inlinecode">&lt;:</span>&nbsp;to&nbsp;make&nbsp;the&nbsp;definitions&nbsp;transparent,&nbsp;so&nbsp;the<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;implementation&nbsp;details&nbsp;can&nbsp;be&nbsp;revealed,&nbsp;if&nbsp;needed&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">NullAddressAxiom</span> &lt;: <span class="id" title="var">NullAddress</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Section</span> <span class="id" title="var">NAddr</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">BaseTypes</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">null_address</span> : <span class="id" title="var">Address</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">set_delegate_call</span> : <span class="id" title="var">baker_address</span> -&gt; <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">delegate_call</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">addr</span>, <span class="id" title="var">Forall</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">action</span> =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">action</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">act_transfer</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">False</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">act_call</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">False</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">act_deploy</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">False</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>) (<span class="id" title="var">set_delegate_call</span> <span class="id" title="var">addr</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">End</span> <span class="id" title="var">NAddr</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">NullAddressAxiom</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Instantiating the implementaion with required instances for serialisation/deserialisation 
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <span class="id" title="var">DEX2</span> := <span class="id" title="var">Dexter2</span> <span class="id" title="var">DSInstances</span> <span class="id" title="var">NullAddressAxiom</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

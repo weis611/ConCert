@@ -1,0 +1,596 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.fa2.FA2Token</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Extras</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">RecordUpdate</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Monads</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ContractCommon</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.FA2</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">FA2Interface</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">FA2Token</span>.<br/>
+<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>}.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Primitive</span> <span class="id" title="var">Projections</span>.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Nonrecursive</span> <span class="id" title="var">Elimination</span> <span class="id" title="var">Schemes</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">N_scope</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Any&nbsp;contract&nbsp;that&nbsp;wants&nbsp;to&nbsp;receive&nbsp;callback&nbsp;messages&nbsp;from&nbsp;the&nbsp;FA2&nbsp;contract<br/>
+&nbsp;&nbsp;&nbsp;should&nbsp;have&nbsp;this&nbsp;type&nbsp;as&nbsp;its&nbsp;Msg&nbsp;type.&nbsp;The&nbsp;contract&nbsp;may&nbsp;have&nbsp;other&nbsp;endpoints,<br/>
+&nbsp;&nbsp;&nbsp;as&nbsp;composed&nbsp;in&nbsp;the&nbsp;'other_msg'&nbsp;constructor&nbsp;*)</span><br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">FA2ReceiverMsg</span> {<span class="id" title="var">Msg'</span> : <span class="id" title="keyword">Type</span>} :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">receive_balance_of_param</span> : <span class="id" title="var">list</span> <span class="id" title="var">balance_of_response</span> -&gt; <span class="id" title="var">FA2ReceiverMsg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">receive_total_supply_param</span> : <span class="id" title="var">list</span> <span class="id" title="var">total_supply_response</span> -&gt; <span class="id" title="var">FA2ReceiverMsg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">receive_metadata_callback</span> : <span class="id" title="var">list</span> <span class="id" title="var">token_metadata</span> -&gt; <span class="id" title="var">FA2ReceiverMsg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">receive_is_operator</span> : <span class="id" title="var">is_operator_response</span>  -&gt; <span class="id" title="var">FA2ReceiverMsg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">receive_permissions_descriptor</span> : <span class="id" title="var">permissions_descriptor</span> -&gt; <span class="id" title="var">FA2ReceiverMsg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">other_msg</span> : <span class="id" title="var">Msg'</span> -&gt; <span class="id" title="var">FA2ReceiverMsg</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Transfer&nbsp;hook&nbsp;contracts&nbsp;of&nbsp;the&nbsp;FA2&nbsp;Contract&nbsp;should&nbsp;use&nbsp;this&nbsp;type&nbsp;as&nbsp;their&nbsp;Msg&nbsp;type&nbsp;*)</span><br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">FA2TransferHook</span> {<span class="id" title="var">Msg</span> : <span class="id" title="keyword">Type</span>} :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">transfer_hook</span> : <span class="id" title="var">transfer_descriptor_param</span> -&gt; <span class="id" title="var">FA2TransferHook</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">hook_other_msg</span> : <span class="id" title="var">Msg</span> -&gt; <span class="id" title="var">FA2TransferHook</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;The&nbsp;FA2&nbsp;Endpoints.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">Msg</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">msg_transfer</span> : <span class="id" title="var">list</span> <span class="id" title="var">transfer</span> -&gt; <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">msg_set_transfer_hook</span> : <span class="id" title="var">set_hook_param</span> -&gt; <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">msg_receive_hook_transfer</span> : <span class="id" title="var">transfer_descriptor_param</span> -&gt; <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">msg_balance_of</span> : <span class="id" title="var">balance_of_param</span> -&gt; <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">msg_total_supply</span> : <span class="id" title="var">total_supply_param</span> -&gt; <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">msg_token_metadata</span> : <span class="id" title="var">token_metadata_param</span> -&gt; <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">msg_permissions_descriptor</span> : <span class="id" title="var">callback</span> <span class="id" title="var">permissions_descriptor</span> -&gt; <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">msg_update_operators</span> : <span class="id" title="var">list</span> <span class="id" title="var">update_operator</span> -&gt; <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">msg_is_operator</span> : <span class="id" title="var">is_operator_param</span> -&gt; <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">msg_create_tokens</span> : <span class="id" title="var">token_id</span> -&gt; <span class="id" title="var">Msg</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">TokenLedger</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_token_ledger</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fungible</span> : <span class="id" title="var">bool</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">balances</span> : <span class="id" title="var">FMap</span> <span class="id" title="var">Address</span> <span class="id" title="var">N</span><br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_state</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fa2_owner</span>          : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">assets</span>             : <span class="id" title="var">FMap</span> <span class="id" title="var">token_id</span> <span class="id" title="var">TokenLedger</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">operators</span>          : <span class="id" title="var">FMap</span> <span class="id" title="var">Address</span> (<span class="id" title="var">FMap</span> <span class="id" title="var">Address</span> <span class="id" title="var">operator_tokens</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">permission_policy</span>  : <span class="id" title="var">permissions_descriptor</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokens</span>             : <span class="id" title="var">FMap</span> <span class="id" title="var">token_id</span> <span class="id" title="var">token_metadata</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_hook_addr</span> : <span class="id" title="var">option</span> <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">Setup</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_setup</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">setup_total_supply</span>        : <span class="id" title="var">list</span> (<span class="id" title="var">token_id</span> * <span class="id" title="var">N</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">setup_tokens</span>              : <span class="id" title="var">FMap</span> <span class="id" title="var">token_id</span> <span class="id" title="var">token_metadata</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">initial_permission_policy</span> : <span class="id" title="var">permissions_descriptor</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_hook_addr_</span>       : <span class="id" title="var">option</span> <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">TokenLedger</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">State</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">Setup</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">Serialization</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">setup_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">Setup</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">Setup_rect</span> &lt;<span class="id" title="var">build_setup</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">FA2ReceiverMsg_serializable</span> {<span class="id" title="var">Msg</span> : <span class="id" title="keyword">Type</span>} `{<span class="id" title="var">Serializable</span> <span class="id" title="var">Msg</span>} : <span class="id" title="var">Serializable</span> (@<span class="id" title="var">FA2ReceiverMsg</span> <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> (@<span class="id" title="var">FA2ReceiverMsg_rect</span> <span class="id" title="var">Msg</span>) &lt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(@<span class="id" title="var">receive_balance_of_param</span> <span class="id" title="var">Msg</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(@<span class="id" title="var">receive_total_supply_param</span> <span class="id" title="var">Msg</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(@<span class="id" title="var">receive_metadata_callback</span> <span class="id" title="var">Msg</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(@<span class="id" title="var">receive_is_operator</span> <span class="id" title="var">Msg</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(@<span class="id" title="var">receive_permissions_descriptor</span> <span class="id" title="var">Msg</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(@<span class="id" title="var">other_msg</span> <span class="id" title="var">Msg</span>)&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">FA2TransferHook_serializable</span> {<span class="id" title="var">Msg</span> : <span class="id" title="keyword">Type</span>} `{<span class="id" title="var">Serializable</span> <span class="id" title="var">Msg</span>} : <span class="id" title="var">Serializable</span> (@<span class="id" title="var">FA2TransferHook</span> <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> (@<span class="id" title="var">FA2TransferHook_rect</span> <span class="id" title="var">Msg</span>) &lt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(@<span class="id" title="var">transfer_hook</span>  <span class="id" title="var">Msg</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(@<span class="id" title="var">hook_other_msg</span> <span class="id" title="var">Msg</span>)&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">callback_permissions_descriptor_serializable</span> : <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback</span> <span class="id" title="var">permissions_descriptor</span>) := <span class="id" title="var">callback_serializable</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">msg_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">Msg</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">Msg_rect</span> &lt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">msg_transfer</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">msg_set_transfer_hook</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">msg_receive_hook_transfer</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">msg_balance_of</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">msg_total_supply</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">msg_token_metadata</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">msg_permissions_descriptor</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">msg_update_operators</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">msg_is_operator</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">msg_create_tokens</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">TokenLedger_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">TokenLedger</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">TokenLedger_rect</span> &lt;<span class="id" title="var">build_token_ledger</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">state_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">State_rect</span> &lt;<span class="id" title="var">build_state</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Serialization</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">address_balance</span> (<span class="id" title="var">token_id</span> : <span class="id" title="var">token_id</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">addr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">N</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">FMap.find</span> <span class="id" title="var">token_id</span> <span class="id" title="var">state</span>.(<span class="id" title="var">assets</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">ledger</span> =&gt; <span class="id" title="var">with_default</span> 0%<span class="id" title="var">N</span> (<span class="id" title="var">FMap.find</span> <span class="id" title="var">addr</span> <span class="id" title="var">ledger</span>.(<span class="id" title="var">balances</span>))<br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; 0%<span class="id" title="var">N</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">address_has_sufficient_asset_balance</span> (<span class="id" title="var">token_id</span> : <span class="id" title="var">token_id</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">owner</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">transaction_amount</span> : <span class="id" title="var">N</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">unit</span> :=<br/>
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">transaction_amount</span> &lt;=? <span class="id" title="var">address_balance</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owner</span> <span class="id" title="var">state</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">None</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">policy_disallows_operator_transfer</span> (<span class="id" title="var">policy</span> : <span class="id" title="var">permissions_descriptor</span>) : <span class="id" title="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">policy</span>.(<span class="id" title="var">descr_operator</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">operator_transfer_permitted</span> =&gt; <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">operator_transfer_denied</span> =&gt; <span class="id" title="var">true</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">policy_disallows_self_transfer</span> (<span class="id" title="var">policy</span> : <span class="id" title="var">permissions_descriptor</span>) : <span class="id" title="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">policy</span>.(<span class="id" title="var">descr_self</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">self_transfer_permitted</span> =&gt; <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">self_transfer_denied</span> =&gt; <span class="id" title="var">true</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_owner_operator_tokens</span> (<span class="id" title="var">owner</span> <span class="id" title="var">operator</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">operator_tokens</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">operator_tokens</span> &lt;- <span class="id" title="var">FMap.find</span> <span class="id" title="var">owner</span> <span class="id" title="var">state</span>.(<span class="id" title="var">operators</span>) ;<br/>
+&nbsp;&nbsp;<span class="id" title="var">FMap.find</span> <span class="id" title="var">operator</span> <span class="id" title="var">operator_tokens</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Executes&nbsp;a&nbsp;single&nbsp;transfer&nbsp;by&nbsp;returning&nbsp;a&nbsp;new&nbsp;state,&nbsp;if&nbsp;successful.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">try_single_transfer</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">params</span> : <span class="id" title="var">transfer</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">ledger</span> &lt;- <span class="id" title="var">FMap.find</span> <span class="id" title="var">params</span>.(<span class="id" title="var">transfer_token_id</span>) <span class="id" title="var">state</span>.(<span class="id" title="var">assets</span>) ;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">current_owner_balance</span> := <span class="id" title="var">address_balance</span> <span class="id" title="var">params</span>.(<span class="id" title="var">transfer_token_id</span>) <span class="id" title="var">params</span>.(<span class="id" title="var">from_</span>) <span class="id" title="var">state</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_balances</span> := <span class="id" title="var">FMap.add</span> <span class="id" title="var">params</span>.(<span class="id" title="var">from_</span>) (<span class="id" title="var">current_owner_balance</span> - <span class="id" title="var">params</span>.(<span class="id" title="var">amount</span>)) <span class="id" title="var">ledger</span>.(<span class="id" title="var">balances</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_balances</span> := <span class="id" title="var">FMap.partial_alter</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">balance</span> =&gt; <span class="id" title="var">Some</span> ((<span class="id" title="var">with_default</span> 0 <span class="id" title="var">balance</span>) + <span class="id" title="var">params</span>.(<span class="id" title="var">amount</span>))) <span class="id" title="var">params</span>.(<span class="id" title="var">to_</span>) <span class="id" title="var">new_balances</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_ledger</span> := <span class="id" title="var">ledger</span>&lt;|<span class="id" title="var">balances</span> := <span class="id" title="var">new_balances</span>|&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>&lt;|<span class="id" title="var">assets</span> ::= <span class="id" title="var">FMap.add</span> <span class="id" title="var">params</span>.(<span class="id" title="var">transfer_token_id</span>) <span class="id" title="var">new_ledger</span>|&gt;).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">transfer_check_permissions</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">params</span> : <span class="id" title="var">transfer</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">policy</span> : <span class="id" title="var">permissions_descriptor</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">unit</span> :=<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;check&nbsp;for&nbsp;sufficient&nbsp;permissions&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">address_has_sufficient_asset_balance</span> <span class="id" title="var">params</span>.(<span class="id" title="var">transfer_token_id</span>) <span class="id" title="var">params</span>.(<span class="id" title="var">from_</span>) <span class="id" title="var">params</span>.(<span class="id" title="var">amount</span>) <span class="id" title="var">state</span> ;<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;only&nbsp;allow&nbsp;transfers&nbsp;of&nbsp;known&nbsp;token_ids&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">FMap.find</span> <span class="id" title="var">params</span>.(<span class="id" title="var">transfer_token_id</span>) <span class="id" title="var">state</span>.(<span class="id" title="var">tokens</span>) ;<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;if&nbsp;caller&nbsp;is&nbsp;owner&nbsp;of&nbsp;transfer,&nbsp;then&nbsp;check&nbsp;policy&nbsp;if&nbsp;self_transfer&nbsp;is&nbsp;allowed&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">caller</span> <span class="id" title="var">params</span>.(<span class="id" title="var">from_</span>))<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">throwIf</span> (<span class="id" title="var">policy_disallows_self_transfer</span> <span class="id" title="var">policy</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;check&nbsp;if&nbsp;policy&nbsp;allows&nbsp;operator&nbsp;transfer&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">policy_disallows_operator_transfer</span> <span class="id" title="var">policy</span>) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">operators_map</span> &lt;- <span class="id" title="var">FMap.find</span> <span class="id" title="var">params</span>.(<span class="id" title="var">from_</span>) <span class="id" title="var">state</span>.(<span class="id" title="var">operators</span>) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">op_tokens</span> &lt;- <span class="id" title="var">FMap.find</span> <span class="id" title="var">caller</span> <span class="id" title="var">operators_map</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;check&nbsp;if&nbsp;operator&nbsp;has&nbsp;permission&nbsp;to&nbsp;transfer&nbsp;the&nbsp;given&nbsp;token_id&nbsp;type&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">op_tokens</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">all_tokens</span> =&gt; <span class="id" title="var">Some</span> <span class="id" title="var">tt</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">some_tokens</span> <span class="id" title="var">token_ids</span> =&gt; <span class="id" title="keyword">if</span> (<span class="id" title="var">existsb</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">id</span> =&gt; <span class="id" title="var">id</span> =? <span class="id" title="var">params</span>.(<span class="id" title="var">transfer_token_id</span>)) <span class="id" title="var">token_ids</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Executes&nbsp;all&nbsp;transfers&nbsp;in&nbsp;a&nbsp;batch&nbsp;operation&nbsp;and&nbsp;returns&nbsp;a&nbsp;new&nbsp;state&nbsp;if&nbsp;*all*<br/>
+&nbsp;&nbsp;&nbsp;transfers&nbsp;were&nbsp;successful.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">try_transfer</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">transfers</span> : <span class="id" title="var">list</span> <span class="id" title="var">transfer</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">check_transfer_iterator</span> <span class="id" title="var">state_opt</span> <span class="id" title="var">params</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">state</span> &lt;- <span class="id" title="var">state_opt</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">transfer_check_permissions</span> <span class="id" title="var">caller</span> <span class="id" title="var">params</span> <span class="id" title="var">state</span>.(<span class="id" title="var">permission_policy</span>) <span class="id" title="var">state</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">try_single_transfer</span> <span class="id" title="var">caller</span> <span class="id" title="var">params</span> <span class="id" title="var">state</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;returns&nbsp;the&nbsp;new&nbsp;state&nbsp;if&nbsp;all&nbsp;transfers&nbsp;*can*&nbsp;succeed,&nbsp;otherwise&nbsp;returns&nbsp;None&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">fold_left</span> <span class="id" title="var">check_transfer_iterator</span> <span class="id" title="var">transfers</span> (<span class="id" title="var">Some</span> <span class="id" title="var">state</span>).<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Forwards&nbsp;the&nbsp;transfer&nbsp;to&nbsp;the&nbsp;hook&nbsp;to&nbsp;approve/reject&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">call_transfer_hook</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">caddr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">transfer_hook_addr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">transfers</span> : <span class="id" title="var">list</span> <span class="id" title="var">transfer</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">mk_transfer_descr</span> <span class="id" title="var">tr</span> := {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_from_</span> := (<span class="id" title="var">tr</span>.(<span class="id" title="var">from_</span>));<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_to_</span> := (<span class="id" title="var">tr</span>.(<span class="id" title="var">to_</span>));<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_token_id</span> := <span class="id" title="var">tr</span>.(<span class="id" title="var">transfer_token_id</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_amount</span> := <span class="id" title="var">tr</span>.(<span class="id" title="var">amount</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">transfer_decr_param</span> := {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_fa2</span> := <span class="id" title="var">caddr</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_batch</span> := <span class="id" title="var">map</span> <span class="id" title="var">mk_transfer_descr</span> <span class="id" title="var">transfers</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_operator</span> := <span class="id" title="var">caller</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">act_call</span> <span class="id" title="var">transfer_hook_addr</span> 0%<span class="id" title="var">Z</span> (<span class="id" title="var">serialize</span> (<span class="id" title="var">transfer_hook</span> <span class="id" title="var">transfer_decr_param</span>)).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">group_transfer_descriptors</span> (<span class="id" title="var">params</span> : <span class="id" title="var">list</span> <span class="id" title="var">transfer_descriptor</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">list</span> (<span class="id" title="var">list</span> <span class="id" title="var">transfer_descriptor</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">trx_map</span> := <span class="id" title="var">fold_right</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">trx</span> <span class="id" title="var">trx_map</span> =&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">FMap.find</span> <span class="id" title="var">trx</span>.(<span class="id" title="var">transfer_descr_from_</span>) <span class="id" title="var">trx_map</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">trxs</span> =&gt; <span class="id" title="var">FMap.add</span> <span class="id" title="var">trx</span>.(<span class="id" title="var">transfer_descr_from_</span>) (<span class="id" title="var">trx</span> :: <span class="id" title="var">trxs</span>) <span class="id" title="var">trx_map</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">FMap.add</span> <span class="id" title="var">trx</span>.(<span class="id" title="var">transfer_descr_from_</span>) [<span class="id" title="var">trx</span>] <span class="id" title="var">trx_map</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;) <span class="id" title="var">FMap.empty</span> <span class="id" title="var">params</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">FMap.values</span> <span class="id" title="var">trx_map</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Handles&nbsp;incoming&nbsp;transfers:<br/>
+&nbsp;&nbsp;&nbsp;-&nbsp;if&nbsp;the&nbsp;contract&nbsp;has&nbsp;a&nbsp;transfer_hook,&nbsp;then&nbsp;it&nbsp;uses&nbsp;the&nbsp;hook<br/>
+&nbsp;&nbsp;&nbsp;-&nbsp;otherwise&nbsp;it&nbsp;checks&nbsp;&amp;&nbsp;performs&nbsp;the&nbsp;transfers&nbsp;now&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">handle_transfer</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">caddr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">transfers</span> : <span class="id" title="var">list</span> <span class="id" title="var">transfer</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span>(<span class="id" title="var">State</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">state</span>.(<span class="id" title="var">transfer_hook_addr</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;send&nbsp;call&nbsp;transfer&nbsp;hook&nbsp;(approved&nbsp;transfers&nbsp;will&nbsp;be&nbsp;received&nbsp;in&nbsp;the&nbsp;msg_receive_hook_transfer&nbsp;endpoint)&nbsp;*)</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">transfer_hook_addr</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">call_hook_act</span> := <span class="id" title="var">call_transfer_hook</span> <span class="id" title="var">caller</span> <span class="id" title="var">caddr</span> <span class="id" title="var">transfer_hook_addr</span> <span class="id" title="var">transfers</span> <span class="id" title="var">state</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>, [<span class="id" title="var">call_hook_act</span>])<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;if&nbsp;no&nbsp;hook&nbsp;is&nbsp;attached,&nbsp;send&nbsp;transfer&nbsp;message&nbsp;to&nbsp;self,&nbsp;and&nbsp;notify&nbsp;senders&nbsp;of&nbsp;transfer&nbsp;*)</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">mk_transfer_descr</span> <span class="id" title="var">tr</span> := {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_from_</span> := <span class="id" title="var">tr</span>.(<span class="id" title="var">from_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_to_</span> := <span class="id" title="var">tr</span>.(<span class="id" title="var">to_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_token_id</span> := <span class="id" title="var">tr</span>.(<span class="id" title="var">transfer_token_id</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_amount</span> := <span class="id" title="var">tr</span>.(<span class="id" title="var">amount</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">mk_transfer_decr_param</span> <span class="id" title="var">batch</span> := {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_fa2</span> := <span class="id" title="var">caddr</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_batch</span> := <span class="id" title="var">batch</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_operator</span> := <span class="id" title="var">caller</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">transfer_decr_param</span> := <span class="id" title="var">mk_transfer_decr_param</span> (<span class="id" title="var">map</span> <span class="id" title="var">mk_transfer_descr</span> <span class="id" title="var">transfers</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">is_from_contract</span> <span class="id" title="var">descriptors</span> := <span class="id" title="var">existsb</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">descr</span> =&gt; <span class="id" title="var">address_is_contract</span> <span class="id" title="var">descr</span>.(<span class="id" title="var">transfer_descr_from_</span>)) <span class="id" title="var">descriptors</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">trx_descriptors_grouped</span> := (<span class="id" title="var">group_transfer_descriptors</span> (<span class="id" title="var">map</span> <span class="id" title="var">mk_transfer_descr</span> <span class="id" title="var">transfers</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">self_transfer_act</span> := <span class="id" title="var">act_call</span> <span class="id" title="var">caddr</span> 0%<span class="id" title="var">Z</span> (<span class="id" title="var">serialize</span> (<span class="id" title="var">msg_receive_hook_transfer</span> <span class="id" title="var">transfer_decr_param</span>)) <span class="id" title="tactic">in</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;let&nbsp;mk_sender_hook_act&nbsp;descr_param&nbsp;:=&nbsp;act_call&nbsp;descr_param.(transfer_descr_operator)&nbsp;0*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">mk_sender_hook_act</span> <span class="id" title="var">trx</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">trx</span>.(<span class="id" title="var">sender_callback_addr</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">callback_addr</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">descr</span> := <span class="id" title="var">mk_transfer_decr_param</span> [<span class="id" title="var">mk_transfer_descr</span> <span class="id" title="var">trx</span>] <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">act_call</span> <span class="id" title="var">callback_addr</span> 0%<span class="id" title="var">Z</span> (@<span class="id" title="var">serialize</span> <span class="id" title="var">fa2_token_sender</span> <span class="id" title="var">_</span> (<span class="id" title="var">tokens_sent</span> <span class="id" title="var">descr</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">sender_hook_acts</span> := <span class="id" title="var">fold_right</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">act_opt</span> <span class="id" title="var">acc</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">act_opt</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">act</span> =&gt; <span class="id" title="var">act</span> :: <span class="id" title="var">acc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">acc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;) [] (<span class="id" title="var">map</span> <span class="id" title="var">mk_sender_hook_act</span> <span class="id" title="var">transfers</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;If&nbsp;no&nbsp;sender&nbsp;callbacks&nbsp;need&nbsp;to&nbsp;be&nbsp;made,&nbsp;just&nbsp;perform&nbsp;transfers&nbsp;now&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">Nat.eqb</span> (<span class="id" title="var">length</span> <span class="id" title="var">sender_hook_acts</span>) 0%<span class="id" title="var">nat</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">option_map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">new_state</span> =&gt; (<span class="id" title="var">new_state</span>, [])) (<span class="id" title="var">try_transfer</span> <span class="id" title="var">caller</span> <span class="id" title="var">transfers</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Notice&nbsp;that&nbsp;sender&nbsp;hooks&nbsp;are&nbsp;invoked&nbsp;before&nbsp;the&nbsp;transfer&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>, <span class="id" title="var">sender_hook_acts</span> ++ [<span class="id" title="var">self_transfer_act</span>])<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool_scope</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">mk_transfer_from_decr</span> <span class="id" title="var">descr</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">from_</span> := <span class="id" title="var">descr</span>.(<span class="id" title="var">transfer_descr_from_</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="var">to_</span> := <span class="id" title="var">descr</span>.(<span class="id" title="var">transfer_descr_to_</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="var">transfer_token_id</span> := <span class="id" title="var">descr</span>.(<span class="id" title="var">transfer_descr_token_id</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="var">amount</span> := <span class="id" title="var">descr</span>.(<span class="id" title="var">transfer_descr_amount</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="var">sender_callback_addr</span> := <span class="id" title="var">None</span> <span class="comment">(*&nbsp;Some&nbsp;param.(transfer_descr_operator)&nbsp;*)</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">handle_transfer_hook_receive</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">param</span> : <span class="id" title="var">transfer_descriptor_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">self_addr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;check&nbsp;if&nbsp;caller&nbsp;is&nbsp;current&nbsp;hook&nbsp;or&nbsp;self&nbsp;-&nbsp;only&nbsp;hook&nbsp;or&nbsp;self&nbsp;is&nbsp;allowed&nbsp;to&nbsp;call&nbsp;this&nbsp;endpoint&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="keyword">if</span> (<span class="id" title="keyword">match</span> <span class="id" title="var">state</span>.(<span class="id" title="var">transfer_hook_addr</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">hook_addr</span> =&gt; ((<span class="id" title="var">address_eqb</span> <span class="id" title="var">caller</span> <span class="id" title="var">hook_addr</span>) || (<span class="id" title="var">address_eqb</span> <span class="id" title="var">caller</span> <span class="id" title="var">self_addr</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; (<span class="id" title="var">address_eqb</span> <span class="id" title="var">caller</span> <span class="id" title="var">self_addr</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">None</span>  ;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">transfers</span> := <span class="id" title="var">map</span> <span class="id" title="var">mk_transfer_from_decr</span> <span class="id" title="var">param</span>.(<span class="id" title="var">transfer_descr_batch</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">try_transfer</span> <span class="id" title="var">param</span>.(<span class="id" title="var">transfer_descr_operator</span>) <span class="id" title="var">transfers</span> <span class="id" title="var">state</span>.<br/>
+<span class="id" title="keyword">Close</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool_scope</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;create&nbsp;a&nbsp;'balance_of'&nbsp;action&nbsp;to&nbsp;send&nbsp;to&nbsp;the&nbsp;callback&nbsp;address&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_balance_of_callback</span> (<span class="id" title="var">param</span> : <span class="id" title="var">balance_of_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">bal_req_iterator</span> (<span class="id" title="var">bal_req</span> : <span class="id" title="var">balance_of_request</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">owner_bal</span> := <span class="id" title="var">address_balance</span> <span class="id" title="var">bal_req</span>.(<span class="id" title="var">bal_req_token_id</span>) <span class="id" title="var">bal_req</span>.(<span class="id" title="var">owner</span>) <span class="id" title="var">state</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Build_balance_of_response</span> <span class="id" title="var">bal_req</span> <span class="id" title="var">owner_bal</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">responses</span> := <span class="id" title="var">map</span> <span class="id" title="var">bal_req_iterator</span> <span class="id" title="var">param</span>.(<span class="id" title="var">bal_requests</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">response_msg</span> := <span class="id" title="var">serialize</span> (<span class="id" title="var">receive_balance_of_param</span> <span class="id" title="var">responses</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">act_call</span> <span class="id" title="var">param</span>.(<span class="id" title="var">bal_callback</span>) 0%<span class="id" title="var">Z</span> <span class="id" title="var">response_msg</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;create&nbsp;a&nbsp;'total_supply'&nbsp;action&nbsp;to&nbsp;send&nbsp;to&nbsp;the&nbsp;callback&nbsp;address&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_total_supply_callback</span> (<span class="id" title="var">param</span> : <span class="id" title="var">total_supply_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">token_id_balance</span> (<span class="id" title="var">token_id</span> : <span class="id" title="var">token_id</span>) : <span class="id" title="var">N</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">FMap.find</span> <span class="id" title="var">token_id</span> <span class="id" title="var">state</span>.(<span class="id" title="var">assets</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">ledger</span> =&gt; <span class="id" title="var">fold_left</span> <span class="id" title="var">N.add</span> (<span class="id" title="var">FMap.values</span> <span class="id" title="var">ledger</span>.(<span class="id" title="var">balances</span>)) 0%<span class="id" title="var">N</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; 0%<span class="id" title="var">N</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">mk_response</span> (<span class="id" title="var">token_id</span> : <span class="id" title="var">token_id</span>) : <span class="id" title="var">total_supply_response</span> := <span class="id" title="var">Build_total_supply_response</span> <span class="id" title="var">token_id</span> (<span class="id" title="var">token_id_balance</span> <span class="id" title="var">token_id</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">responses</span> := <span class="id" title="var">map</span> <span class="id" title="var">mk_response</span> <span class="id" title="var">param</span>.(<span class="id" title="var">supply_param_token_ids</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">response_msg</span> := <span class="id" title="var">serialize</span> (<span class="id" title="var">receive_total_supply_param</span> <span class="id" title="var">responses</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">act_call</span> <span class="id" title="var">param</span>.(<span class="id" title="var">supply_param_callback</span>) 0%<span class="id" title="var">Z</span> <span class="id" title="var">response_msg</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Updates&nbsp;operators&nbsp;if&nbsp;policy&nbsp;allows&nbsp;it,&nbsp;and&nbsp;if&nbsp;the&nbsp;caller&nbsp;is&nbsp;the&nbsp;owner.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">update_operators</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">updates</span> : <span class="id" title="var">list</span> <span class="id" title="var">update_operator</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;If&nbsp;policy&nbsp;doesn't&nbsp;allow&nbsp;operator&nbsp;transfer,&nbsp;then&nbsp;this&nbsp;operation&nbsp;fails&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">policy_disallows_operator_transfer</span> <span class="id" title="var">state</span>.(<span class="id" title="var">permission_policy</span>)) ;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">exec_add</span> <span class="id" title="var">params</span> (<span class="id" title="var">state_opt</span> : <span class="id" title="var">option</span> <span class="id" title="var">State</span>) : <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">state_</span> &lt;- <span class="id" title="var">state_opt</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;only&nbsp;the&nbsp;owner&nbsp;of&nbsp;the&nbsp;token&nbsp;is&nbsp;allowed&nbsp;to&nbsp;update&nbsp;their&nbsp;operators&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">caller</span> <span class="id" title="var">params</span>.(<span class="id" title="var">op_param_owner</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">operator_tokens</span> : <span class="id" title="var">FMap</span> <span class="id" title="var">Address</span> <span class="id" title="var">operator_tokens</span> := <span class="id" title="var">with_default</span> <span class="id" title="var">FMap.empty</span> (<span class="id" title="var">FMap.find</span> <span class="id" title="var">caller</span> <span class="id" title="var">state_</span>.(<span class="id" title="var">operators</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Add&nbsp;new&nbsp;operator&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">operator_tokens</span> := <span class="id" title="var">FMap.add</span> <span class="id" title="var">params</span>.(<span class="id" title="var">op_param_operator</span>) <span class="id" title="var">params</span>.(<span class="id" title="var">op_param_tokens</span>) <span class="id" title="var">operator_tokens</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state_</span>&lt;| <span class="id" title="var">operators</span> ::= <span class="id" title="var">FMap.add</span> <span class="id" title="var">caller</span> <span class="id" title="var">operator_tokens</span> |&gt;) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">exec_update</span> <span class="id" title="var">state_</span> <span class="id" title="var">op</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">op</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">add_operator</span> <span class="id" title="var">params</span> =&gt; <span class="id" title="var">exec_add</span> <span class="id" title="var">params</span> <span class="id" title="var">state_</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">remove_operator</span> <span class="id" title="var">params</span> =&gt; <span class="id" title="var">exec_add</span> <span class="id" title="var">params</span> <span class="id" title="var">state_</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;(<span class="id" title="var">fold_left</span> <span class="id" title="var">exec_update</span> <span class="id" title="var">updates</span> (<span class="id" title="var">Some</span> <span class="id" title="var">state</span>)).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">operator_tokens_eqb</span> (<span class="id" title="var">a</span> <span class="id" title="var">b</span> : <span class="id" title="var">operator_tokens</span>) : <span class="id" title="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> (<span class="id" title="var">a</span>, <span class="id" title="var">b</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| (<span class="id" title="var">all_tokens</span>, <span class="id" title="var">all_tokens</span>) =&gt; <span class="id" title="var">true</span><br/>
+&nbsp;&nbsp;| (<span class="id" title="var">some_tokens</span> <span class="id" title="var">a'</span>, <span class="id" title="var">some_tokens</span> <span class="id" title="var">b'</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="keyword">fix</span> <span class="id" title="var">my_list_eqb</span> <span class="id" title="var">l1</span> <span class="id" title="var">l2</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> (<span class="id" title="var">l1</span>, <span class="id" title="var">l2</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (<span class="id" title="var">x</span> :: <span class="id" title="var">l1</span>, <span class="id" title="var">y</span> :: <span class="id" title="var">l2</span>) =&gt; <span class="id" title="keyword">if</span> <span class="id" title="var">x</span> =? <span class="id" title="var">y</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">my_list_eqb</span> <span class="id" title="var">l1</span> <span class="id" title="var">l2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ([], []) =&gt; <span class="id" title="var">true</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="tactic">in</span> <span class="id" title="var">my_list_eqb</span> <span class="id" title="var">a'</span> <span class="id" title="var">b'</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_is_operator_response_callback</span> (<span class="id" title="var">params</span> : <span class="id" title="var">is_operator_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">State</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) :=<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;if&nbsp;policy&nbsp;doesn't&nbsp;allow&nbsp;operator&nbsp;transfers,&nbsp;then&nbsp;this&nbsp;operation&nbsp;will&nbsp;fail&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">policy_disallows_operator_transfer</span> <span class="id" title="var">state</span>.(<span class="id" title="var">permission_policy</span>)) ;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">operator_params</span> := <span class="id" title="var">params</span>.(<span class="id" title="var">is_operator_operator</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">operator_tokens_opt</span> := <span class="id" title="var">get_owner_operator_tokens</span> <span class="id" title="var">operator_params</span>.(<span class="id" title="var">op_param_owner</span>) <span class="id" title="var">operator_params</span>.(<span class="id" title="var">op_param_operator</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">is_operator_result</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">operator_tokens_opt</span> <span class="id" title="var">state</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;check&nbsp;if&nbsp;operator_tokens&nbsp;from&nbsp;the&nbsp;params&nbsp;and&nbsp;from&nbsp;the&nbsp;state&nbsp;are&nbsp;equal&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">op_tokens</span> =&gt; <span class="id" title="var">operator_tokens_eqb</span> <span class="id" title="var">op_tokens</span> <span class="id" title="var">operator_params</span>.(<span class="id" title="var">op_param_tokens</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">response</span> : <span class="id" title="var">is_operator_response</span> := {| <span class="id" title="var">operator</span> := <span class="id" title="var">operator_params</span>; <span class="id" title="var">is_operator</span> := <span class="id" title="var">is_operator_result</span> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">act</span> := <span class="id" title="var">act_call</span> <span class="id" title="var">params</span>.(<span class="id" title="var">is_operator_callback</span>) 0%<span class="id" title="var">Z</span> (<span class="id" title="var">serialize</span> (<span class="id" title="var">receive_is_operator</span> <span class="id" title="var">response</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>, [<span class="id" title="var">act</span>]).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_permissions_descriptor_callback</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>) (<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">response</span> := <span class="id" title="var">serialize</span> (<span class="id" title="var">receive_permissions_descriptor</span> <span class="id" title="var">state</span>.(<span class="id" title="var">permission_policy</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">act_call</span> <span class="id" title="var">caller</span> 0%<span class="id" title="var">Z</span> <span class="id" title="var">response</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">try_set_transfer_hook</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">params</span> : <span class="id" title="var">set_hook_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;only&nbsp;owner&nbsp;can&nbsp;set&nbsp;transfer&nbsp;hook&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">caller</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fa2_owner</span>))) ;<br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>&lt;| <span class="id" title="var">transfer_hook_addr</span> :=  <span class="id" title="var">Some</span> <span class="id" title="var">params</span>.(<span class="id" title="var">hook_addr</span>)|&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;| <span class="id" title="var">permission_policy</span>  := <span class="id" title="var">params</span>.(<span class="id" title="var">hook_permissions_descriptor</span>) |&gt;).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_token_metadata_callback</span> (<span class="id" title="var">param</span> : <span class="id" title="var">token_metadata_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">token_ids</span> := <span class="id" title="var">param</span>.(<span class="id" title="var">metadata_token_ids</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">state_tokens</span> := <span class="id" title="var">state</span>.(<span class="id" title="var">tokens</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">metadata_list</span> : <span class="id" title="var">list</span> <span class="id" title="var">token_metadata</span> := <span class="id" title="var">fold_right</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">id</span> <span class="id" title="var">acc</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">FMap.find</span> <span class="id" title="var">id</span> <span class="id" title="var">state_tokens</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">metadata</span> =&gt; <span class="id" title="var">metadata</span> :: <span class="id" title="var">acc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">acc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;) [] <span class="id" title="var">token_ids</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">response</span> := <span class="id" title="var">serialize</span> (<span class="id" title="var">receive_metadata_callback</span> <span class="id" title="var">metadata_list</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">act_call</span> <span class="id" title="var">param</span>.(<span class="id" title="var">metadata_callback</span>) 0%<span class="id" title="var">Z</span> <span class="id" title="var">response</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;creates&nbsp;some&nbsp;tokens&nbsp;with&nbsp;a&nbsp;fixed&nbsp;exchange&nbsp;ratio&nbsp;of&nbsp;1:100&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">try_create_tokens</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">amount</span> : <span class="id" title="var">Amount</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">tokenid</span> : <span class="id" title="var">token_id</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">exchange_rate</span> := 100%<span class="id" title="var">Z</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">ledger</span> &lt;- <span class="id" title="var">FMap.find</span> <span class="id" title="var">tokenid</span> <span class="id" title="var">state</span>.(<span class="id" title="var">assets</span>) ;<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;only&nbsp;allow&nbsp;amounts&nbsp;&gt;&nbsp;0&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">Z.leb</span> <span class="id" title="var">amount</span> 0%<span class="id" title="var">Z</span>) ;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">amount</span> := <span class="id" title="var">Z.to_N</span> (<span class="id" title="var">amount</span> * <span class="id" title="var">exchange_rate</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">caller_bal</span> := <span class="id" title="var">with_default</span> 0 (<span class="id" title="var">FMap.find</span> <span class="id" title="var">caller</span> <span class="id" title="var">ledger</span>.(<span class="id" title="var">balances</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_balances</span> := <span class="id" title="var">FMap.add</span> <span class="id" title="var">caller</span> (<span class="id" title="var">caller_bal</span> + <span class="id" title="var">amount</span>) <span class="id" title="var">ledger</span>.(<span class="id" title="var">balances</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_ledger</span> := <span class="id" title="var">ledger</span>&lt;| <span class="id" title="var">balances</span> := <span class="id" title="var">new_balances</span> |&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>&lt;| <span class="id" title="var">assets</span> ::=  <span class="id" title="var">FMap.add</span> <span class="id" title="var">tokenid</span> <span class="id" title="var">new_ledger</span> |&gt;).<br/>
+
+<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">maybe_msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">Msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">State</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">sender</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">caddr</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_address</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">without_actions</span> := <span class="id" title="var">option_map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">new_state</span> =&gt; (<span class="id" title="var">new_state</span>, [])) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">without_statechange</span> <span class="id" title="var">acts</span> := <span class="id" title="var">Some</span> (<span class="id" title="var">state</span>, <span class="id" title="var">acts</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Only&nbsp;'create_token'&nbsp;messages&nbsp;are&nbsp;allowed&nbsp;to&nbsp;carry&nbsp;money&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>) &gt;? 0<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="keyword">match</span> <span class="id" title="var">maybe_msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">msg_create_tokens</span> <span class="id" title="var">tokenid</span>) =&gt; <span class="id" title="var">without_actions</span> (<span class="id" title="var">try_create_tokens</span> <span class="id" title="var">sender</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>) <span class="id" title="var">tokenid</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">match</span> <span class="id" title="var">maybe_msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">msg_transfer</span> <span class="id" title="var">transfers</span>) =&gt; <span class="id" title="var">handle_transfer</span> <span class="id" title="var">sender</span> <span class="id" title="var">caddr</span> <span class="id" title="var">transfers</span> <span class="id" title="var">state</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">msg_receive_hook_transfer</span> <span class="id" title="var">param</span>) =&gt; <span class="id" title="var">without_actions</span> (<span class="id" title="var">handle_transfer_hook_receive</span> <span class="id" title="var">sender</span> <span class="id" title="var">param</span> <span class="id" title="var">caddr</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">msg_is_operator</span> <span class="id" title="var">params</span>) =&gt; <span class="id" title="var">get_is_operator_response_callback</span> <span class="id" title="var">params</span> <span class="id" title="var">state</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">msg_balance_of</span> <span class="id" title="var">params</span>) =&gt; <span class="id" title="var">without_statechange</span> [<span class="id" title="var">get_balance_of_callback</span> <span class="id" title="var">params</span> <span class="id" title="var">state</span>]<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">msg_total_supply</span> <span class="id" title="var">params</span>) =&gt; <span class="id" title="var">without_statechange</span> [<span class="id" title="var">get_total_supply_callback</span> <span class="id" title="var">params</span> <span class="id" title="var">state</span>]<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">msg_permissions_descriptor</span> <span class="id" title="var">_</span>) =&gt; <span class="id" title="var">without_statechange</span> [<span class="id" title="var">get_permissions_descriptor_callback</span> <span class="id" title="var">sender</span> <span class="id" title="var">state</span>]<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">msg_token_metadata</span> <span class="id" title="var">param</span>) =&gt; <span class="id" title="var">without_statechange</span> [<span class="id" title="var">get_token_metadata_callback</span> <span class="id" title="var">param</span> <span class="id" title="var">state</span>]<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">msg_update_operators</span> <span class="id" title="var">updates</span>) =&gt; <span class="id" title="var">without_actions</span> (<span class="id" title="var">update_operators</span> <span class="id" title="var">sender</span> <span class="id" title="var">updates</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">msg_set_transfer_hook</span> <span class="id" title="var">params</span>) =&gt; <span class="id" title="var">without_actions</span> (<span class="id" title="var">try_set_transfer_hook</span> <span class="id" title="var">sender</span> <span class="id" title="var">params</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">map_values_FMap</span> {<span class="id" title="var">A</span> <span class="id" title="var">B</span> <span class="id" title="var">C</span>: <span class="id" title="keyword">Type</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id" title="var">countable.Countable</span> <span class="id" title="var">A</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id" title="var">base.EqDecision</span> <span class="id" title="var">A</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">f</span> : <span class="id" title="var">B</span> -&gt; <span class="id" title="var">C</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">m</span> : <span class="id" title="var">FMap</span> <span class="id" title="var">A</span> <span class="id" title="var">B</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">FMap</span> <span class="id" title="var">A</span> <span class="id" title="var">C</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">l</span> := <span class="id" title="var">FMap.elements</span> <span class="id" title="var">m</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">mapped_l</span> := <span class="id" title="var">List.map</span> (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">a</span>, <span class="id" title="var">b</span>) =&gt; (<span class="id" title="var">a</span>, <span class="id" title="var">f</span> <span class="id" title="var">b</span>)) <span class="id" title="var">l</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">FMap.of_list</span> <span class="id" title="var">mapped_l</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">init</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">setup</span> : <span class="id" title="var">Setup</span>) : <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;setup&nbsp;ledgers&nbsp;with&nbsp;empty&nbsp;balance&nbsp;for&nbsp;each&nbsp;initial&nbsp;token&nbsp;id&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">assets'</span> := <span class="id" title="var">map_values_FMap</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_token_ledger</span> <span class="id" title="var">false</span> <span class="id" title="var">FMap.empty</span><br/>
+&nbsp;&nbsp;) <span class="id" title="var">setup</span>.(<span class="id" title="var">setup_tokens</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> {| <span class="id" title="var">permission_policy</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">initial_permission_policy</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fa2_owner</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_hook_addr</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">transfer_hook_addr_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">assets</span> := <span class="id" title="var">assets'</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">operators</span> := <span class="id" title="var">FMap.empty</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokens</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">setup_tokens</span>) |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">contract</span> : <span class="id" title="var">Contract</span> <span class="id" title="var">Setup</span> <span class="id" title="var">Msg</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_contract</span> <span class="id" title="var">init</span> <span class="id" title="var">receive</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">FA2Token</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

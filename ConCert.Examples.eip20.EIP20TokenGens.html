@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.eip20.EIP20TokenGens</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">QCTest</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.EIP20</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">EIP20Token</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>. <span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Type</span> <span class="id" title="var">EIP20GensInfo</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">contract_addr</span> : <span class="id" title="var">Address</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">gAccount</span> : <span class="id" title="var">G</span> <span class="id" title="var">Address</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">EIP20GensInfo</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">EIP20Gens</span> (<span class="id" title="var">Info</span> : <span class="id" title="var">EIP20GensInfo</span>).<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Info</span>.<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">SerializedValue</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">deserialize</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">serialize</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">serializeMsg</span> := @<span class="id" title="var">serialize</span> <span class="id" title="var">EIP20Token.Msg</span> <span class="id" title="var">_</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;This&nbsp;function&nbsp;tries&nbsp;to&nbsp;generate&nbsp;a&nbsp;transfer&nbsp;between&nbsp;existing&nbsp;accounts&nbsp;in&nbsp;the&nbsp;token&nbsp;contract's&nbsp;state.<br/>
+&nbsp;&nbsp;&nbsp;Otherwise&nbsp;tries&nbsp;to&nbsp;use&nbsp;accounts&nbsp;in&nbsp;the&nbsp;Blockchain&nbsp;state.<br/>
+&nbsp;&nbsp;&nbsp;Has&nbsp;a&nbsp;small&nbsp;chance&nbsp;to&nbsp;transfer&nbsp;between&nbsp;"fresh"&nbsp;accounts.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gTransfer</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) (<span class="id" title="var">state</span> : <span class="id" title="var">EIP20Token.State</span>) : <span class="id" title="var">G</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">nr_accounts_in_state</span> := <span class="id" title="var">FMap.size</span> <span class="id" title="var">state</span>.(<span class="id" title="var">balances</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">weight_1</span> := 2 * <span class="id" title="var">nr_accounts_in_state</span> + 1 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">randomize_mk_gen</span> <span class="id" title="var">g</span> := <span class="comment">(*&nbsp;the&nbsp;probability&nbsp;of&nbsp;sampling&nbsp;fresh&nbsp;accounts&nbsp;grows&nbsp;smaller&nbsp;over&nbsp;time&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">freq</span> [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">weight_1</span>, <span class="id" title="var">returnGen</span> <span class="id" title="var">g</span>) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0, <span class="id" title="var">from_addr</span> &lt;- <span class="id" title="var">arbitrary</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">to_addr</span> &lt;- <span class="id" title="var">arbitrary</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGen</span> (<span class="id" title="var">from_addr</span>, <span class="id" title="var">transfer</span> <span class="id" title="var">to_addr</span> 0%<span class="id" title="var">N</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;] <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">sample</span> &lt;- <span class="id" title="var">sampleFMapOpt</span> <span class="id" title="var">state</span>.(<span class="id" title="var">balances</span>) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">sample</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">addr</span>, <span class="id" title="var">balance</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_amount</span> &lt;- <span class="id" title="var">choose</span> (0%<span class="id" title="var">N</span>, <span class="id" title="var">balance</span>) ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">account</span> &lt;- <span class="id" title="var">gAccount</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">randomize_mk_gen</span> (<span class="id" title="var">addr</span>, <span class="id" title="var">transfer</span> <span class="id" title="var">account</span> <span class="id" title="var">transfer_amount</span>)<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;if&nbsp;the&nbsp;contract&nbsp;state&nbsp;contains&nbsp;no&nbsp;accounts,&nbsp;just&nbsp;transfer&nbsp;0&nbsp;tokens&nbsp;between&nbsp;two&nbsp;arbitrary&nbsp;accounts&nbsp;*)</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">from_addr</span> &lt;- <span class="id" title="var">arbitrary</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">to_addr</span> &lt;- <span class="id" title="var">arbitrary</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGen</span> (<span class="id" title="var">from_addr</span>, <span class="id" title="var">transfer</span> <span class="id" title="var">to_addr</span> 0%<span class="id" title="var">N</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">N_scope</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Note:&nbsp;not&nbsp;optimal&nbsp;implementation.&nbsp;Should&nbsp;filter&nbsp;on&nbsp;balances&nbsp;map&nbsp;instead&nbsp;of&nbsp;first&nbsp;sampling&nbsp;and&nbsp;then&nbsp;filtering&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gApprove</span> (<span class="id" title="var">state</span> : <span class="id" title="var">EIP20Token.State</span>) : <span class="id" title="var">GOpt</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">sample2UniqueFMapOpt</span> <span class="id" title="var">state</span>.(<span class="id" title="var">balances</span>)) (<span class="id" title="keyword">fun</span> <span class="id" title="var">p</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">addr1</span> := <span class="id" title="var">fst</span> (<span class="id" title="var">fst</span> <span class="id" title="var">p</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">balance1</span> := <span class="id" title="var">snd</span> (<span class="id" title="var">fst</span> <span class="id" title="var">p</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">addr2</span> := <span class="id" title="var">fst</span> (<span class="id" title="var">snd</span> <span class="id" title="var">p</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">balance2</span> := <span class="id" title="var">snd</span> (<span class="id" title="var">snd</span> <span class="id" title="var">p</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> 0 &lt;? <span class="id" title="var">balance1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">amount</span> &lt;- <span class="id" title="var">choose</span> (0, <span class="id" title="var">balance1</span>) ;; <span class="id" title="var">returnGenSome</span> (<span class="id" title="var">addr1</span>, <span class="id" title="var">approve</span> <span class="id" title="var">addr2</span> <span class="id" title="var">amount</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> 0 &lt;? <span class="id" title="var">balance2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">amount</span> &lt;- <span class="id" title="var">choose</span> (0, <span class="id" title="var">balance2</span>) ;; <span class="id" title="var">returnGenSome</span> (<span class="id" title="var">addr2</span>, <span class="id" title="var">approve</span> <span class="id" title="var">addr1</span> <span class="id" title="var">amount</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">returnGen</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gTransfer_from</span> (<span class="id" title="var">state</span> : <span class="id" title="var">EIP20Token.State</span>) : <span class="id" title="var">GOpt</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">sampleFMapOpt</span> <span class="id" title="var">state</span>.(<span class="id" title="var">allowances</span>)) (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">allower</span>, <span class="id" title="var">allowance_map</span>) =&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">sampleFMapOpt</span> <span class="id" title="var">allowance_map</span>) (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">delegate</span>, <span class="id" title="var">allowance</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">sampleFMapOpt</span> <span class="id" title="var">state</span>.(<span class="id" title="var">balances</span>)) (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">receiver</span>, <span class="id" title="var">_</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">allower_balance</span> := (<span class="id" title="var">FMap_find_</span> <span class="id" title="var">allower</span> <span class="id" title="var">state</span>.(<span class="id" title="var">balances</span>) 0) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">amount</span> &lt;- (<span class="id" title="keyword">if</span> <span class="id" title="var">allower_balance</span> =? 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">returnGen</span> 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">choose</span> (0, <span class="id" title="var">N.min</span> <span class="id" title="var">allowance</span> <span class="id" title="var">allower_balance</span>)) ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> (<span class="id" title="var">delegate</span>, <span class="id" title="var">transfer_from</span> <span class="id" title="var">allower</span> <span class="id" title="var">receiver</span>  <span class="id" title="var">amount</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;)).<br/>
+
+<br/>
+<span class="id" title="keyword">Local Close</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">N_scope</span>.<br/>
+<span class="comment">(*&nbsp;Main&nbsp;generator.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gEIP20TokenAction</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) : <span class="id" title="var">GOpt</span> <span class="id" title="var">Action</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller_addr</span> <span class="id" title="var">msg</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_origin</span> := <span class="id" title="var">caller_addr</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_from</span> := <span class="id" title="var">caller_addr</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act_body</span> := <span class="id" title="var">act_call</span> <span class="id" title="var">contract_addr</span> 0%<span class="id" title="var">Z</span> (<span class="id" title="var">serializeMsg</span> <span class="id" title="var">msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">state</span> &lt;- <span class="id" title="var">returnGen</span> (<span class="id" title="var">get_contract_state</span> <span class="id" title="var">EIP20Token.State</span> <span class="id" title="var">env</span> <span class="id" title="var">contract_addr</span>) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">backtrack</span> [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;transfer&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(2, '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) &lt;- <span class="id" title="var">gTransfer</span> <span class="id" title="var">env</span> <span class="id" title="var">state</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;transfer_from&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(3, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">gTransfer_from</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> <span class="id" title="var">msg</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;approve&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(2, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">gApprove</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">EIP20Gens</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

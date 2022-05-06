@@ -1,0 +1,442 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.fa2.FA2Printers</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">QCTest</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.FA2</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">FA2Interface</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.FA2</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">FA2Token</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.FA2</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">TestContracts</span>.<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showCallback</span> {<span class="id" title="var">A</span> : <span class="id" title="keyword">Type</span>}: <span class="id" title="keyword">Show</span> (<span class="id" title="var">FA2Interface.callback</span> <span class="id" title="var">A</span>) :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">v</span> := "return address: " ++ <span class="id" title="var">show</span> <span class="id" title="var">v</span>.(<span class="id" title="var">return_addr</span> <span class="id" title="var">A</span>)<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2InterfaceTransfer</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.transfer</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "from_: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">from_</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "to_: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">to_</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "transfer_token_id: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">transfer_token_id</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "amount: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">amount</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "callback: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">sender_callback_addr</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfacebalance_of_request</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.balance_of_request</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "balance_of_request{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "owner: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">owner</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "bal_req_token_id: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">bal_req_token_id</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfacebalance_of_response</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.balance_of_response</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "balance_of_response{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "request: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">request</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "balance: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">balance</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfacebalance_of_param</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.balance_of_param</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "balance_of_param{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "bal_requests: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">bal_requests</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "bal_callback: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">bal_callback</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfacetotal_supply_response</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.total_supply_response</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "total_supply_response{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "supply_resp_token_id: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">supply_resp_token_id</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "total_supply: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">total_supply</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfacetotal_supply_param</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.total_supply_param</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "total_supply_param{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "supply_param_token_ids: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">supply_param_token_ids</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "supply_param_callback: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">supply_param_callback</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfacetoken_metadata</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.token_metadata</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "token_metadata{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "metadata_token_id: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">metadata_token_id</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "metadata_decimals: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">metadata_decimals</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfacetoken_metadata_param</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.token_metadata_param</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "token_metadata_param{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "metadata_token_ids: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">metadata_token_ids</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "metadata_callback: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">metadata_callback</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showoperator_tokens</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">operator_tokens</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">all_tokens</span> =&gt; "all_tokens"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">some_tokens</span> <span class="id" title="var">token_ids</span> =&gt; "some_tokens " ++ <span class="id" title="var">show</span> <span class="id" title="var">token_ids</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfaceoperator_param</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.operator_param</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "operator_param{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "op_param_owner: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">op_param_owner</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "op_param_operator: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">op_param_operator</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "op_param_tokens: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">op_param_tokens</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">showupdate_operator</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">update_operator</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">add_operator</span> <span class="id" title="var">param</span> =&gt; "add_operator " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">remove_operator</span> <span class="id" title="var">param</span> =&gt; "remove_operator " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfaceis_operator_response</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.is_operator_response</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "is_operator_response{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "operator: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">operator</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "is_operator: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">is_operator</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfaceis_operator_param</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.is_operator_param</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "is_operator_param{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "is_operator_operator: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">is_operator_operator</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "is_operator_callback: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">is_operator_callback</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showself_transfer_policy</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">self_transfer_policy</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">self_transfer_permitted</span> =&gt; "self_transfer_permitted "<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">self_transfer_denied</span> =&gt; "self_transfer_denied "<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showoperator_transfer_policy</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">operator_transfer_policy</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">operator_transfer_permitted</span> =&gt; "operator_transfer_permitted "<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">operator_transfer_denied</span> =&gt; "operator_transfer_denied "<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showowner_transfer_policy</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">owner_transfer_policy</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">owner_no_op</span> =&gt; "owner_no_op "<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">optional_owner_hook</span> =&gt; "optional_owner_hook "<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">required_owner_hook</span> =&gt; "required_owner_hook "<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Instance&nbsp;showFA2Interfacecustom_permission_policy&nbsp;:&nbsp;Show&nbsp;FA2Interface.custom_permission_policy&nbsp;:=<br/>
+{|<br/>
+&nbsp;&nbsp;show&nbsp;t&nbsp;:=&nbsp;"custom_permission_policy{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++&nbsp;"custom_policy_config_api:&nbsp;"&nbsp;++&nbsp;show&nbsp;t.(custom_policy_config_api)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++&nbsp;"}"<br/>
+|}.&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfacepermissions_descriptor</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.permissions_descriptor</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "permissions_descriptor{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "descr_self: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">descr_self</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "descr_operator: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">descr_operator</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "descr_receiver: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">descr_receiver</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "descr_sender: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">descr_sender</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "descr_custom: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">descr_custom</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfacetransfer_descriptor</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.transfer_descriptor</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "transfer_descriptor{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "transfer_descr_from_: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">transfer_descr_from_</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "transfer_descr_to_: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">transfer_descr_to_</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "transfer_descr_token_id: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">transfer_descr_token_id</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "transfer_descr_amount: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">transfer_descr_amount</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfacetransfer_descriptor_param</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.transfer_descriptor_param</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "transfer_descriptor_param{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "transfer_descr_fa2: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">transfer_descr_fa2</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "transfer_descr_batch: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">transfer_descr_batch</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "transfer_descr_operator: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">transfer_descr_operator</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showfa2_token_receiver</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">fa2_token_receiver</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">tokens_received</span> <span class="id" title="var">param</span> =&gt; "tokens_received " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showfa2_token_sender</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">fa2_token_sender</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">tokens_sent</span> <span class="id" title="var">param</span> =&gt; "tokens_sent " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Interfaceset_hook_param</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Interface.set_hook_param</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "set_hook_param{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "hook_addr: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">hook_addr</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "hook_permissions_descriptor: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">hook_permissions_descriptor</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2ReceiverMsg</span> {<span class="id" title="var">Msg</span> : <span class="id" title="keyword">Type</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id" title="var">serMsg</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">Msg</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id" title="keyword">Show</span> <span class="id" title="var">Msg</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="keyword">Show</span> (@<span class="id" title="var">FA2ReceiverMsg</span> <span class="id" title="var">_</span> <span class="id" title="var">Msg</span>) :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">receive_balance_of_param</span> <span class="id" title="var">param</span> =&gt; "receive_balance_of_param " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">receive_total_supply_param</span> <span class="id" title="var">param</span> =&gt; "receive_total_supply_param " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">receive_metadata_callback</span> <span class="id" title="var">param</span> =&gt; "receive_metadata_callback " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">receive_is_operator</span> <span class="id" title="var">param</span> =&gt; "receive_is_operator " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">receive_permissions_descriptor</span> <span class="id" title="var">param</span> =&gt; "receive_permissions_descriptor " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">other_msg</span> <span class="id" title="var">msg</span> =&gt; <span class="id" title="var">show</span> <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2TransferHook</span> {<span class="id" title="var">Msg</span> : <span class="id" title="keyword">Type</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id" title="var">serMsg</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">Msg</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id" title="keyword">Show</span> <span class="id" title="var">Msg</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="keyword">Show</span> (@<span class="id" title="var">FA2TransferHook</span> <span class="id" title="var">_</span> <span class="id" title="var">Msg</span>) :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">transfer_hook</span> <span class="id" title="var">param</span> =&gt; "transferhook " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">hook_other_msg</span> <span class="id" title="var">msg</span> =&gt; <span class="id" title="var">show</span> <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2TokenMsg</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Token.Msg</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">msg_transfer</span> <span class="id" title="var">param</span> =&gt; "transfer " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">msg_set_transfer_hook</span> <span class="id" title="var">param</span> =&gt; "set_transfer_hook " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">msg_balance_of</span> <span class="id" title="var">param</span> =&gt; "balance_of " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">msg_total_supply</span> <span class="id" title="var">param</span> =&gt; "total_supply " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">msg_token_metadata</span> <span class="id" title="var">param</span> =&gt; "token_metadata " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">msg_permissions_descriptor</span> <span class="id" title="var">param</span> =&gt; "permissions_descriptor " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">msg_update_operators</span> <span class="id" title="var">param</span> =&gt; "update_operators " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">msg_is_operator</span> <span class="id" title="var">param</span> =&gt; "is_operator " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">msg_receive_hook_transfer</span> <span class="id" title="var">param</span> =&gt; "receive_hook_transfer " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">msg_create_tokens</span> <span class="id" title="var">tokenid</span> =&gt; "create_tokens " ++ <span class="id" title="var">show</span> <span class="id" title="var">tokenid</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2TokenLedger</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Token.TokenLedger</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "Token_Ledger{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "fungible: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">fungible</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "balances: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">balances</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">showFA2State</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Token.State</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "FA2TokenState{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "fa2_owner: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">fa2_owner</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "assets: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">assets</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "operators: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">operators</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "tokens_metadata: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">tokens</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "transfer_hook: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">transfer_hook_addr</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "permission_policy: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">permission_policy</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2Setup</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2Token.Setup</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "FA2TokenSetup{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "setup_total_supply: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">setup_total_supply</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "tokens_metadata: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">setup_tokens</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "permission_policy: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">initial_permission_policy</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Printers&nbsp;for&nbsp;Test&nbsp;Contracts&nbsp;*)</span><br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2ClientMsg</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2ClientMsg</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Call_fa2_is_operator</span> <span class="id" title="var">param</span> =&gt; "Call_fa2_is_operator " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Call_fa2_balance_of_param</span> <span class="id" title="var">param</span> =&gt; "Call_fa2_balance_of_param " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Call_fa2_total_supply_param</span> <span class="id" title="var">param</span> =&gt; "Call_fa2_total_supply_param param " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Call_fa2_metadata_callback</span> <span class="id" title="var">param</span> =&gt; "Call_fa2_metadata_callback param " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Call_fa2_permissions_descriptor</span> <span class="id" title="var">param</span> =&gt; "Call_fa2_permissions_descriptor param " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2ClientContractMsg</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">ClientMsg</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="var">show</span> <span class="id" title="var">m</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2ClientState</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">ClientState</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "FA2ClientState{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "fa2_caddr: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">fa2_caddr</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "bit: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">bit</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2ClientSetup</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">ClientSetup</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "FA2ClientSetup{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "fa2_caddr_: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">fa2_caddr_</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2TransferHookMsg</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">FA2TransferHookMsg</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">set_permission_policy</span> <span class="id" title="var">param</span> =&gt; "set_permission_policy " ++ <span class="id" title="var">show</span> <span class="id" title="var">param</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showTransferHookMsg</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">TransferHookMsg</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">m</span> := <span class="id" title="var">show</span> <span class="id" title="var">m</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2TransferHookContractState</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">HookState</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "FA2TransferHookState{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "fa2_caddr: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">hook_fa2_caddr</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "policy: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">hook_policy</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "owner: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">hook_owner</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showFA2TransferHookContractSetup</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">HookSetup</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">t</span> := "FA2TransferHookSetup{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "fa2_caddr_: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">hook_fa2_caddr_</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "policy_: " ++ <span class="id" title="var">show</span> <span class="id" title="var">t</span>.(<span class="id" title="var">hook_policy_</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showSerializedMsg</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">SerializedValue</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="keyword">Show</span> <span class="id" title="var">Msg</span> &lt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">FA2Token.Msg</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">TestContracts.ClientMsg</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">TestContracts.TransferHookMsg</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">FA2Token.Setup</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">TestContracts.ClientSetup</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">TestContracts.HookSetup</span> &gt;.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

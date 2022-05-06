@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.fa2.TestContracts</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Monads</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ContractCommon</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.FA2</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">FA2Token</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.FA2</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">FA2Interface</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">RecordUpdate</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">FA2Client</span>.<br/>
+<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>}.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Primitive</span> <span class="id" title="var">Projections</span>.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Nonrecursive</span> <span class="id" title="var">Elimination</span> <span class="id" title="var">Schemes</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">N_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">FA2ClientMsg</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Call_fa2_is_operator</span> : <span class="id" title="var">is_operator_param</span> -&gt; <span class="id" title="var">FA2ClientMsg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Call_fa2_balance_of_param</span> : <span class="id" title="var">list</span> <span class="id" title="var">balance_of_response</span> -&gt; <span class="id" title="var">FA2ClientMsg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Call_fa2_total_supply_param</span> : <span class="id" title="var">list</span> <span class="id" title="var">total_supply_response</span> -&gt; <span class="id" title="var">FA2ClientMsg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Call_fa2_metadata_callback</span> : <span class="id" title="var">list</span> <span class="id" title="var">token_metadata</span> -&gt; <span class="id" title="var">FA2ClientMsg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Call_fa2_permissions_descriptor</span> : <span class="id" title="var">permissions_descriptor</span> -&gt; <span class="id" title="var">FA2ClientMsg</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">FA2ClientMsg_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">FA2ClientMsg</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">FA2ClientMsg_rect</span> &lt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Call_fa2_is_operator</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Call_fa2_balance_of_param</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Call_fa2_total_supply_param</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Call_fa2_metadata_callback</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Call_fa2_permissions_descriptor</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">ClientMsg</span> := @<span class="id" title="var">FA2ReceiverMsg</span> <span class="id" title="var">BaseTypes</span> <span class="id" title="var">FA2ClientMsg</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">ClientState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_clientstate</span> {<br/>
+&nbsp;&nbsp;<span class="id" title="var">fa2_caddr</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">bit</span> : <span class="id" title="var">N</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">ClientSetup</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_clientsetup</span> {<br/>
+&nbsp;&nbsp;<span class="id" title="var">fa2_caddr_</span> : <span class="id" title="var">Address</span><br/>
+}.<br/>
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">ClientState</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">ClientSetup</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">Serialization</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">setup_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">ClientSetup</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">ClientSetup_rect</span> &lt;<span class="id" title="var">build_clientsetup</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">state_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">ClientState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">ClientState_rect</span> &lt;<span class="id" title="var">build_clientstate</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">ClientMsg_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">ClientMsg</span> := <span class="id" title="var">FA2Token.FA2ReceiverMsg_serializable</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Serialization</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">client_init</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">setup</span> : <span class="id" title="var">ClientSetup</span>) : <span class="id" title="var">option</span> <span class="id" title="var">ClientState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fa2_caddr</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">fa2_caddr_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">bit</span> := 0;<br/>
+&nbsp;&nbsp;|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">client_receive</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">ClientState</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">maybe_msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">ClientMsg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">ClientState</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">maybe_msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">receive_is_operator</span> <span class="id" title="var">is_op_response</span>) =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">state</span>&lt;| <span class="id" title="var">bit</span>:= 42|&gt;, [])<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">other_msg</span> (<span class="id" title="var">Call_fa2_is_operator</span> <span class="id" title="var">is_op_param</span>)) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>&lt;| <span class="id" title="var">bit</span> := 2|&gt;, [<span class="id" title="var">act_call</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fa2_caddr</span>) 0%<span class="id" title="var">Z</span> (@<span class="id" title="var">serialize</span> <span class="id" title="var">FA2Token.Msg</span> <span class="id" title="var">_</span> (<span class="id" title="var">FA2Token.msg_is_operator</span> <span class="id" title="var">is_op_param</span>))])<br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">client_contract</span> : <span class="id" title="var">Contract</span> <span class="id" title="var">FA2Client.ClientSetup</span> <span class="id" title="var">ClientMsg</span> <span class="id" title="var">FA2Client.ClientState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_contract</span> <span class="id" title="var">client_init</span> <span class="id" title="var">client_receive</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">FA2Client</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;A&nbsp;contract&nbsp;which&nbsp;implements&nbsp;the&nbsp;transfer&nbsp;hook&nbsp;endpoint&nbsp;of&nbsp;FA2&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Behavior&nbsp;is&nbsp;driven&nbsp;by&nbsp;a&nbsp;permission&nbsp;policy&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">FA2TransferHook</span>.<br/>
+<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>}.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Primitive</span> <span class="id" title="var">Projections</span>.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Nonrecursive</span> <span class="id" title="var">Elimination</span> <span class="id" title="var">Schemes</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">N_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">FA2TransferHookMsg</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">set_permission_policy</span> : <span class="id" title="var">permissions_descriptor</span> -&gt; <span class="id" title="var">FA2TransferHookMsg</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">FA2TransferHookMsg_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">FA2TransferHookMsg</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">FA2TransferHookMsg_rect</span> &lt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">set_permission_policy</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TransferHookMsg</span> := @<span class="id" title="var">FA2TransferHook</span> <span class="id" title="var">BaseTypes</span> <span class="id" title="var">FA2TransferHookMsg</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">HookState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_hookstate</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">hook_owner</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">hook_fa2_caddr</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">hook_policy</span> : <span class="id" title="var">permissions_descriptor</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">HookSetup</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_hooksetup</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">hook_fa2_caddr_</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">hook_policy_</span> : <span class="id" title="var">permissions_descriptor</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">HookState</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">HookSetup</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">Serialization</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">hooksetup_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">HookSetup</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">HookSetup_rect</span> &lt;<span class="id" title="var">build_hooksetup</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">hookstate_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">HookState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">HookState_rect</span> &lt;<span class="id" title="var">build_hookstate</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Serialization</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">hook_init</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">setup</span> : <span class="id" title="var">HookSetup</span>) : <span class="id" title="var">option</span> <span class="id" title="var">HookState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">hook_owner</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">hook_fa2_caddr</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">hook_fa2_caddr_</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">hook_policy</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">hook_policy_</span>);<br/>
+&nbsp;&nbsp;|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">check_transfer_permissions</span> (<span class="id" title="var">tr</span> : <span class="id" title="var">transfer_descriptor</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">operator</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">HookState</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">unit</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">tr</span>.(<span class="id" title="var">transfer_descr_from_</span>) <span class="id" title="var">operator</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="keyword">if</span> (<span class="id" title="var">FA2Token.policy_disallows_self_transfer</span> <span class="id" title="var">state</span>.(<span class="id" title="var">hook_policy</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> (<span class="id" title="var">FA2Token.policy_disallows_operator_transfer</span> <span class="id" title="var">state</span>.(<span class="id" title="var">hook_policy</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;called&nbsp;whenever&nbsp;this&nbsp;hook&nbsp;receives&nbsp;a&nbsp;transfer&nbsp;from&nbsp;the&nbsp;FA2&nbsp;contract&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;checks&nbsp;the&nbsp;permission&nbsp;policy,&nbsp;and&nbsp;if&nbsp;all&nbsp;transfers&nbsp;are&nbsp;valid,<br/>
+&nbsp;&nbsp;&nbsp;forwards&nbsp;the&nbsp;transfers&nbsp;to&nbsp;the&nbsp;'msg_receive_hook_transfer'&nbsp;endpoint&nbsp;of&nbsp;the&nbsp;FA2&nbsp;Contract&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">on_hook_receive_transfer</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">param</span> : <span class="id" title="var">transfer_descriptor_param</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">HookState</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">caller</span> <span class="id" title="var">state</span>.(<span class="id" title="var">hook_fa2_caddr</span>))) ;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">param</span>.(<span class="id" title="var">transfer_descr_fa2</span>) <span class="id" title="var">state</span>.(<span class="id" title="var">hook_fa2_caddr</span>))) ;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">operator</span> := <span class="id" title="var">param</span>.(<span class="id" title="var">transfer_descr_operator</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">check_transfer_iterator</span> <span class="id" title="var">tr</span> <span class="id" title="var">acc</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">check_transfer_permissions</span> <span class="id" title="var">tr</span> <span class="id" title="var">operator</span> <span class="id" title="var">state</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> <span class="id" title="var">tt</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;check&nbsp;if&nbsp;all&nbsp;transfers&nbsp;satisfy&nbsp;the&nbsp;permission&nbsp;policy.&nbsp;If&nbsp;at&nbsp;least&nbsp;one&nbsp;does&nbsp;not,&nbsp;the&nbsp;whole&nbsp;operation&nbsp;fails&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">fold_right</span> <span class="id" title="var">check_transfer_iterator</span> (<span class="id" title="var">Some</span> <span class="id" title="var">tt</span>) <span class="id" title="var">param</span>.(<span class="id" title="var">transfer_descr_batch</span>) ;<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;send&nbsp;out&nbsp;transfer&nbsp;action&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">msg</span> := @<span class="id" title="var">serialize</span> <span class="id" title="var">FA2Token.Msg</span> <span class="id" title="var">_</span> (<span class="id" title="var">msg_receive_hook_transfer</span> <span class="id" title="var">param</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> [(<span class="id" title="var">act_call</span> <span class="id" title="var">caller</span> 0%<span class="id" title="var">Z</span> <span class="id" title="var">msg</span>)].<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">try_update_permission_policy</span> (<span class="id" title="var">caller</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">new_policy</span> : <span class="id" title="var">permissions_descriptor</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">HookState</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: (<span class="id" title="var">option</span> <span class="id" title="var">HookState</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">caller</span> <span class="id" title="var">state</span>.(<span class="id" title="var">hook_owner</span>))) ;<br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>&lt;| <span class="id" title="var">hook_policy</span> := <span class="id" title="var">new_policy</span> |&gt;).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">hook_receive</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">HookState</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">maybe_msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">TransferHookMsg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">HookState</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">sender</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">without_actions</span> := <span class="id" title="var">option_map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">new_state</span> =&gt; (<span class="id" title="var">new_state</span>, [])) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">without_statechange</span> := <span class="id" title="var">option_map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">acts</span> =&gt; (<span class="id" title="var">state</span>, <span class="id" title="var">acts</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">maybe_msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">transfer_hook</span> <span class="id" title="var">param</span>) =&gt; <span class="id" title="var">without_statechange</span> (<span class="id" title="var">on_hook_receive_transfer</span> <span class="id" title="var">sender</span> <span class="id" title="var">param</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">hook_other_msg</span> (<span class="id" title="var">set_permission_policy</span> <span class="id" title="var">policy</span>)) =&gt; <span class="id" title="var">without_actions</span> (<span class="id" title="var">try_update_permission_policy</span> <span class="id" title="var">sender</span> <span class="id" title="var">policy</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">hook_contract</span> : <span class="id" title="var">Contract</span> <span class="id" title="var">HookSetup</span> <span class="id" title="var">TransferHookMsg</span> <span class="id" title="var">HookState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_contract</span> <span class="id" title="var">hook_init</span> <span class="id" title="var">hook_receive</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">FA2TransferHook</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

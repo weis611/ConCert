@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.dexter.DexterTests</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Monads</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ResultMonad</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">QCTest</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.FA2</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">FA2Token</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.FA2</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">FA2Interface</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Dexter</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Dexter</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Dexter</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">DexterGens</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Extras</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;the&nbsp;policy&nbsp;which&nbsp;allows&nbsp;both&nbsp;owners&nbsp;and&nbsp;operators&nbsp;to&nbsp;transfer&nbsp;tokens.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">policy_all</span> : <span class="id" title="var">permissions_descriptor</span> := {|<br/>
+&nbsp;&nbsp;<span class="id" title="var">descr_self</span> := <span class="id" title="var">self_transfer_permitted</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">descr_operator</span> := <span class="id" title="var">operator_transfer_permitted</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">descr_sender</span> := <span class="id" title="var">owner_no_op</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">descr_receiver</span> := <span class="id" title="var">owner_no_op</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">descr_custom</span> := <span class="id" title="var">None</span>;<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">token_metadata_0</span> : <span class="id" title="var">token_metadata</span> := {|<br/>
+&nbsp;&nbsp;<span class="id" title="var">metadata_token_id</span> := 0%<span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">metadata_decimals</span> := 8%<span class="id" title="var">N</span>;<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">token_setup</span> : <span class="id" title="var">FA2Token.Setup</span> := {|<br/>
+&nbsp;&nbsp;<span class="id" title="var">transfer_hook_addr_</span> := <span class="id" title="var">None</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">setup_total_supply</span> := [];<br/>
+&nbsp;&nbsp;<span class="id" title="var">setup_tokens</span> := <span class="id" title="var">FMap.add</span> 0%<span class="id" title="var">N</span> <span class="id" title="var">token_metadata_0</span> <span class="id" title="var">FMap.empty</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">initial_permission_policy</span> := <span class="id" title="var">policy_all</span>;<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">deploy_fa2token</span> : @<span class="id" title="var">ActionBody</span> <span class="id" title="var">LocalChainBase</span> := <span class="id" title="var">create_deployment</span> 0 <span class="id" title="var">FA2Token.contract</span> <span class="id" title="var">token_setup</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">fa2_caddr</span> : <span class="id" title="var">Address</span> := <span class="id" title="var">addr_of_Z</span> 128%<span class="id" title="var">Z</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">dexter_setup</span> : <span class="id" title="var">Dexter.Setup</span> := {|<br/>
+&nbsp;&nbsp;<span class="id" title="var">fa2_caddr_</span> := <span class="id" title="var">fa2_caddr</span>;<br/>
+|}.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;The&nbsp;Dexter&nbsp;contract&nbsp;gets&nbsp;30&nbsp;chain&nbsp;assets&nbsp;initially&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">deploy_dexter</span> : @<span class="id" title="var">ActionBody</span> <span class="id" title="var">LocalChainBase</span> := <span class="id" title="var">create_deployment</span> 30 <span class="id" title="var">Dexter.contract</span> <span class="id" title="var">dexter_setup</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">dexter_caddr</span> : <span class="id" title="var">Address</span> := <span class="id" title="var">addr_of_Z</span> 129%<span class="id" title="var">Z</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">ExplotContract</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">ExploitContractMsg</span> := <span class="id" title="var">fa2_token_sender</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">ExploitContractState</span> := <span class="id" title="var">nat</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">ExplotContractSetup</span> := <span class="id" title="var">unit</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">exploit_init</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">setup</span> : <span class="id" title="var">ExplotContractSetup</span>) : <span class="id" title="var">option</span> <span class="id" title="var">ExploitContractState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> 1.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">exploit_receive</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">ExploitContractState</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">maybe_msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">ExploitContractMsg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">ExploitContractState</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">sender</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">caddr</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_address</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">dexter_balance</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_balance</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">maybe_msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">tokens_sent</span> <span class="id" title="var">param</span>) =&gt; <span class="id" title="keyword">if</span> 5 &lt;? <span class="id" title="var">state</span> <span class="comment">(*&nbsp;repeat&nbsp;reentrancy&nbsp;up&nbsp;to&nbsp;five&nbsp;times&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">state</span>, [])<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">token_exchange_msg</span> := <span class="id" title="var">other_msg</span> (<span class="id" title="var">tokens_to_asset</span> {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">exchange_owner</span> := <span class="id" title="var">person_1</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">exchange_token_id</span> := 0%<span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokens_sold</span> := 200%<span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">callback_addr</span> := <span class="id" title="var">caddr</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|}) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span> + 1, [<span class="id" title="var">act_call</span> <span class="id" title="var">dexter_caddr</span> 0%<span class="id" title="var">Z</span> (<span class="id" title="var">serialize</span> <span class="id" title="var">token_exchange_msg</span>)])<br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">state</span>, [])<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">exploit_contract</span> : <span class="id" title="var">Contract</span> <span class="id" title="var">ExplotContractSetup</span> <span class="id" title="var">ExploitContractMsg</span> <span class="id" title="var">ExploitContractState</span> :=<br/>
+<span class="id" title="var">build_contract</span> <span class="id" title="var">exploit_init</span> <span class="id" title="var">exploit_receive</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">ExplotContract</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">deploy_exploit</span> : @<span class="id" title="var">ActionBody</span> <span class="id" title="var">LocalChainBase</span> := <span class="id" title="var">create_deployment</span> 0 <span class="id" title="var">exploit_contract</span> <span class="id" title="var">tt</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">exploit_caddr</span> : <span class="id" title="var">Address</span> := <span class="id" title="var">addr_of_Z</span> 130%<span class="id" title="var">Z</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">dexter_other_msg</span> := @<span class="id" title="var">other_msg</span> <span class="id" title="var">_</span> <span class="id" title="var">DexterMsg</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">add_operator_all</span> <span class="id" title="var">owner</span> <span class="id" title="var">operator</span> := {|<br/>
+&nbsp;&nbsp;<span class="id" title="var">op_param_owner</span> := <span class="id" title="var">owner</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">op_param_operator</span> := <span class="id" title="var">operator</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">op_param_tokens</span> := <span class="id" title="var">all_tokens</span>;<br/>
+|}.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Setup&nbsp;a&nbsp;chain&nbsp;with&nbsp;fa2&nbsp;contract,&nbsp;dexter&nbsp;contract,&nbsp;and&nbsp;exploit&nbsp;contract&nbsp;deployed.<br/>
+&nbsp;&nbsp;&nbsp;Also&nbsp;adds&nbsp;some&nbsp;tokens&nbsp;to&nbsp;person_1&nbsp;and&nbsp;dexter&nbsp;contract,&nbsp;and&nbsp;adds&nbsp;some&nbsp;operators&nbsp;on&nbsp;the&nbsp;fa2&nbsp;contract&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">chain0</span> : <span class="id" title="var">ChainBuilder</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">unpack_result</span> (<span class="id" title="var">TraceGens.add_block</span> <span class="id" title="var">builder_initial</span> []).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">chain1</span> : <span class="id" title="var">ChainBuilder</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">unpack_result</span> (<span class="id" title="var">TraceGens.add_block</span> <span class="id" title="var">chain0</span><br/>
+&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">creator</span> <span class="id" title="var">creator</span> (<span class="id" title="var">act_transfer</span> <span class="id" title="var">person_1</span> 10) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">creator</span> <span class="id" title="var">creator</span> <span class="id" title="var">deploy_fa2token</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">creator</span> <span class="id" title="var">creator</span> <span class="id" title="var">deploy_dexter</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">creator</span> <span class="id" title="var">creator</span> <span class="id" title="var">deploy_exploit</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">person_1</span> <span class="id" title="var">person_1</span> (<span class="id" title="var">act_call</span> <span class="id" title="var">fa2_caddr</span> 10%<span class="id" title="var">Z</span> (<span class="id" title="var">serialize</span> (<span class="id" title="var">msg_create_tokens</span> 0%<span class="id" title="var">N</span>))) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">creator</span> <span class="id" title="var">creator</span> (<span class="id" title="var">act_call</span> <span class="id" title="var">dexter_caddr</span> 10%<span class="id" title="var">Z</span> (<span class="id" title="var">serialize</span> (<span class="id" title="var">dexter_other_msg</span> (<span class="id" title="var">add_to_tokens_reserve</span> 0%<span class="id" title="var">N</span>)))) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">person_1</span> <span class="id" title="var">person_1</span> (<span class="id" title="var">act_call</span> <span class="id" title="var">fa2_caddr</span> 0%<span class="id" title="var">Z</span>  (<span class="id" title="var">serialize</span> (<span class="id" title="var">msg_update_operators</span> [<span class="id" title="var">add_operator</span> (<span class="id" title="var">add_operator_all</span> <span class="id" title="var">person_1</span> <span class="id" title="var">exploit_caddr</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">add_operator</span> (<span class="id" title="var">add_operator_all</span> <span class="id" title="var">person_1</span> <span class="id" title="var">dexter_caddr</span>)])))<br/>
+&nbsp;&nbsp;]).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">dexter_state</span> <span class="id" title="var">env</span> := <span class="id" title="var">get_contract_state</span> <span class="id" title="var">Dexter.State</span> <span class="id" title="var">env</span> <span class="id" title="var">dexter_caddr</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">token_state</span> <span class="id" title="var">env</span> := <span class="id" title="var">get_contract_state</span> <span class="id" title="var">FA2Token.State</span> <span class="id" title="var">env</span> <span class="id" title="var">fa2_caddr</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">explit_state</span> <span class="id" title="var">env</span> := <span class="id" title="var">get_contract_state</span> <span class="id" title="var">ExploitContractState</span> <span class="id" title="var">env</span> <span class="id" title="var">exploit_caddr</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">TestInfo</span> &lt;: <span class="id" title="var">DexterTestsInfo</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">fa2_contract_addr</span> := <span class="id" title="var">fa2_caddr</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">dexter_contract_addr</span> := <span class="id" title="var">dexter_caddr</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">exploit_contract_addr</span> := <span class="id" title="var">exploit_caddr</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">accounts</span> := <span class="id" title="var">test_chain_addrs_5</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">TestInfo</span>.<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">MG</span> := <span class="id" title="var">DexterGens.DexterGens</span> <span class="id" title="var">TestInfo</span>. <span class="id" title="keyword">Import</span> <span class="id" title="var">MG</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">call_dexter</span> <span class="id" title="var">owner_addr</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">dummy_descriptor</span> := {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_fa2</span> := <span class="id" title="var">fa2_caddr</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_batch</span> := [];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_descr_operator</span> := <span class="id" title="var">dexter_caddr</span>;<br/>
+&nbsp;&nbsp;|} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">owner_addr</span> <span class="id" title="var">owner_addr</span> (<span class="id" title="var">act_call</span> <span class="id" title="var">exploit_caddr</span> 0%<span class="id" title="var">Z</span> (@<span class="id" title="var">serialize</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> (<span class="id" title="var">tokens_sent</span> <span class="id" title="var">dummy_descriptor</span>))).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gExploitAction</span> : <span class="id" title="var">GOpt</span> <span class="id" title="var">Action</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">bindGen</span> <span class="id" title="var">gTestAddrs3</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">addr</span> =&gt; <span class="id" title="var">returnGenSome</span> (<span class="id" title="var">call_dexter</span> <span class="id" title="var">addr</span>)).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gExploitChainTraceList</span> <span class="id" title="var">max_acts_per_block</span> <span class="id" title="var">cb</span> <span class="id" title="var">length</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">TraceGens.gChain</span> <span class="id" title="var">cb</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">cb</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">gExploitAction</span>) <span class="id" title="var">length</span> 1 <span class="id" title="var">max_acts_per_block</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Sample&nbsp;(gExploitAction).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Sample&nbsp;(gExploitChainTraceList&nbsp;1&nbsp;chain1&nbsp;1).&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">person_1_initial_balance</span> : <span class="id" title="var">Amount</span> := <span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain1</span> <span class="id" title="var">person_1</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">dexter_liquidity</span> : <span class="id" title="var">Amount</span> := <span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain1</span> <span class="id" title="var">dexter_caddr</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">account_tokens</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) (<span class="id" title="var">account</span> : <span class="id" title="var">Address</span>) : <span class="id" title="var">N</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">with_default</span> 0%<span class="id" title="var">N</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">state_fa2</span> &lt;- <span class="id" title="var">token_state</span> <span class="id" title="var">env</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">assets</span> &lt;- <span class="id" title="var">FMap.find</span> 0%<span class="id" title="var">N</span> <span class="id" title="var">state_fa2</span>.(<span class="id" title="var">assets</span>) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">FMap.find</span> <span class="id" title="var">account</span> <span class="id" title="var">assets</span>.(<span class="id" title="var">balances</span>)).<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(account_tokens&nbsp;chain1&nbsp;dexter_caddr).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;1000*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(account_tokens&nbsp;chain1&nbsp;person_1).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;1000*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;person_1_initial_balance.&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;0*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;dexter_liquidity.&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;30*)</span><br/>
+
+<br/>
+<span class="comment">(*&nbsp;This&nbsp;property&nbsp;asserts&nbsp;that&nbsp;the&nbsp;token&nbsp;reserve&nbsp;of&nbsp;the&nbsp;dexter&nbsp;contract&nbsp;is&nbsp;consistent<br/>
+&nbsp;&nbsp;&nbsp;with&nbsp;how&nbsp;much&nbsp;money&nbsp;has&nbsp;been&nbsp;exchanged&nbsp;for&nbsp;tokens,&nbsp;with&nbsp;respect&nbsp;to&nbsp;the&nbsp;conversion&nbsp;function&nbsp;'getInputPrice'&nbsp;*)</span><br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">tokens_to_asset_correct_P_opt</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) : <span class="id" title="var">option</span> <span class="id" title="var">Checker</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">state_dexter</span> &lt;- <span class="id" title="var">dexter_state</span> <span class="id" title="var">env</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">person_1_balance</span> := <span class="id" title="var">env_account_balances</span> <span class="id" title="var">env</span> <span class="id" title="var">person_1</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">dexter_balance</span> := <span class="id" title="var">env_account_balances</span> <span class="id" title="var">env</span> <span class="id" title="var">dexter_caddr</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">dexter_initial_balance</span> := <span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain1</span> <span class="id" title="var">dexter_caddr</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">dexter_initial_token_reserve</span> := <span class="id" title="var">Z.of_N</span> (<span class="id" title="var">account_tokens</span> <span class="id" title="var">chain1</span> <span class="id" title="var">dexter_caddr</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">dexter_current_token_reserve</span> := <span class="id" title="var">Z.of_N</span> (<span class="id" title="var">account_tokens</span> <span class="id" title="var">env</span> <span class="id" title="var">dexter_caddr</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">tokens_received</span> := <span class="id" title="var">dexter_current_token_reserve</span> - <span class="id" title="var">dexter_initial_token_reserve</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">expected_currency_sold</span> := <span class="id" title="var">getInputPrice</span> <span class="id" title="var">tokens_received</span> <span class="id" title="var">dexter_initial_token_reserve</span> <span class="id" title="var">dexter_initial_balance</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">expected_dexter_balance</span> := <span class="id" title="var">dexter_initial_balance</span> - <span class="id" title="var">expected_currency_sold</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">whenFail</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"dexter balance was " ++ <span class="id" title="var">show</span> <span class="id" title="var">dexter_balance</span> ++ " while it was expected to be at least " ++ <span class="id" title="var">show</span> <span class="id" title="var">expected_dexter_balance</span> ++ <span class="id" title="var">nl</span> ++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"person_1 balance: " ++ <span class="id" title="var">show</span> <span class="id" title="var">person_1_balance</span> ++ <span class="id" title="var">nl</span> ++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"person_1 tokens: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">account_tokens</span> <span class="id" title="var">env</span> <span class="id" title="var">person_1</span>) ++ <span class="id" title="var">nl</span> ++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"dexter balance: " ++ <span class="id" title="var">show</span> <span class="id" title="var">dexter_balance</span> ++ <span class="id" title="var">nl</span> ++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"dexter tokens: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">account_tokens</span> <span class="id" title="var">env</span> <span class="id" title="var">dexter_caddr</span>) ++ <span class="id" title="var">nl</span> ++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"history: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">state_dexter</span>.(<span class="id" title="var">price_history</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">checker</span> (<span class="id" title="var">expected_dexter_balance</span> &lt;? <span class="id" title="var">dexter_balance</span>))<br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">tokens_to_asset_correct_P</span> <span class="id" title="var">env</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">tokens_to_asset_correct_P_opt</span> <span class="id" title="var">env</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">p</span> =&gt; <span class="id" title="var">p</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">false</span> ==&gt; <span class="id" title="var">true</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">tokens_to_asset_correct</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">TraceGens.forAllBlocks</span> 1 <span class="id" title="var">chain1</span> (<span class="id" title="var">gExploitChainTraceList</span> 1) <span class="id" title="var">tokens_to_asset_correct_P</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Illustration&nbsp;of&nbsp;how&nbsp;the&nbsp;reentrancy&nbsp;attack&nbsp;can&nbsp;give&nbsp;the&nbsp;caller&nbsp;more&nbsp;money&nbsp;with&nbsp;the&nbsp;same&nbsp;amount&nbsp;of&nbsp;tokens.<br/>
+&nbsp;&nbsp;&nbsp;Notice&nbsp;how&nbsp;in&nbsp;the&nbsp;second&nbsp;sequence,&nbsp;the&nbsp;second&nbsp;argument&nbsp;remains&nbsp;the&nbsp;same,&nbsp;ie.&nbsp;it&nbsp;emulates&nbsp;the&nbsp;reentrancy&nbsp;attack.&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(getInputPrice&nbsp;200&nbsp;1000&nbsp;30).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;4&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(getInputPrice&nbsp;200&nbsp;1200&nbsp;26).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;3&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(getInputPrice&nbsp;200&nbsp;1400&nbsp;23).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;2&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(getInputPrice&nbsp;200&nbsp;1600&nbsp;21).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;2&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(getInputPrice&nbsp;200&nbsp;1800&nbsp;19).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;1&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;total&nbsp;=&nbsp;12&nbsp;*)</span><br/>
+
+<br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(getInputPrice&nbsp;200&nbsp;1000&nbsp;30).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;4&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(getInputPrice&nbsp;200&nbsp;1000&nbsp;26).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;4&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(getInputPrice&nbsp;200&nbsp;1000&nbsp;22).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;3&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(getInputPrice&nbsp;200&nbsp;1000&nbsp;19).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;3&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Compute&nbsp;(getInputPrice&nbsp;200&nbsp;1000&nbsp;16).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;2&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;total&nbsp;=&nbsp;16&nbsp;*)</span><br/>
+
+<br/>
+<span class="comment">(*&nbsp;QuickChick&nbsp;(expectFailure&nbsp;tokens_to_asset_correct).&nbsp;*)</span><br/>
+<span class="comment">(*<br/>
+Begin&nbsp;Trace:<br/>
+step_action{Action{act_from:&nbsp;11256,&nbsp;0,&nbsp;transferhook&nbsp;transfer_descriptor_param{transfer_descr_fa2:&nbsp;128256})}}<br/>
+End&nbsp;Trace<br/>
+dexter&nbsp;balance&nbsp;was&nbsp;14&nbsp;while&nbsp;it&nbsp;was&nbsp;expected&nbsp;to&nbsp;be&nbsp;at&nbsp;least&nbsp;16person_1&nbsp;balance:&nbsp;16<br/>
+person_1&nbsp;tokens:&nbsp;0<br/>
+dexter&nbsp;balance:&nbsp;14<br/>
+dexter&nbsp;tokens:&nbsp;2000<br/>
+history:&nbsp;<span class="inlinecode">2;</span> <span class="inlinecode">3;</span> <span class="inlinecode">3;</span> <span class="inlinecode">4;</span> <span class="inlinecode">4</span><br/>
+***&nbsp;Failed&nbsp;after&nbsp;1&nbsp;tests&nbsp;and&nbsp;0&nbsp;shrinks.&nbsp;(0&nbsp;discards)<br/>
+&nbsp;*)</span><br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.fa2.FA2Interface</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">RecordUpdate</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">FA2Interface</span>.<br/>
+<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>}.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Primitive</span> <span class="id" title="var">Projections</span>.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Nonrecursive</span> <span class="id" title="var">Elimination</span> <span class="id" title="var">Schemes</span>.<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">FA2Types</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">token_id</span> := <span class="id" title="var">N</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Dummy&nbsp;implementation&nbsp;of&nbsp;callbacks.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">callback</span> (<span class="id" title="var">A</span> : <span class="id" title="keyword">Type</span>) := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">blob</span> : <span class="id" title="var">option</span> <span class="id" title="var">A</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">return_addr</span> : <span class="id" title="var">Address</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">callback_addr</span> {<span class="id" title="var">A</span> : <span class="id" title="keyword">Type</span>} (<span class="id" title="var">c</span> : <span class="id" title="var">callback</span> <span class="id" title="var">A</span>) : <span class="id" title="var">Address</span> := <span class="id" title="var">c</span>.(<span class="id" title="var">return_addr</span> <span class="id" title="var">A</span>).<br/>
+<span class="id" title="keyword">Global</span> <span class="id" title="keyword">Coercion</span> <span class="id" title="var">callback_addr</span> : <span class="id" title="var">callback</span> &gt;-&gt; <span class="id" title="var">Address</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">transfer</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_transfer</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">from_</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">to_</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_token_id</span> : <span class="id" title="var">token_id</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">amount</span> : <span class="id" title="var">N</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sender_callback_addr</span> : <span class="id" title="var">option</span> <span class="id" title="var">Address</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">balance_of_request</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">owner</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">bal_req_token_id</span> : <span class="id" title="var">token_id</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">balance_of_response</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">request</span> : <span class="id" title="var">balance_of_request</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">balance</span> : <span class="id" title="var">N</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">balance_of_param</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">bal_requests</span> : <span class="id" title="var">list</span> <span class="id" title="var">balance_of_request</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">bal_callback</span> : <span class="id" title="var">callback</span> (<span class="id" title="var">list</span> <span class="id" title="var">balance_of_response</span>);<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">total_supply_response</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">supply_resp_token_id</span> : <span class="id" title="var">token_id</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">total_supply</span> : <span class="id" title="var">N</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">total_supply_param</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">supply_param_token_ids</span> : <span class="id" title="var">list</span> <span class="id" title="var">token_id</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">supply_param_callback</span> : <span class="id" title="var">callback</span> (<span class="id" title="var">list</span> <span class="id" title="var">total_supply_response</span>);<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">token_metadata</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">metadata_token_id</span> : <span class="id" title="var">token_id</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">metadata_decimals</span> : <span class="id" title="var">N</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">token_metadata_param</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">metadata_token_ids</span> : <span class="id" title="var">list</span> <span class="id" title="var">token_id</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">metadata_callback</span> : <span class="id" title="var">callback</span> (<span class="id" title="var">list</span> <span class="id" title="var">token_metadata</span>);<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">operator_tokens</span>  :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">all_tokens</span> : <span class="id" title="var">operator_tokens</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">some_tokens</span> : <span class="id" title="var">list</span> <span class="id" title="var">token_id</span> -&gt; <span class="id" title="var">operator_tokens</span>. <span class="comment">(*&nbsp;a&nbsp;set&nbsp;could&nbsp;be&nbsp;used&nbsp;here&nbsp;instead&nbsp;of&nbsp;list?*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">operator_param</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">op_param_owner</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">op_param_operator</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">op_param_tokens</span> : <span class="id" title="var">operator_tokens</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">update_operator</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">add_operator</span> : <span class="id" title="var">operator_param</span> -&gt; <span class="id" title="var">update_operator</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">remove_operator</span> : <span class="id" title="var">operator_param</span> -&gt; <span class="id" title="var">update_operator</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">is_operator_response</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">operator</span> : <span class="id" title="var">operator_param</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">is_operator</span> : <span class="id" title="var">bool</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">is_operator_param</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">is_operator_operator</span> : <span class="id" title="var">operator_param</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">is_operator_callback</span> : <span class="id" title="var">callback</span> (<span class="id" title="var">is_operator_response</span>);<br/>
+}.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;permission&nbsp;policy&nbsp;definition&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">self_transfer_policy</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">self_transfer_permitted</span> : <span class="id" title="var">self_transfer_policy</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">self_transfer_denied</span> : <span class="id" title="var">self_transfer_policy</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">operator_transfer_policy</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">operator_transfer_permitted</span> : <span class="id" title="var">operator_transfer_policy</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">operator_transfer_denied</span> : <span class="id" title="var">operator_transfer_policy</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">owner_transfer_policy</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">owner_no_op</span> : <span class="id" title="var">owner_transfer_policy</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">optional_owner_hook</span> : <span class="id" title="var">owner_transfer_policy</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">required_owner_hook</span> : <span class="id" title="var">owner_transfer_policy</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">permissions_descriptor</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">descr_self</span> : <span class="id" title="var">self_transfer_policy</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">descr_operator</span> : <span class="id" title="var">operator_transfer_policy</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">descr_receiver</span> : <span class="id" title="var">owner_transfer_policy</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">descr_sender</span> : <span class="id" title="var">owner_transfer_policy</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">descr_custom</span> : <span class="id" title="var">option</span> <span class="id" title="var">Address</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">transfer_descriptor</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">transfer_descr_from_</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">transfer_descr_to_</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">transfer_descr_token_id</span> : <span class="id" title="var">token_id</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">transfer_descr_amount</span> : <span class="id" title="var">N</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">transfer_descriptor_param</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">transfer_descr_fa2</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">transfer_descr_batch</span> : <span class="id" title="var">list</span> <span class="id" title="var">transfer_descriptor</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">transfer_descr_operator</span> : <span class="id" title="var">Address</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">fa2_token_receiver</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">tokens_received</span> : <span class="id" title="var">transfer_descriptor_param</span> -&gt; <span class="id" title="var">fa2_token_receiver</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">fa2_token_sender</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">tokens_sent</span> : <span class="id" title="var">transfer_descriptor_param</span> -&gt; <span class="id" title="var">fa2_token_sender</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">set_hook_param</span> := {<br/>
+&nbsp;&nbsp;<span class="id" title="var">hook_addr</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">hook_permissions_descriptor</span> : <span class="id" title="var">permissions_descriptor</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">FA2Types</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">Setters</span>.<br/>
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">transfer</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">balance_of_request</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">balance_of_response</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">balance_of_param</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">total_supply_response</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">total_supply_param</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">token_metadata</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">token_metadata_param</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">operator_param</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">is_operator_response</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">is_operator_param</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">permissions_descriptor</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">transfer_descriptor</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">transfer_descriptor_param</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">set_hook_param</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Setters</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">Serialization</span>.<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">callback_serializable</span> {<span class="id" title="var">A</span> : <span class="id" title="keyword">Type</span>} `{<span class="id" title="var">serA</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">A</span>} : <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback</span> <span class="id" title="var">A</span>) :=<br/>
+<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback_rect</span> <span class="id" title="var">A</span>) &lt;(<span class="id" title="var">Build_callback</span> <span class="id" title="var">A</span>)&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">transfer_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">transfer</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">transfer_rect</span> &lt;<span class="id" title="var">build_transfer</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">balance_of_request_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">balance_of_request</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">balance_of_request_rect</span> &lt;<span class="id" title="var">Build_balance_of_request</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">balance_of_response_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">balance_of_response</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">balance_of_response_rect</span> &lt;<span class="id" title="var">Build_balance_of_response</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">bal_of_param_callback_serializable</span> : <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback</span> (<span class="id" title="var">list</span> <span class="id" title="var">balance_of_response</span>)) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback_rect</span> (<span class="id" title="var">list</span> <span class="id" title="var">balance_of_response</span>)) &lt;(<span class="id" title="var">Build_callback</span> (<span class="id" title="var">list</span> <span class="id" title="var">balance_of_response</span>))&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">balance_of_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">balance_of_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">balance_of_param_rect</span> &lt;<span class="id" title="var">Build_balance_of_param</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">total_supply_response_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">total_supply_response</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">total_supply_response_rect</span> &lt;<span class="id" title="var">Build_total_supply_response</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">supply_param_callback_serializable</span> : <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback</span> (<span class="id" title="var">list</span> <span class="id" title="var">total_supply_response</span>)) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback_rect</span> (<span class="id" title="var">list</span> <span class="id" title="var">total_supply_response</span>)) &lt;(<span class="id" title="var">Build_callback</span> (<span class="id" title="var">list</span> <span class="id" title="var">total_supply_response</span>))&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">total_supply_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">total_supply_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">total_supply_param_rect</span> &lt;<span class="id" title="var">Build_total_supply_param</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">token_metadata_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">token_metadata</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">token_metadata_rect</span> &lt;<span class="id" title="var">Build_token_metadata</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">metadata_callback_serializable</span> : <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback</span> (<span class="id" title="var">list</span> <span class="id" title="var">token_metadata</span>)) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback_rect</span> (<span class="id" title="var">list</span> <span class="id" title="var">token_metadata</span>)) &lt;(<span class="id" title="var">Build_callback</span> (<span class="id" title="var">list</span> <span class="id" title="var">token_metadata</span>))&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">token_metadata_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">token_metadata_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">token_metadata_param_rect</span> &lt;<span class="id" title="var">Build_token_metadata_param</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">operator_tokens_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">operator_tokens</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">operator_tokens_rect</span> &lt;<span class="id" title="var">all_tokens</span>, <span class="id" title="var">some_tokens</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">operator_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">operator_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">operator_param_rect</span> &lt;<span class="id" title="var">Build_operator_param</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">update_operator_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">update_operator</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">update_operator_rect</span> &lt;<span class="id" title="var">add_operator</span>, <span class="id" title="var">remove_operator</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">is_operator_response_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">is_operator_response</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">is_operator_response_rect</span> &lt;<span class="id" title="var">Build_is_operator_response</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">is_operator_param_callback_serializable</span> : <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback</span> <span class="id" title="var">is_operator_response</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback_rect</span> <span class="id" title="var">is_operator_response</span>) &lt;(<span class="id" title="var">Build_callback</span> <span class="id" title="var">is_operator_response</span>)&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">is_operator_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">is_operator_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">is_operator_param_rect</span> &lt;<span class="id" title="var">Build_is_operator_param</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">self_transfer_policy_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">self_transfer_policy</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">self_transfer_policy_rect</span> &lt;<span class="id" title="var">self_transfer_permitted</span>, <span class="id" title="var">self_transfer_denied</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">operator_transfer_policy_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">operator_transfer_policy</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">operator_transfer_policy_rect</span> &lt;<span class="id" title="var">operator_transfer_permitted</span>, <span class="id" title="var">operator_transfer_denied</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">owner_transfer_policy_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">owner_transfer_policy</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">owner_transfer_policy_rect</span> &lt;<span class="id" title="var">owner_no_op</span> , <span class="id" title="var">optional_owner_hook</span>, <span class="id" title="var">required_owner_hook</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">permissions_descriptor_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">permissions_descriptor</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">permissions_descriptor_rect</span> &lt;<span class="id" title="var">Build_permissions_descriptor</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">transfer_descriptor_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">transfer_descriptor</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">transfer_descriptor_rect</span> &lt;<span class="id" title="var">Build_transfer_descriptor</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">transfer_descriptor_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">transfer_descriptor_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">transfer_descriptor_param_rect</span> &lt;<span class="id" title="var">Build_transfer_descriptor_param</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">fa2_token_receiver_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">fa2_token_receiver</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">fa2_token_receiver_rect</span> &lt;<span class="id" title="var">tokens_received</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">fa2_token_sender_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">fa2_token_sender</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">fa2_token_sender_rect</span> &lt;<span class="id" title="var">tokens_sent</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">transfer_descriptor_param_callback_serializable</span> : <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback</span> <span class="id" title="var">transfer_descriptor_param</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> (<span class="id" title="var">callback_rect</span> <span class="id" title="var">transfer_descriptor_param</span>) &lt;(<span class="id" title="var">Build_callback</span> <span class="id" title="var">transfer_descriptor_param</span>)&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">set_hook_param_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">set_hook_param</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">set_hook_param_rect</span> &lt;<span class="id" title="var">Build_set_hook_param</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Serialization</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">FA2Interface</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

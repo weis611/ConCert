@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.boardroomVoting.Egcd</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Psatz</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Znumtheory</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">egcd_aux</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">n</span> : <span class="id" title="var">nat</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">r0</span> <span class="id" title="var">a0</span> <span class="id" title="var">b0</span> <span class="id" title="var">r1</span> <span class="id" title="var">a1</span> <span class="id" title="var">b1</span> : <span class="id" title="var">Z</span>) {<span class="id" title="keyword">struct</span> <span class="id" title="var">n</span>} : <span class="id" title="var">Z</span> * <span class="id" title="var">Z</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">n</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| 0%<span class="id" title="var">nat</span> =&gt; (0, 0)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">S</span> <span class="id" title="var">n</span> =&gt; <span class="id" title="keyword">let</span> (<span class="id" title="var">q</span>, <span class="id" title="var">r</span>) := <span class="id" title="var">Z.div_eucl</span> <span class="id" title="var">r0</span> <span class="id" title="var">r1</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">r</span> =? 0 <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">a1</span>, <span class="id" title="var">b1</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">egcd_aux</span> <span class="id" title="var">n</span> <span class="id" title="var">r1</span> <span class="id" title="var">a1</span> <span class="id" title="var">b1</span> <span class="id" title="var">r</span> (<span class="id" title="var">a0</span> - <span class="id" title="var">q</span>*<span class="id" title="var">a1</span>) (<span class="id" title="var">b0</span> - <span class="id" title="var">q</span>*<span class="id" title="var">b1</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;returns&nbsp;(x,&nbsp;y)&nbsp;such&nbsp;that&nbsp;x*m&nbsp;+&nbsp;y*n&nbsp;=&nbsp;Z.gcd(x,&nbsp;y)&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">egcd</span> (<span class="id" title="var">m</span> <span class="id" title="var">n</span> : <span class="id" title="var">Z</span>) : <span class="id" title="var">Z</span> * <span class="id" title="var">Z</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">m</span> =? 0 <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(0, <span class="id" title="var">Z.sgn</span> <span class="id" title="var">n</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> <span class="id" title="var">n</span> =? 0 <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Z.sgn</span> <span class="id" title="var">m</span>, 0)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">num_steps</span> := <span class="id" title="var">S</span> (<span class="id" title="var">Z.to_nat</span> (<span class="id" title="var">Z.log2</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span>) + <span class="id" title="var">Z.log2</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span>))) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span> &lt;? <span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> (<span class="id" title="var">x</span>, <span class="id" title="var">y</span>) := <span class="id" title="var">egcd_aux</span> <span class="id" title="var">num_steps</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span>) 1 0 (<span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span>) 0 1 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Z.sgn</span> <span class="id" title="var">m</span> * <span class="id" title="var">y</span>, <span class="id" title="var">Z.sgn</span> <span class="id" title="var">n</span> * <span class="id" title="var">x</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> (<span class="id" title="var">x</span>, <span class="id" title="var">y</span>) := <span class="id" title="var">egcd_aux</span> <span class="id" title="var">num_steps</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span>) 1 0 (<span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span>) 0 1 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Z.sgn</span> <span class="id" title="var">m</span> * <span class="id" title="var">x</span>, <span class="id" title="var">Z.sgn</span> <span class="id" title="var">n</span> * <span class="id" title="var">y</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">egcd_aux_spec</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span> <span class="id" title="var">steps</span> <span class="id" title="var">r0</span> <span class="id" title="var">a0</span> <span class="id" title="var">b0</span> <span class="id" title="var">r1</span> <span class="id" title="var">a1</span> <span class="id" title="var">b1</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">Z.log2</span> <span class="id" title="var">r0</span> + <span class="id" title="var">Z.log2</span> <span class="id" title="var">r1</span> &lt; <span class="id" title="var">Z.of_nat</span> <span class="id" title="var">steps</span> -&gt;<br/>
+&nbsp;&nbsp;0 &lt; <span class="id" title="var">r1</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">r1</span> &lt;= <span class="id" title="var">r0</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">r0</span> = <span class="id" title="var">a0</span>*<span class="id" title="var">m</span> + <span class="id" title="var">b0</span>*<span class="id" title="var">n</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">r1</span> = <span class="id" title="var">a1</span>*<span class="id" title="var">m</span> + <span class="id" title="var">b1</span>*<span class="id" title="var">n</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">Z.gcd</span> <span class="id" title="var">r0</span> <span class="id" title="var">r1</span> = <span class="id" title="var">Z.gcd</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> (<span class="id" title="var">x</span>, <span class="id" title="var">y</span>) := <span class="id" title="var">egcd_aux</span> <span class="id" title="var">steps</span> <span class="id" title="var">r0</span> <span class="id" title="var">a0</span> <span class="id" title="var">b0</span> <span class="id" title="var">r1</span> <span class="id" title="var">a1</span> <span class="id" title="var">b1</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">x</span>*<span class="id" title="var">m</span> + <span class="id" title="var">y</span>*<span class="id" title="var">n</span> = <span class="id" title="var">Z.gcd</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="var">r0</span> <span class="id" title="var">a0</span> <span class="id" title="var">b0</span> <span class="id" title="var">r1</span> <span class="id" title="var">a1</span> <span class="id" title="var">b1</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">steps</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">steps</span> <span class="id" title="var">IH</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">r0</span> <span class="id" title="var">a0</span> <span class="id" title="var">b0</span> <span class="id" title="var">r1</span> <span class="id" title="var">a1</span> <span class="id" title="var">b1</span> <span class="id" title="var">enough_steps</span> <span class="id" title="var">r1pos</span> <span class="id" title="var">r1gt</span> <span class="id" title="var">r0eq</span> <span class="id" title="var">r1eq</span> <span class="id" title="var">is_gcd</span>.<br/>
+&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span> -[<span class="id" title="var">Z.add</span>] <span class="id" title="tactic">in</span> <span class="id" title="var">enough_steps</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">Z.log2_nonneg</span> <span class="id" title="var">r0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">Z.log2_nonneg</span> <span class="id" title="var">r1</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">Z_div_mod</span> <span class="id" title="var">r0</span> <span class="id" title="var">r1</span> <span class="id" title="keyword">ltac</span>:(<span class="id" title="var">lia</span>)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">Z.div_eucl</span> <span class="id" title="var">r0</span> <span class="id" title="var">r1</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">q</span> <span class="id" title="var">r</span>].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">Z.eqb_spec</span> <span class="id" title="var">r</span> 0) <span class="id" title="keyword">as</span> [-&gt;|?].<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.add_0_r</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">r1eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">is_gcd</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.gcd_comm</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.gcd_mul_diag_l</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">apply</span> <span class="id" title="var">IH</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">q</span>; <span class="id" title="tactic">try</span> <span class="id" title="var">lia</span>; <span class="id" title="var">cycle</span> 1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">Z.mul_pos_neg</span> <span class="id" title="var">r1</span> (<span class="id" title="var">Z.neg</span> <span class="id" title="var">p</span>) <span class="id" title="keyword">ltac</span>:(<span class="id" title="var">lia</span>) <span class="id" title="keyword">ltac</span>:(<span class="id" title="var">lia</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">r</span> + <span class="id" title="var">r1</span> &lt;= <span class="id" title="var">r0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">enough</span> (<span class="id" title="var">r1</span> &lt;= <span class="id" title="var">r1</span> * <span class="id" title="var">Z.pos</span> <span class="id" title="var">p</span>) <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Z.le_mul_diag_r</span>; <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">Z.log2</span> <span class="id" title="var">r1</span> + <span class="id" title="var">Z.log2</span> <span class="id" title="var">r</span> &lt; <span class="id" title="var">Z.log2</span> <span class="id" title="var">r0</span> + <span class="id" title="var">Z.log2</span> <span class="id" title="var">r1</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">enough</span> (<span class="id" title="var">Z.log2</span> <span class="id" title="var">r</span> &lt; <span class="id" title="var">Z.log2</span> <span class="id" title="var">r0</span>) <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">Z.log2_le_mono</span> (<span class="id" title="var">r</span>*2^1) <span class="id" title="var">r0</span> <span class="id" title="keyword">ltac</span>:(<span class="id" title="var">lia</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">Z.shiftl_mul_pow2</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H2</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.log2_shiftl</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H2</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">rewrite</span> !<span class="id" title="var">Z.mul_sub_distr_r</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">replace</span> (<span class="id" title="var">a0</span> * <span class="id" title="var">m</span> - <span class="id" title="var">q</span> * <span class="id" title="var">a1</span> * <span class="id" title="var">m</span> + (<span class="id" title="var">b0</span> * <span class="id" title="var">n</span> - <span class="id" title="var">q</span> * <span class="id" title="var">b1</span> * <span class="id" title="var">n</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">with</span> (<span class="id" title="var">a0</span> * <span class="id" title="var">m</span> + <span class="id" title="var">b0</span>*<span class="id" title="var">n</span> + (-1) * (<span class="id" title="var">q</span>*(<span class="id" title="var">a1</span>*<span class="id" title="var">m</span> + <span class="id" title="var">b1</span>*<span class="id" title="var">n</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">r0eq</span>, &lt;-<span class="id" title="var">r1eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">is_gcd</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">proj1</span> <span class="id" title="var">H</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">Z.gcd_comm</span> (<span class="id" title="var">r1</span> * <span class="id" title="var">q</span> + <span class="id" title="var">r</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.add_comm</span>, <span class="id" title="var">Z.mul_comm</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.gcd_add_mult_diag_r</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">egcd_spec</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> (<span class="id" title="var">x</span>, <span class="id" title="var">y</span>) := <span class="id" title="var">egcd</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">m</span>*<span class="id" title="var">x</span> + <span class="id" title="var">n</span>*<span class="id" title="var">y</span> = <span class="id" title="var">Z.gcd</span> <span class="id" title="var">m</span> <span class="id" title="var">n</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">egcd</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">Z.eqb_spec</span> <span class="id" title="var">m</span> 0) <span class="id" title="keyword">as</span> [-&gt;|?].<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">apply</span> <span class="id" title="var">Z.sgn_abs</span>. }<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">Z.eqb_spec</span> <span class="id" title="var">n</span> 0) <span class="id" title="keyword">as</span> [-&gt;|?].<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.gcd_0_r</span>, <span class="id" title="var">Z.add_0_r</span>; <span class="id" title="tactic">apply</span> <span class="id" title="var">Z.sgn_abs</span>. }<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">Z.log2_nonneg</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span>)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">Z.log2_nonneg</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span>)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">Z.ltb_spec</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span>) (<span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span>)).<br/>
+&nbsp;&nbsp;- <span class="id" title="var">unshelve</span> <span class="id" title="var">epose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">egcd_aux_spec</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span>) (<span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">S</span> (<span class="id" title="var">Z.to_nat</span> (<span class="id" title="var">Z.log2</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span>) + <span class="id" title="var">Z.log2</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span>))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span>) 1 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span>) 0 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat2Z.inj_succ</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z2Nat.id</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> (<span class="id" title="var">egcd_aux</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> !<span class="id" title="var">Z.mul_assoc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.gcd_abs_l</span>, <span class="id" title="var">Z.gcd_comm</span>, <span class="id" title="var">Z.gcd_abs_l</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> !<span class="id" title="var">Z.sgn_abs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">unshelve</span> <span class="id" title="var">epose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">egcd_aux_spec</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span>) (<span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">S</span> (<span class="id" title="var">Z.to_nat</span> (<span class="id" title="var">Z.log2</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span>) + <span class="id" title="var">Z.log2</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span>))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Z.abs</span> <span class="id" title="var">m</span>) 1 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Z.abs</span> <span class="id" title="var">n</span>) 0 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat2Z.inj_succ</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z2Nat.id</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> (<span class="id" title="var">egcd_aux</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> !<span class="id" title="var">Z.mul_assoc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.gcd_abs_l</span>, <span class="id" title="var">Z.gcd_comm</span>, <span class="id" title="var">Z.gcd_abs_l</span>, <span class="id" title="var">Z.gcd_comm</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> !<span class="id" title="var">Z.sgn_abs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">mul_fst_egcd</span> <span class="id" title="var">a</span> <span class="id" title="var">n</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">rel_prime</span> <span class="id" title="var">a</span> <span class="id" title="var">n</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">a</span> * <span class="id" title="var">fst</span> (<span class="id" title="var">egcd</span> <span class="id" title="var">a</span> <span class="id" title="var">n</span>) <span class="id" title="var">mod</span> <span class="id" title="var">n</span> = 1 <span class="id" title="var">mod</span> <span class="id" title="var">n</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">Z.eqb_spec</span> <span class="id" title="var">n</span> 0) <span class="id" title="keyword">as</span> [-&gt;|?].<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">intros</span>; <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> !<span class="id" title="var">Zmod_0_r</span>. }<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">relprime</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">egcd_spec</span> <span class="id" title="var">a</span> <span class="id" title="var">n</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">egcd</span> <span class="id" title="var">a</span> <span class="id" title="var">n</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">x</span> <span class="id" title="var">y</span>]; <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">Zgcd_1_rel_prime</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">relprime</span>) <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">replace</span> (<span class="id" title="var">a</span> * <span class="id" title="var">x</span>) <span class="id" title="keyword">with</span> (1  + (-<span class="id" title="var">y</span>)*<span class="id" title="var">n</span>) <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">Z.add_mod_idemp_r</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.mod_mul</span>, <span class="id" title="var">Z.add_0_r</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">egcd_divides</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">b</span> &lt;&gt; 0 -&gt;<br/>
+&nbsp;&nbsp;(<span class="id" title="var">b</span> | <span class="id" title="var">a</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">egcd</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> = (0, <span class="id" title="var">Z.sgn</span> <span class="id" title="var">b</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">b0</span> <span class="id" title="var">divides</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">egcd</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">Z.eqb_spec</span> <span class="id" title="var">a</span> 0) <span class="id" title="keyword">as</span> [-&gt;|<span class="id" title="var">a0</span>]; [<span class="id" title="var">easy</span>|].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">proj2</span> (<span class="id" title="var">Z.eqb_neq</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">b0</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">b</span> &lt;= <span class="id" title="var">Z.abs</span> <span class="id" title="var">a</span>) <span class="id" title="tactic">by</span> (<span class="id" title="tactic">apply</span> <span class="id" title="var">Zdivide_bounds</span>; <span class="id" title="tactic">auto</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">replace</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">a</span> &lt;? <span class="id" title="var">Z.abs</span> <span class="id" title="var">b</span>) <span class="id" title="keyword">with</span> <span class="id" title="var">false</span>; <span class="id" title="var">cycle</span> 1.<br/>
+&nbsp;&nbsp;{ <span class="id" title="var">now</span> <span class="id" title="tactic">symmetry</span>; <span class="id" title="tactic">apply</span> <span class="id" title="var">Z.ltb_ge</span>. }<br/>
+&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">Z_div_mod_full</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">a</span>) (<span class="id" title="var">Z.abs</span> <span class="id" title="var">b</span>) <span class="id" title="keyword">ltac</span>:(<span class="id" title="var">lia</span>)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">Z.div_eucl</span> (<span class="id" title="var">Z.abs</span> <span class="id" title="var">a</span>) (<span class="id" title="var">Z.abs</span> <span class="id" title="var">b</span>)) <span class="id" title="keyword">as</span> [<span class="id" title="var">q</span> <span class="id" title="var">r</span>].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">Zmod_unique_full</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> (<span class="id" title="var">proj2</span> <span class="id" title="var">H0</span>) (<span class="id" title="var">proj1</span> <span class="id" title="var">H0</span>)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Z.divide_abs_l</span>, <span class="id" title="var">Z.divide_abs_r</span> <span class="id" title="tactic">in</span> <span class="id" title="var">divides</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">Zdivide_mod</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">divides</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.mul_0_r</span>, <span class="id" title="var">Z.mul_1_r</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

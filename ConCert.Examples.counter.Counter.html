@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.counter.Counter</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab237"></a><h1 class="section">Counter</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Morphisms</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Basics</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Automation</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Extras</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab238"></a><h2 class="section">Definition</h2>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Section</span> <span class="id" title="var">Counter</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Enabling recursors for records allows for deriving <span class="inlinecode"><a class="idref" href="ConCert.Execution.Serializable.html#Serializable"><span class="id" title="record">Serializable</span></a></span> instances. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Set</span> <span class="id" title="var">Nonrecursive</span> <span class="id" title="var">Elimination</span> <span class="id" title="var">Schemes</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The definitions in this section are generalized over the <span class="inlinecode"><a class="idref" href="ConCert.Execution.Blockchain.html#ChainBase"><span class="id" title="record">ChainBase</span></a></span> that specifies the type of addresses and which properties such a type must have 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The state is a current counter value and the owner's address 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_state</span> { <span class="id" title="var">count</span> : <span class="id" title="var">Z</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">owner</span> : <span class="id" title="var">Address</span> }.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The contract accepts two kinds of messages: increment or decrement by some number 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Inductive</span> <span class="id" title="var">Msg</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Inc</span> (<span class="id" title="var">i</span> : <span class="id" title="var">Z</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Dec</span> (<span class="id" title="var">i</span> : <span class="id" title="var">Z</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Since a contract is essentially a state transition function, we isolate
+      the functionality corresponding to each kind of message into step functions 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">increment</span> (<span class="id" title="var">n</span> : <span class="id" title="var">Z</span>) (<span class="id" title="var">st</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">count</span> := <span class="id" title="var">st</span>.(<span class="id" title="var">count</span>) + <span class="id" title="var">n</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">owner</span> := <span class="id" title="var">st</span>.(<span class="id" title="var">owner</span>) |}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">decrement</span> (<span class="id" title="var">n</span> : <span class="id" title="var">Z</span>) (<span class="id" title="var">st</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">count</span> := <span class="id" title="var">st</span>.(<span class="id" title="var">count</span>) - <span class="id" title="var">n</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">owner</span> := <span class="id" title="var">st</span>.(<span class="id" title="var">owner</span>) |}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The main functionality of the contract.
+      Dispatches on a message, validates the input and calls the step functions 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">counter</span> (<span class="id" title="var">st</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">msg</span> : <span class="id" title="var">Msg</span>) : <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Inc</span> <span class="id" title="var">i</span> =&gt; <span class="id" title="keyword">if</span> (0 &lt;? <span class="id" title="var">i</span>) <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">increment</span> <span class="id" title="var">i</span> <span class="id" title="var">st</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Dec</span> <span class="id" title="var">i</span> =&gt; <span class="id" title="keyword">if</span> (0 &lt;? <span class="id" title="var">i</span>) <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">decrement</span> <span class="id" title="var">i</span> <span class="id" title="var">st</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The "entry point" of the contract. Dispatches on a message and calls <span class="inlinecode"><span class="id" title="definition">counter</span></span>. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">counter_receive</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">Msg</span>) : <span class="id" title="var">option</span> (<span class="id" title="var">State</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;:= <span class="id" title="keyword">match</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">m</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">counter</span> <span class="id" title="var">state</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">res</span> =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">res</span>, [])<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We initialize the contract state with <span class="inlinecode"><span class="id" title="variable">init_value</span></span> and set <span class="inlinecode"><span class="id" title="projection">owner</span></span> to the address from which the contract was deployed 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">counter_init</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">init_value</span> : <span class="id" title="var">Z</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> {| <span class="id" title="var">count</span> := <span class="id" title="var">init_value</span> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">owner</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) |}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Deriving the <span class="inlinecode"><a class="idref" href="ConCert.Execution.Serializable.html#Serializable"><span class="id" title="record">Serializable</span></a></span> instances for the state and for the messages 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">State_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">State_rect</span>&lt;<span class="id" title="var">build_state</span>&gt;.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">Msg_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">Msg</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">Msg_rect</span>&lt;<span class="id" title="var">Inc</span>, <span class="id" title="var">Dec</span>&gt;.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The counter contract 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">counter_contract</span> : <span class="id" title="var">Contract</span> <span class="id" title="var">Z</span> <span class="id" title="var">Msg</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_contract</span> <span class="id" title="var">counter_init</span> <span class="id" title="var">counter_receive</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Counter</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab239"></a><h2 class="section">Functional properties</h2>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Section</span> <span class="id" title="var">FunctionalProperties</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Lia</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab240"></a><h3 class="section">Specification</h3>
+
+<div class="paragraph"> </div>
+
+ If the counter call succeeds and returns <span class="inlinecode"><span class="id" title="variable">next_state</span></span> then,
+      depending on a message, it either increments or decrements
+      by the number sent in the corresponding message 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">counter_correct</span> {<span class="id" title="var">prev_state</span> <span class="id" title="var">next_state</span> <span class="id" title="var">msg</span>} :<br/>
+&nbsp;&nbsp;<span class="id" title="var">counter</span> <span class="id" title="var">prev_state</span> <span class="id" title="var">msg</span> = <span class="id" title="var">Some</span> <span class="id" title="var">next_state</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Inc</span> <span class="id" title="var">n</span> =&gt; <span class="id" title="var">prev_state</span>.(<span class="id" title="var">count</span>) &lt; <span class="id" title="var">next_state</span>.(<span class="id" title="var">count</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">next_state</span>.(<span class="id" title="var">count</span>) = <span class="id" title="var">prev_state</span>.(<span class="id" title="var">count</span>) + <span class="id" title="var">n</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Dec</span> <span class="id" title="var">n</span> =&gt; <span class="id" title="var">prev_state</span>.(<span class="id" title="var">count</span>) &gt; <span class="id" title="var">next_state</span>.(<span class="id" title="var">count</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">next_state</span>.(<span class="id" title="var">count</span>) = <span class="id" title="var">prev_state</span>.(<span class="id" title="var">count</span>) - <span class="id" title="var">n</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">all</span> : <span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">unfold</span> <span class="id" title="var">increment</span>,<span class="id" title="var">decrement</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">all</span> : <span class="id" title="tactic">destruct</span> (0 &lt;? <span class="id" title="var">i</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hz</span>;<span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">all</span> : <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.ltb_lt</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">split</span>;<span class="id" title="tactic">auto</span>;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">FunctionalProperties</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab241"></a><h2 class="section">Safety properties</h2>
+
+<div class="paragraph"> </div>
+
+ Safety properties are stated for all states reachable from the initial state. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Section</span> <span class="id" title="var">SafetyProperties</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Converting a message to a number. Note that the decrements are negative. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">opt_msg_to_number</span> (<span class="id" title="var">msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">Inc</span> <span class="id" title="var">i</span>) =&gt; <span class="id" title="var">i</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">Dec</span> <span class="id" title="var">i</span>) =&gt; - <span class="id" title="var">i</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; 0<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">program_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Lia</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">receive_produces_no_calls</span> {<span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">cstate</span> <span class="id" title="var">msg</span> <span class="id" title="var">new_cstate</span>} <span class="id" title="var">acts</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">counter_receive</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">cstate</span> <span class="id" title="var">msg</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">new_cstate</span>, <span class="id" title="var">acts</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">acts</span> = [].<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">receive_some</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">msg</span> | ];<span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">counter</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="keyword">as</span> [[? ?] | ] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hreceive</span>;<span class="id" title="tactic">try</span> <span class="id" title="tactic">inversion</span> <span class="id" title="var">receive_some</span>;<span class="id" title="tactic">subst</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">auto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The sum of all increment/decrement messages sent to the contract. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">sum_inc_dec</span> (<span class="id" title="var">l</span> : <span class="id" title="var">list</span> (<span class="id" title="var">ContractCallInfo</span> <span class="id" title="var">Msg</span>)) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">sumZ</span> (<span class="id" title="var">opt_msg_to_number</span> ∘ <span class="id" title="var">call_msg</span>) <span class="id" title="var">l</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We state the following safety property: for all reachable states (i.e. at any point in time after deployment), the state of the counter is equal to the initial value plus the sum of all successful increment and decrement messages sent to the contract.
+
+<div class="paragraph"> </div>
+
+ We use a special induction principle <span class="inlinecode"><a class="idref" href="ConCert.Execution.Blockchain.html#contract_induction"><span class="id" title="lemma">contract_induction</span></a></span> that takes care of the boilerplate and exposes the cases in the convenient form. The <span class="inlinecode"><a class="idref" href="ConCert.Execution.Serializable.html#tag"><span class="id" title="variable">tag</span></a></span> variable in the context contains a hint what is expected to be done in each case. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">counter_safe</span> <span class="id" title="var">block_state</span> <span class="id" title="var">counter_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">trace</span> : <span class="id" title="var">ChainTrace</span> <span class="id" title="var">empty_state</span> <span class="id" title="var">block_state</span>) :<br/>
+&nbsp;&nbsp;<span class="id" title="var">env_contracts</span> <span class="id" title="var">block_state</span> <span class="id" title="var">counter_addr</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">counter_contract</span> : <span class="id" title="var">WeakContract</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">cstate</span> <span class="id" title="var">call_info</span> <span class="id" title="var">deploy_info</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">incoming_calls</span> <span class="id" title="var">Msg</span> <span class="id" title="var">trace</span> <span class="id" title="var">counter_addr</span> = <span class="id" title="var">Some</span> <span class="id" title="var">call_info</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">contract_state</span> <span class="id" title="var">block_state</span> <span class="id" title="var">counter_addr</span> = <span class="id" title="var">Some</span> <span class="id" title="var">cstate</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">deployment_info</span> <span class="id" title="var">_</span> <span class="id" title="var">trace</span> <span class="id" title="var">counter_addr</span> = <span class="id" title="var">Some</span> <span class="id" title="var">deploy_info</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="keyword">let</span> <span class="id" title="var">init_val</span> := <span class="id" title="var">deploy_info</span>.(<span class="id" title="var">deployment_setup</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">init_val</span> + <span class="id" title="var">sum_inc_dec</span> <span class="id" title="var">call_info</span> = <span class="id" title="var">cstate</span>.(<span class="id" title="var">count</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">contract_induction</span>; <span class="id" title="tactic">intros</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;+ <span class="comment">(*&nbsp;deployment&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">init_some</span>;<span class="id" title="tactic">subst</span>;<span class="id" title="tactic">clear</span> <span class="id" title="var">init_some</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;+ <span class="comment">(*&nbsp;contract&nbsp;call&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">msg</span>|];<span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">counter</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">cstate</span>|] <span class="id" title="var">eqn</span>:<span class="id" title="var">counter_some</span>;<span class="id" title="tactic">inversion</span> <span class="id" title="var">receive_some</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;NOTE:&nbsp;we&nbsp;use&nbsp;the&nbsp;functional&nbsp;correctness&nbsp;here&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">counter_correct</span> <span class="id" title="var">counter_some</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">Cspec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span>;<span class="id" title="tactic">intuition</span>;<span class="id" title="tactic">unfold</span> <span class="id" title="var">sum_inc_dec</span> <span class="id" title="tactic">in</span> *;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;+ <span class="comment">(*&nbsp;contract&nbsp;self-call&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;NOTE:&nbsp;we&nbsp;know&nbsp;that&nbsp;the&nbsp;self-call&nbsp;is&nbsp;not&nbsp;possible&nbsp;because&nbsp;<span class="inlinecode"><span class="id" title="var">counter_receive</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;always&nbsp;returns&nbsp;an&nbsp;empty&nbsp;list&nbsp;of&nbsp;actions.&nbsp;We&nbsp;instantiate&nbsp;the&nbsp;<span class="inlinecode"><span class="id" title="var">CallFacts</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;predicate&nbsp;with&nbsp;the&nbsp;assumption&nbsp;that&nbsp;the&nbsp;from-address&nbsp;is&nbsp;not&nbsp;equal&nbsp;to&nbsp;the<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contract&nbsp;address.&nbsp;We&nbsp;will&nbsp;be&nbsp;asked&nbsp;to&nbsp;prove&nbsp;this&nbsp;goal&nbsp;later.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">instantiate</span> (<span class="id" title="var">CallFacts</span> := <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">ctx</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">ctx_from</span> <span class="id" title="var">ctx</span> &lt;&gt; <span class="id" title="var">ctx_contract_address</span> <span class="id" title="var">ctx</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">CallFacts</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;+ <span class="comment">(*&nbsp;we&nbsp;asked&nbsp;to&nbsp;prove&nbsp;additional&nbsp;assumptions&nbsp;we&nbsp;might&nbsp;have&nbsp;made.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Since&nbsp;we&nbsp;instantiated&nbsp;only&nbsp;<span class="inlinecode"><span class="id" title="var">CallFacts</span></span>,&nbsp;we&nbsp;instantiate&nbsp;other&nbsp;assumptions<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;a&nbsp;trivial&nbsp;proposition&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">instantiate</span> (<span class="id" title="var">AddBlockFacts</span> := <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">True</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">instantiate</span> (<span class="id" title="var">DeployFacts</span> := <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">True</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unset_all</span>;<span class="id" title="tactic">subst</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">destruct_chain_step</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">destruct_action_eval</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">cstate</span> <span class="id" title="var">Hc</span> <span class="id" title="var">Hstate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;we&nbsp;use&nbsp;the&nbsp;fact&nbsp;that&nbsp;<span class="inlinecode"><span class="id" title="var">counter_receive</span></span>&nbsp;doesn't&nbsp;return&nbsp;any&nbsp;actions&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> ((<span class="id" title="var">outgoing_acts</span> <span class="id" title="var">bstate_from</span> <span class="id" title="var">to_addr</span>) = []) <span class="id" title="keyword">as</span> <span class="id" title="var">Hempty</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">apply</span> <span class="id" title="var">lift_outgoing_acts_nil</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">contract</span> := <span class="id" title="var">counter_contract</span>);<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">eapply</span> (<span class="id" title="var">receive_produces_no_calls</span> (<span class="id" title="var">chain</span>:=<span class="id" title="var">chain</span>) (<span class="id" title="var">ctx</span>:=<span class="id" title="var">ctx</span>));<span class="id" title="tactic">eauto</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">H</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">outgoing_acts</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">queue_prev</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">act</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hempty</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="var">destruct_address_eq</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">SafetyProperties</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

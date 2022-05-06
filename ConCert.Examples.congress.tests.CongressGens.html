@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.congress.tests.CongressGens</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">BoundedN</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">QCTest</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Congress</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Congress</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>. <span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+
+<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">SerializedValue</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">deserialize</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">serialize</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">serializeMsg</span> := <span class="id" title="var">serialize</span> <span class="id" title="var">Msg</span> <span class="id" title="var">_</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;ChainGens&nbsp;for&nbsp;the&nbsp;types&nbsp;defined&nbsp;in&nbsp;the&nbsp;Congress&nbsp;contract&nbsp;*)</span><br/>
+
+<br/>
+<span class="comment">(*&nbsp;Helper&nbsp;function&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">genToOpt</span> {<span class="id" title="var">A</span> : <span class="id" title="keyword">Type</span>} (<span class="id" title="var">g</span> : <span class="id" title="var">G</span> <span class="id" title="var">A</span>) : <span class="id" title="var">GOpt</span> <span class="id" title="var">A</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">a</span> &lt;- <span class="id" title="var">g</span> ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> <span class="id" title="var">a</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gRulesSized</span> (<span class="id" title="var">n</span> : <span class="id" title="var">nat</span>) : <span class="id" title="var">G</span> <span class="id" title="var">Rules</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">vote_count</span> &lt;- <span class="id" title="var">choose</span>(1%<span class="id" title="var">Z</span>, 1000%<span class="id" title="var">Z</span>) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">margin</span> &lt;- <span class="id" title="var">choose</span>(1%<span class="id" title="var">Z</span>, 1000%<span class="id" title="var">Z</span>) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">liftM</span> (<span class="id" title="var">build_rules</span> <span class="id" title="var">vote_count</span> <span class="id" title="var">margin</span>) <span class="id" title="var">arbitrary</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">genRulesSized</span> : <span class="id" title="var">GenSized</span> <span class="id" title="var">Rules</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">arbitrarySized</span> := <span class="id" title="var">gRulesSized</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">genSetupSized</span> : <span class="id" title="var">GenSized</span> <span class="id" title="var">Setup</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">arbitrarySized</span> <span class="id" title="var">n</span> := <span class="id" title="var">liftM</span> <span class="id" title="var">build_setup</span> (<span class="id" title="var">arbitrarySized</span> <span class="id" title="var">n</span>)<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">lc_contract_members_and_proposals_new_voters</span> (<span class="id" title="var">state</span> : <span class="id" title="var">Congress.State</span>) : (<span class="id" title="var">FMap</span> <span class="id" title="var">Address</span> (<span class="id" title="var">list</span> <span class="id" title="var">ProposalId</span>)) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">candidate_members</span> := (<span class="id" title="var">map</span> <span class="id" title="var">fst</span> <span class="id" title="var">o</span> <span class="id" title="var">FMap.elements</span>) (<span class="id" title="var">members</span> <span class="id" title="var">state</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">proposals_pairs</span> := <span class="id" title="var">FMap.elements</span> (<span class="id" title="var">proposals</span> <span class="id" title="var">state</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (0 &lt;? <span class="id" title="var">length</span> <span class="id" title="var">candidate_members</span>) &amp;&amp; (0 &lt;? <span class="id" title="var">length</span> <span class="id" title="var">proposals_pairs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">voters_to_proposals</span> : <span class="id" title="var">FMap</span> <span class="id" title="var">Address</span> (<span class="id" title="var">list</span> <span class="id" title="var">ProposalId</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">List.fold_left</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">acc</span> <span class="id" title="var">m</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">unvoted_proposals</span> : <span class="id" title="var">list</span> (<span class="id" title="var">ProposalId</span> * <span class="id" title="var">Proposal</span>) := <span class="id" title="var">List.filter</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">p</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">FMap.find</span> <span class="id" title="var">m</span> (<span class="id" title="var">votes</span> (<span class="id" title="var">snd</span> <span class="id" title="var">p</span>)) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">true</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>) <span class="id" title="var">proposals_pairs</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">List.map</span> <span class="id" title="var">fst</span> <span class="id" title="var">unvoted_proposals</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; <span class="id" title="var">acc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> <span class="id" title="keyword">as</span> <span class="id" title="var">ps</span> =&gt; <span class="id" title="var">FMap.add</span> <span class="id" title="var">m</span> <span class="id" title="var">ps</span> <span class="id" title="var">acc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="id" title="var">candidate_members</span> <span class="id" title="var">FMap.empty</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">voters_to_proposals</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">FMap.empty</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">lc_contract_members_and_proposals_with_votes</span> (<span class="id" title="var">state</span> : <span class="id" title="var">Congress.State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">FMap</span> <span class="id" title="var">Address</span> (<span class="id" title="var">list</span> <span class="id" title="var">ProposalId</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">members</span> : <span class="id" title="var">list</span> <span class="id" title="var">Address</span> := (<span class="id" title="var">map</span> <span class="id" title="var">fst</span> <span class="id" title="var">o</span> <span class="id" title="var">FMap.elements</span>) (<span class="id" title="var">members</span> <span class="id" title="var">state</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">proposals_map</span> : <span class="id" title="var">FMap</span> <span class="id" title="var">nat</span> <span class="id" title="var">Proposal</span> := <span class="id" title="var">filter_FMap</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">p</span> =&gt; 0 =? (<span class="id" title="var">FMap.size</span> (<span class="id" title="var">votes</span> (<span class="id" title="var">snd</span> <span class="id" title="var">p</span>))))  (<span class="id" title="var">proposals</span> <span class="id" title="var">state</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (0 &lt;? <span class="id" title="var">length</span> <span class="id" title="var">members</span>) &amp;&amp; (0 =? (<span class="id" title="var">FMap.size</span> <span class="id" title="var">proposals_map</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">propIds</span> : <span class="id" title="var">list</span> <span class="id" title="var">ProposalId</span> := (<span class="id" title="var">map</span> <span class="id" title="var">fst</span> <span class="id" title="var">o</span> <span class="id" title="var">FMap.elements</span>) <span class="id" title="var">proposals_map</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fold_left</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">acc</span> <span class="id" title="var">m</span> =&gt; <span class="id" title="var">FMap.add</span> <span class="id" title="var">m</span> <span class="id" title="var">propIds</span> <span class="id" title="var">acc</span>) <span class="id" title="var">members</span> <span class="id" title="var">FMap.empty</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">FMap.empty</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">congressContractsMembers_nonowners</span> <span class="id" title="var">state</span> : <span class="id" title="var">list</span> <span class="id" title="var">Address</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">members</span> := (<span class="id" title="var">map</span> <span class="id" title="var">fst</span> <span class="id" title="var">o</span> <span class="id" title="var">FMap.elements</span>) (<span class="id" title="var">members</span> <span class="id" title="var">state</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">non_owner_members</span> := <span class="id" title="var">filter</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">member</span> =&gt; <span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">member</span> (<span class="id" title="var">owner</span> <span class="id" title="var">state</span>))) <span class="id" title="var">members</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">non_owner_members</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gCongressMember_without_caller</span> (<span class="id" title="var">state</span> : <span class="id" title="var">Congress.State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">calling_addr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">contract_addr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">GOpt</span> <span class="id" title="var">Address</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">members</span> := (<span class="id" title="var">map</span> <span class="id" title="var">fst</span> <span class="id" title="var">o</span> <span class="id" title="var">FMap.elements</span>) (<span class="id" title="var">members</span> <span class="id" title="var">state</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">members_without_caller</span> := <span class="id" title="var">List.remove</span> <span class="id" title="var">address_eqdec</span> <span class="id" title="var">calling_addr</span> <span class="id" title="var">members</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">members_without_caller</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| [] =&gt; <span class="id" title="var">returnGen</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">m</span>::<span class="id" title="var">ms</span> =&gt; <span class="id" title="var">liftM</span> <span class="id" title="var">Some</span> (<span class="id" title="var">elems_</span> <span class="id" title="var">m</span> <span class="id" title="var">members_without_caller</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">try_newCongressMember_fix</span> (<span class="id" title="var">members</span> : <span class="id" title="var">list</span> <span class="id" title="var">Address</span>) <span class="id" title="var">nr_attempts</span> <span class="id" title="var">curr_nr</span> : <span class="id" title="var">option</span> <span class="id" title="var">Address</span>  :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="keyword">fix</span> <span class="id" title="var">aux</span> <span class="id" title="var">nr_attempts</span> <span class="id" title="var">curr_nr</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">nr_attempts</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| 0 =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">S</span> <span class="id" title="var">n'</span> =&gt; <span class="id" title="keyword">match</span> @<span class="id" title="var">BoundedN.of_nat</span> <span class="id" title="var">AddrSize</span> <span class="id" title="var">curr_nr</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">addr_attempt</span> =&gt; <span class="id" title="keyword">if</span> <span class="id" title="var">List.existsb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">addr_attempt</span>) <span class="id" title="var">members</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">aux</span> <span class="id" title="var">n'</span> (<span class="id" title="var">S</span> <span class="id" title="var">curr_nr</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> <span class="id" title="var">addr_attempt</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="tactic">in</span> <span class="id" title="var">aux</span> <span class="id" title="var">nr_attempts</span> <span class="id" title="var">curr_nr</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">try_newCongressMember</span> (<span class="id" title="var">state</span> : <span class="id" title="var">Congress.State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">congress_addr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">nr_attempts</span> : <span class="id" title="var">nat</span>) : <span class="id" title="var">option</span> <span class="id" title="var">Address</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">members</span> := (<span class="id" title="var">map</span> <span class="id" title="var">fst</span> <span class="id" title="var">o</span> <span class="id" title="var">FMap.elements</span>) (<span class="id" title="var">members</span> <span class="id" title="var">state</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">try_newCongressMember_fix</span> <span class="id" title="var">members</span> <span class="id" title="var">nr_attempts</span> 0.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">bindCallerIsOwnerOpt</span> {<span class="id" title="var">A</span> : <span class="id" title="keyword">Type</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">Congress.State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">calling_addr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">contract_addr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">g</span> : <span class="id" title="var">GOpt</span> <span class="id" title="var">A</span>) : <span class="id" title="var">GOpt</span> <span class="id" title="var">A</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">address_eqb</span> <span class="id" title="var">calling_addr</span> <span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">g</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> <span class="id" title="var">address_eqb</span> <span class="id" title="var">state</span>.(<span class="id" title="var">owner</span>) <span class="id" title="var">calling_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">g</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">returnGen</span> <span class="id" title="var">None</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">try_gNewOwner</span> <span class="id" title="var">state</span> <span class="id" title="var">calling_addr</span> <span class="id" title="var">contract_addr</span> : <span class="id" title="var">GOpt</span> <span class="id" title="var">Address</span>:=<br/>
+&nbsp;&nbsp;<span class="id" title="var">bindCallerIsOwnerOpt</span> <span class="id" title="var">state</span> <span class="id" title="var">calling_addr</span> <span class="id" title="var">contract_addr</span> (<span class="id" title="var">gCongressMember_without_caller</span> <span class="id" title="var">state</span> <span class="id" title="var">calling_addr</span> <span class="id" title="var">contract_addr</span>).<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">vote_proposal</span> (<span class="id" title="var">caddr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">members_and_proposals</span> : <span class="id" title="var">FMap</span> <span class="id" title="var">Address</span> (<span class="id" title="var">list</span> <span class="id" title="var">ProposalId</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">call</span> : <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">Msg</span> -&gt; <span class="id" title="var">GOpt</span> <span class="id" title="var">Action</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">vote</span> : <span class="id" title="var">ProposalId</span> -&gt; <span class="id" title="var">Msg</span>):=<br/>
+&nbsp;&nbsp;'(<span class="id" title="var">member</span>, <span class="id" title="var">pids</span>) &lt;- <span class="id" title="var">sampleFMapOpt</span> <span class="id" title="var">members_and_proposals</span> ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">pid</span> &lt;- <span class="id" title="var">elems_opt</span> <span class="id" title="var">pids</span> ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">caddr</span> <span class="id" title="var">member</span> (<span class="id" title="var">vote</span> <span class="id" title="var">pid</span>).<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Returns&nbsp;a&nbsp;mapping&nbsp;to&nbsp;proposals&nbsp;which&nbsp;have&nbsp;been&nbsp;discussed&nbsp;long&nbsp;enough,&nbsp;according&nbsp;to&nbsp;the<br/>
+&nbsp;&nbsp;&nbsp;current&nbsp;rules&nbsp;in&nbsp;the&nbsp;given&nbsp;congress'&nbsp;state&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">finishable_proposals</span> (<span class="id" title="var">state</span> : <span class="id" title="var">Congress.State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">current_slot</span> : <span class="id" title="var">nat</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">FMap</span> <span class="id" title="var">ProposalId</span> <span class="id" title="var">Proposal</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">pids_map_filtered</span> := <span class="id" title="var">filter_FMap</span> (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">_</span>, <span class="id" title="var">proposal</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">proposal</span>.(<span class="id" title="var">proposed_in</span>) + <span class="id" title="var">state</span>.(<span class="id" title="var">state_rules</span>).(<span class="id" title="var">debating_period_in_blocks</span>) &lt;=? <span class="id" title="var">current_slot</span><br/>
+&nbsp;&nbsp;) <span class="id" title="var">state</span>.(<span class="id" title="var">proposals</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> 0 &lt;? <span class="id" title="var">FMap.size</span> <span class="id" title="var">pids_map_filtered</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">pids_map_filtered</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">FMap.empty</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;NOTE:&nbsp;all&nbsp;call&nbsp;considered&nbsp;top-level&nbsp;calls&nbsp;(from&nbsp;users)&nbsp;*)</span><br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">GCongressAction</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) (<span class="id" title="var">fuel</span> : <span class="id" title="var">nat</span>) (<span class="id" title="var">caddr</span> : <span class="id" title="var">Address</span>) : <span class="id" title="var">GOpt</span> <span class="id" title="var">Action</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller_addr</span> <span class="id" title="var">msg</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">amount</span> &lt;- <span class="id" title="keyword">match</span> <span class="id" title="var">env</span>.(<span class="id" title="var">env_account_balances</span>) <span class="id" title="var">caller_addr</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 0%<span class="id" title="var">Z</span> =&gt; <span class="id" title="var">returnGenSome</span> 0%<span class="id" title="var">Z</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">caller_balance</span> =&gt; <span class="id" title="var">genToOpt</span> (<span class="id" title="var">choose</span> (0%<span class="id" title="var">Z</span>, <span class="id" title="var">caller_balance</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> (<span class="id" title="var">build_act</span> <span class="id" title="var">caller_addr</span> <span class="id" title="var">caller_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">congress_action_to_chain_action</span> (<span class="id" title="var">cact_call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">amount</span> (<span class="id" title="var">serializeMsg</span> <span class="id" title="var">msg</span>)))) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">congress_state</span> &lt;- <span class="id" title="var">returnGen</span> (<span class="id" title="var">get_contract_state</span> <span class="id" title="var">Congress.State</span> <span class="id" title="var">env</span> <span class="id" title="var">caddr</span>) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">members</span> := (<span class="id" title="var">map</span> <span class="id" title="var">fst</span> <span class="id" title="var">o</span> <span class="id" title="var">FMap.elements</span>) <span class="id" title="var">congress_state</span>.(<span class="id" title="var">members</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">owner</span> := <span class="id" title="var">congress_state</span>.(<span class="id" title="var">owner</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">fuel</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| 0 =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">backtrack</span> [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;transfer_ownership&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1, <span class="id" title="var">members</span> &lt;- <span class="id" title="var">elems_opt</span> (<span class="id" title="var">congressContractsMembers_nonowners</span> <span class="id" title="var">congress_state</span>) ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">new_owner</span> &lt;- (<span class="id" title="var">try_gNewOwner</span> <span class="id" title="var">congress_state</span> <span class="id" title="var">owner</span> <span class="id" title="var">caddr</span>) ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">caddr</span> <span class="id" title="var">owner</span> (<span class="id" title="var">transfer_ownership</span> <span class="id" title="var">new_owner</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;change_rules&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1, <span class="id" title="var">rules</span> &lt;- <span class="id" title="var">genToOpt</span> (<span class="id" title="var">gRulesSized</span> 4) ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">call</span> <span class="id" title="var">caddr</span> <span class="id" title="var">owner</span> (<span class="id" title="var">change_rules</span> <span class="id" title="var">rules</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;add_member&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(2, <span class="id" title="var">addr</span> &lt;- <span class="id" title="var">returnGen</span> (<span class="id" title="var">try_newCongressMember</span> <span class="id" title="var">congress_state</span> <span class="id" title="var">caddr</span> 10) ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">caddr</span> <span class="id" title="var">owner</span> (<span class="id" title="var">add_member</span> <span class="id" title="var">addr</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;remove_member&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1, <span class="id" title="var">member</span> &lt;- <span class="id" title="var">elems_opt</span> <span class="id" title="var">members</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">caddr</span> <span class="id" title="var">owner</span> (<span class="id" title="var">remove_member</span> <span class="id" title="var">member</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;vote_for_proposal&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Requirements:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;contract&nbsp;with&nbsp;a&nbsp;proposal&nbsp;and&nbsp;members&nbsp;must&nbsp;exist<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;only&nbsp;members&nbsp;which&nbsp;have&nbsp;not&nbsp;already&nbsp;voted&nbsp;can&nbsp;vote&nbsp;again&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(2, <span class="id" title="var">vote_proposal</span> <span class="id" title="var">caddr</span> (<span class="id" title="var">lc_contract_members_and_proposals_new_voters</span> <span class="id" title="var">congress_state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">vote_for_proposal</span> ) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;vote_against_proposal&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(2, <span class="id" title="var">vote_proposal</span> <span class="id" title="var">caddr</span> (<span class="id" title="var">lc_contract_members_and_proposals_new_voters</span> <span class="id" title="var">congress_state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">vote_against_proposal</span> ) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;retract_vote&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(2, <span class="id" title="var">vote_proposal</span> <span class="id" title="var">caddr</span> (<span class="id" title="var">lc_contract_members_and_proposals_with_votes</span> <span class="id" title="var">congress_state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">retract_vote</span>) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;finish_proposal&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Requirements:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;only&nbsp;contract&nbsp;owner&nbsp;can&nbsp;finish&nbsp;proposals<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;the&nbsp;debating&nbsp;period&nbsp;must&nbsp;have&nbsp;passed&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(2, '(<span class="id" title="var">pid</span>, <span class="id" title="var">_</span>) &lt;- <span class="id" title="var">sampleFMapOpt</span> (<span class="id" title="var">finishable_proposals</span> <span class="id" title="var">congress_state</span> <span class="id" title="var">env</span>.(<span class="id" title="var">current_slot</span>)) ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">caddr</span> <span class="id" title="var">owner</span> (<span class="id" title="var">finish_proposal</span> <span class="id" title="var">pid</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
+&nbsp;&nbsp;| <span class="id" title="var">S</span> <span class="id" title="var">fuel'</span> =&gt; <span class="id" title="var">backtrack</span> [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(3, <span class="id" title="var">GCongressAction</span> <span class="id" title="var">env</span> <span class="id" title="var">fuel'</span>  <span class="id" title="var">caddr</span>) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;add_proposal&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;recurse.&nbsp;Msg&nbsp;is&nbsp;converted&nbsp;to&nbsp;a&nbsp;SerializedType&nbsp;using&nbsp;'serialize'&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;This&nbsp;makes&nbsp;it&nbsp;possible&nbsp;to&nbsp;create&nbsp;proposals&nbsp;about&nbsp;proposals&nbsp;about&nbsp;proposals&nbsp;etc...&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Note:&nbsp;currently&nbsp;we&nbsp;don't&nbsp;support&nbsp;having&nbsp;multiple&nbsp;actions&nbsp;in&nbsp;a&nbsp;proposal&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Note:&nbsp;the&nbsp;way&nbsp;we&nbsp;recurse&nbsp;may&nbsp;be&nbsp;too&nbsp;restrictive&nbsp;-&nbsp;we&nbsp;fix&nbsp;a&nbsp;caddr,&nbsp;which&nbsp;may&nbsp;cause&nbsp;gCongressMember<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;return&nbsp;None&nbsp;even&nbsp;though&nbsp;it&nbsp;could&nbsp;have&nbsp;succeeded&nbsp;for&nbsp;another&nbsp;caddr.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maybe&nbsp;this&nbsp;is&nbsp;not&nbsp;a&nbsp;big&nbsp;issue,&nbsp;though.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">act</span> &lt;- <span class="id" title="var">GCongressAction</span> <span class="id" title="var">env</span> <span class="id" title="var">fuel'</span> <span class="id" title="var">caddr</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">caller_addr</span> := <span class="id" title="var">act</span>.(<span class="id" title="var">act_from</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">act</span>.(<span class="id" title="var">act_body</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">act_call</span> <span class="id" title="var">caddr</span> <span class="id" title="var">amount</span> <span class="id" title="var">msg</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">member</span> &lt;- <span class="id" title="var">elems_opt</span> <span class="id" title="var">members</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ca</span> := <span class="id" title="var">cact_call</span> <span class="id" title="var">caddr</span> <span class="id" title="var">amount</span> <span class="id" title="var">msg</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">caddr</span> <span class="id" title="var">member</span> (<span class="id" title="var">create_proposal</span> [<span class="id" title="var">ca</span>])<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">returnGenSome</span> <span class="id" title="var">act</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>)<br/>
+&nbsp;&nbsp;]<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

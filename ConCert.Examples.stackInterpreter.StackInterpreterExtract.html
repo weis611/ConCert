@@ -1,0 +1,540 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.stackInterpreter.StackInterpreterExtract</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab242"></a><h1 class="section">Extraction of an interpreter for a stack based DSL</h1>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Notations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">PreludeExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Common</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">LPretty</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">LiquidityExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">CameLIGOPretty</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">CameLIGOExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Env</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Notations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">map_key_type</span> := (<span class="id" title="var">string</span> * <span class="id" title="var">Z</span>).<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">action</span> := <span class="id" title="var">ActionBody</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Interpreter</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Inductive</span> <span class="id" title="var">op</span> : <span class="id" title="keyword">Set</span> :=  <span class="id" title="keyword">Add</span> | <span class="id" title="var">Sub</span> | <span class="id" title="var">Mult</span> | <span class="id" title="var">Lt</span> | <span class="id" title="var">Le</span> | <span class="id" title="var">Equal</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Inductive</span> <span class="id" title="var">instruction</span> :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">IPushZ</span> : <span class="id" title="var">Z</span> -&gt; <span class="id" title="var">instruction</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">IPushB</span> : <span class="id" title="var">bool</span> -&gt; <span class="id" title="var">instruction</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">IObs</span> : <span class="id" title="var">string</span> * <span class="id" title="var">Z</span> -&gt; <span class="id" title="var">instruction</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">IIf</span> : <span class="id" title="var">instruction</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">IElse</span> : <span class="id" title="var">instruction</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">IEndIf</span> : <span class="id" title="var">instruction</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">IOp</span> : <span class="id" title="var">op</span> -&gt; <span class="id" title="var">instruction</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Inductive</span> <span class="id" title="var">value</span> : <span class="id" title="keyword">Set</span> := <span class="id" title="var">BVal</span> : <span class="id" title="var">bool</span> -&gt; <span class="id" title="var">value</span> | <span class="id" title="var">ZVal</span> : <span class="id" title="var">Z</span> -&gt; <span class="id" title="var">value</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">ext_map</span> := <span class="id" title="var">FMap</span> (<span class="id" title="var">string</span> * <span class="id" title="var">Z</span>) <span class="id" title="var">value</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">lookup</span> (<span class="id" title="var">k</span> : <span class="id" title="var">string</span> * <span class="id" title="var">Z</span>) (<span class="id" title="var">m</span> : <span class="id" title="var">ext_map</span>) := <span class="id" title="var">FMap.find</span> <span class="id" title="var">k</span> <span class="id" title="var">m</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">storage</span> := <span class="id" title="var">list</span> <span class="id" title="var">value</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">init</span> (<span class="id" title="var">ctx</span> : <span class="id" title="var">SimpleCallCtx</span>) (<span class="id" title="var">setup</span> : <span class="id" title="var">unit</span>) : <span class="id" title="var">option</span> <span class="id" title="var">storage</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ctx0</span> := <span class="id" title="var">ctx</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">setup0</span> := <span class="id" title="var">setup</span> <span class="id" title="tactic">in</span> <span class="comment">(*&nbsp;prevents&nbsp;optimisations&nbsp;from&nbsp;removing&nbsp;unused&nbsp;<span class="inlinecode"><span class="id" title="var">ctx</span></span>&nbsp;and&nbsp;<span class="inlinecode"><span class="id" title="var">setup</span></span>&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> [].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">params</span> := <span class="id" title="var">list</span> <span class="id" title="var">instruction</span> * <span class="id" title="var">ext_map</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">continue_</span> (<span class="id" title="var">i</span> : <span class="id" title="var">Z</span>) := (<span class="id" title="var">i</span> =? 0)%<span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">one</span> := 1%<span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">bool_to_cond</span> (<span class="id" title="var">b</span> : <span class="id" title="var">bool</span>) : <span class="id" title="var">Z</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">b</span> <span class="id" title="keyword">then</span> 0 <span class="id" title="keyword">else</span> <span class="id" title="var">one</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">flip</span> (<span class="id" title="var">i</span> : <span class="id" title="var">Z</span>) : <span class="id" title="var">Z</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">i</span> =? 0) <span class="id" title="keyword">then</span> <span class="id" title="var">one</span> <span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> (<span class="id" title="var">i</span> =? <span class="id" title="var">one</span>) <span class="id" title="keyword">then</span> 0 <span class="id" title="keyword">else</span> <span class="id" title="var">i</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">reset_decrement</span> (<span class="id" title="var">i</span> : <span class="id" title="var">Z</span>) : <span class="id" title="var">Z</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">i</span> &lt;=? <span class="id" title="var">one</span>) <span class="id" title="keyword">then</span> 0 <span class="id" title="keyword">else</span> <span class="id" title="var">i</span>-<span class="id" title="var">one</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">interp</span> (<span class="id" title="var">ext</span> : <span class="id" title="var">ext_map</span>) (<span class="id" title="var">insts</span> : <span class="id" title="var">list</span> <span class="id" title="var">instruction</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">list</span> <span class="id" title="var">value</span>) (<span class="id" title="var">cond</span> : <span class="id" title="var">Z</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">insts</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; <span class="id" title="var">Some</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">hd</span> :: <span class="id" title="var">inst0</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">hd</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">IPushZ</span> <span class="id" title="var">i</span> =&gt; <span class="id" title="keyword">if</span> <span class="id" title="var">continue_</span> <span class="id" title="var">cond</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> (<span class="id" title="var">ZVal</span> <span class="id" title="var">i</span> :: <span class="id" title="var">s</span>) <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> <span class="id" title="var">s</span> <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">IPushB</span> <span class="id" title="var">b</span> =&gt; <span class="id" title="keyword">if</span> <span class="id" title="var">continue_</span> <span class="id" title="var">cond</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> (<span class="id" title="var">BVal</span> <span class="id" title="var">b</span> :: <span class="id" title="var">s</span>) <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> <span class="id" title="var">s</span> <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">IIf</span> =&gt; <span class="id" title="keyword">if</span> (<span class="id" title="var">cond</span> =? 0) <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">BVal</span> <span class="id" title="var">b</span> :: <span class="id" title="var">s0</span> =&gt; <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> <span class="id" title="var">s0</span> (<span class="id" title="var">bool_to_cond</span> <span class="id" title="var">b</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="keyword">else</span> <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> <span class="id" title="var">s</span> (<span class="id" title="var">one</span> + <span class="id" title="var">cond</span>)%<span class="id" title="var">Z</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">IElse</span> =&gt; <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> <span class="id" title="var">s</span> (<span class="id" title="var">flip</span> <span class="id" title="var">cond</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">IEndIf</span> =&gt; <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> <span class="id" title="var">s</span> (<span class="id" title="var">reset_decrement</span> <span class="id" title="var">cond</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">IObs</span> <span class="id" title="var">p</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">continue_</span> <span class="id" title="var">cond</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">lookup</span> <span class="id" title="var">p</span> <span class="id" title="var">ext</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">v</span> =&gt; <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> (<span class="id" title="var">v</span> :: <span class="id" title="var">s</span>) <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> <span class="id" title="var">s</span> <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">IOp</span> <span class="id" title="var">op</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">continue_</span> <span class="id" title="var">cond</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">op</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="keyword">Add</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">ZVal</span> <span class="id" title="var">i</span> :: <span class="id" title="var">ZVal</span> <span class="id" title="var">j</span> :: <span class="id" title="var">s0</span> =&gt; <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> (<span class="id" title="var">ZVal</span> (<span class="id" title="var">i</span>+<span class="id" title="var">j</span>) :: <span class="id" title="var">s0</span>)%<span class="id" title="var">Z</span> <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Sub</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">ZVal</span> <span class="id" title="var">i</span> :: <span class="id" title="var">ZVal</span> <span class="id" title="var">j</span> :: <span class="id" title="var">s0</span> =&gt; <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> (<span class="id" title="var">ZVal</span> (<span class="id" title="var">i</span>-<span class="id" title="var">j</span>) :: <span class="id" title="var">s0</span>)%<span class="id" title="var">Z</span> <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Mult</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">ZVal</span> <span class="id" title="var">i</span> :: <span class="id" title="var">ZVal</span> <span class="id" title="var">j</span> :: <span class="id" title="var">s0</span> =&gt; <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> (<span class="id" title="var">ZVal</span> (<span class="id" title="var">i</span>*<span class="id" title="var">j</span>) :: <span class="id" title="var">s0</span>)%<span class="id" title="var">Z</span> <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Le</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">ZVal</span> <span class="id" title="var">i</span> :: <span class="id" title="var">ZVal</span> <span class="id" title="var">j</span> :: <span class="id" title="var">s0</span> =&gt; <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> (<span class="id" title="var">BVal</span> (<span class="id" title="var">i</span>&lt;=?<span class="id" title="var">j</span>) :: <span class="id" title="var">s0</span>)%<span class="id" title="var">Z</span> <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Lt</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">ZVal</span> <span class="id" title="var">i</span> :: <span class="id" title="var">ZVal</span> <span class="id" title="var">j</span> :: <span class="id" title="var">s0</span> =&gt; <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> (<span class="id" title="var">BVal</span> (<span class="id" title="var">i</span>&lt;?<span class="id" title="var">j</span>) :: <span class="id" title="var">s0</span>)%<span class="id" title="var">Z</span> <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Equal</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">s</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">ZVal</span> <span class="id" title="var">i</span> :: <span class="id" title="var">ZVal</span> <span class="id" title="var">j</span> :: <span class="id" title="var">s0</span> =&gt; <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> (<span class="id" title="var">BVal</span> (<span class="id" title="var">i</span> =? <span class="id" title="var">j</span>) :: <span class="id" title="var">s0</span>)%<span class="id" title="var">Z</span> <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">interp</span> <span class="id" title="var">ext</span> <span class="id" title="var">inst0</span> <span class="id" title="var">s</span> <span class="id" title="var">cond</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive</span> (<span class="id" title="var">p</span> : <span class="id" title="var">params</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">list</span> <span class="id" title="var">value</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">list</span> <span class="id" title="var">action</span> * <span class="id" title="var">storage</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">s0</span> := <span class="id" title="var">s</span> <span class="id" title="tactic">in</span> <span class="comment">(*&nbsp;prevents&nbsp;optimisations&nbsp;from&nbsp;removing&nbsp;unused&nbsp;<span class="inlinecode"><span class="id" title="var">s</span></span>&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">interp</span> <span class="id" title="var">p</span>.2 <span class="id" title="var">p</span>.1 [] 0 <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">v</span> =&gt; <span class="id" title="var">Some</span> ([],<span class="id" title="var">v</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Interpreter</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Interpreter</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Input for the interpreter in Liquidity:
+    (<span class="inlinecode"><span class="id" title="constructor">IPushZ</span></span> <span class="inlinecode">0;</span> <span class="inlinecode"><span class="id" title="constructor">IObs</span></span> <span class="inlinecode">(&quot;<a class="idref" href="ConCert.Extraction.CertifyingInlining.html#Tests.Ex6.blah"><span class="id" title="inductive">blah</span></a>&quot;,0);</span> <span class="inlinecode"><span class="id" title="constructor">IOp</span></span> <span class="inlinecode"><span class="id" title="keyword">Add</span>;</span> <span class="inlinecode"><span class="id" title="constructor">IPushZ</span></span> <span class="inlinecode">1;</span> <span class="inlinecode"><span class="id" title="constructor">IOp</span></span> <span class="inlinecode"><span class="id" title="constructor">Equal</span></span>, (Map <span class="inlinecode">((&quot;<a class="idref" href="ConCert.Extraction.CertifyingInlining.html#Tests.Ex6.blah"><span class="id" title="inductive">blah</span></a>&quot;,</span> <span class="inlinecode">0),</span> <span class="inlinecode">(<span class="id" title="constructor">ZVal</span></span> <span class="inlinecode">1))</span>)) 
+</div>
+<div class="code">
+<span class="id" title="keyword">Example</span> <span class="id" title="var">test_interp</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">env</span>  := <span class="id" title="var">FMap.of_list</span> [(("blah", 0%<span class="id" title="var">Z</span>), (<span class="id" title="var">ZVal</span> 1))] <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">interp</span> <span class="id" title="var">env</span> [<span class="id" title="var">IPushZ</span> 0; <span class="id" title="var">IObs</span> ("blah", 0); <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 1; <span class="id" title="var">IOp</span> <span class="id" title="var">Equal</span>] [] 0 =<br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> [<span class="id" title="var">BVal</span> <span class="id" title="var">true</span>].<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Input for the interpreter in Liquidity:
+(<span class="inlinecode"><span class="id" title="constructor">IPushZ</span></span> <span class="inlinecode">1;</span> <span class="inlinecode"><span class="id" title="constructor">IPushZ</span></span> <span class="inlinecode">1;</span> <span class="inlinecode"><span class="id" title="constructor">IOp</span></span> <span class="inlinecode"><span class="id" title="constructor">Equal</span>;</span> <span class="inlinecode"><span class="id" title="constructor">IIf</span>;</span> <span class="inlinecode"><span class="id" title="constructor">IPushZ</span></span> <span class="inlinecode">1;<span class="id" title="constructor">IElse</span>;</span> <span class="inlinecode"><span class="id" title="constructor">IPushZ</span></span> <span class="inlinecode">(-1);<span class="id" title="constructor">IEndIf</span></span>, (Map <font size=-2>&#9744;</font>)) 
+</div>
+<div class="code">
+<span class="id" title="keyword">Example</span> <span class="id" title="var">test_interp_if_1</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">interp</span> <span class="id" title="var">FMap.empty</span> [<span class="id" title="var">IPushZ</span> 1; <span class="id" title="var">IPushZ</span> 1; <span class="id" title="var">IOp</span> <span class="id" title="var">Equal</span>; <span class="id" title="var">IIf</span>; <span class="id" title="var">IPushZ</span> 1;<span class="id" title="var">IElse</span>; <span class="id" title="var">IPushZ</span> (-1);<span class="id" title="var">IEndIf</span>] [] 0<br/>
+&nbsp;&nbsp;= <span class="id" title="var">Some</span> [<span class="id" title="var">ZVal</span> 1].<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Example</span> <span class="id" title="var">test_interp_if_2</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">interp</span> <span class="id" title="var">FMap.empty</span> [<span class="id" title="var">IPushZ</span> 1; <span class="id" title="var">IPushZ</span> 0; <span class="id" title="var">IOp</span> <span class="id" title="var">Equal</span>; <span class="id" title="var">IIf</span>; <span class="id" title="var">IPushZ</span> 1;<span class="id" title="var">IElse</span>; <span class="id" title="var">IPushZ</span> (-1);<span class="id" title="var">IEndIf</span>] [] 0<br/>
+&nbsp;&nbsp;= <span class="id" title="var">Some</span> [<span class="id" title="var">ZVal</span> (-1)].<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Example</span> <span class="id" title="var">test_interp_nested_if_1</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">interp</span> <span class="id" title="var">FMap.empty</span> [<span class="id" title="var">IPushZ</span> 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IOp</span> <span class="id" title="var">Equal</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IIf</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> (-1)%<span class="id" title="var">Z</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> (-1)%<span class="id" title="var">Z</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IOp</span> <span class="id" title="var">Equal</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IIf</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 2;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IElse</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> (-2);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IEndIf</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IElse</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IEndIf</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;] [] 0<br/>
+&nbsp;&nbsp;= <span class="id" title="var">Some</span> [<span class="id" title="var">ZVal</span> 2].<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Example</span> <span class="id" title="var">test_interp_nested_if_2</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">interp</span> <span class="id" title="var">FMap.empty</span> [<span class="id" title="var">IPushB</span> <span class="id" title="var">false</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IIf</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 1;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IElse</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IOp</span> <span class="id" title="var">Equal</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IIf</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> (-1);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IElse</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IEndIf</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;] [] 0<br/>
+&nbsp;&nbsp;= <span class="id" title="var">Some</span> [<span class="id" title="var">ZVal</span> (-1)].<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;let&nbsp;strike&nbsp;=&nbsp;50.0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nominal&nbsp;=&nbsp;1000.0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;theobs&nbsp;=&nbsp;obs&nbsp;("Carlsberg",0)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;scale&nbsp;(r&nbsp;nominal)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(transl&nbsp;maturity<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(iff&nbsp;(r&nbsp;strike&nbsp;!&lt;!&nbsp;theobs)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(scale&nbsp;(theobs&nbsp;-&nbsp;r&nbsp;strike)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(transfOne&nbsp;EUR&nbsp;"you"&nbsp;"me"))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zero))&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">call_option</span> : <span class="id" title="var">list</span> <span class="id" title="var">instruction</span> :=<br/>
+&nbsp;&nbsp;[<span class="id" title="var">IObs</span> ("Maturity", 0);<br/>
+&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 90;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IOp</span> <span class="id" title="var">Equal</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IIf</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IObs</span> ("Carlsberg", 0);<br/>
+&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 50;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IOp</span> <span class="id" title="var">Lt</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IIf</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 50;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IObs</span> ("Carlsberg", 0);<br/>
+&nbsp;&nbsp;<span class="id" title="var">IOp</span> <span class="id" title="var">Sub</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 1000;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IOp</span> <span class="id" title="var">Mult</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IElse</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 0;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IEndIf</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IElse</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IPushZ</span> 0;<br/>
+&nbsp;&nbsp;<span class="id" title="var">IEndIf</span>].<br/>
+
+<br/>
+<span class="comment">(*&nbsp;(<span class="inlinecode"><span class="id" title="var">IObs</span></span> <span class="inlinecode">(&quot;<span class="id" title="var">Maturity</span>&quot;,</span> <span class="inlinecode">0);<span class="id" title="var">IPushZ</span></span> <span class="inlinecode">90;<span class="id" title="var">IOp</span></span> <span class="inlinecode"><span class="id" title="var">Equal</span>;<span class="id" title="var">IIf</span>;</span> <span class="inlinecode"><span class="id" title="var">IObs</span></span> <span class="inlinecode">(&quot;<span class="id" title="var">Carlsberg</span>&quot;,0);</span> <span class="inlinecode"><span class="id" title="var">IPushZ</span></span> <span class="inlinecode">50;</span> <span class="inlinecode"><span class="id" title="var">IOp</span></span> <span class="inlinecode"><span class="id" title="var">Lt</span>;</span> <span class="inlinecode"><span class="id" title="var">IIf</span>;</span> <span class="inlinecode"><span class="id" title="var">IPushZ</span></span> <span class="inlinecode">50;</span> <span class="inlinecode"><span class="id" title="var">IObs</span></span> <span class="inlinecode">(&quot;<span class="id" title="var">Carlsberg</span>&quot;,</span> <span class="inlinecode">0);</span> <span class="inlinecode"><span class="id" title="var">IOp</span></span> <span class="inlinecode"><span class="id" title="var">Sub</span>;</span> <span class="inlinecode"><span class="id" title="var">IPushZ</span></span> <span class="inlinecode">1000;</span> <span class="inlinecode"><span class="id" title="var">IOp</span></span> <span class="inlinecode"><span class="id" title="var">Mult</span>;</span> <span class="inlinecode"><span class="id" title="var">IElse</span>;</span> <span class="inlinecode"><span class="id" title="var">IPushZ</span></span> <span class="inlinecode">0;</span> <span class="inlinecode"><span class="id" title="var">IEndIf</span>;</span> <span class="inlinecode"><span class="id" title="var">IElse</span>;</span> <span class="inlinecode"><span class="id" title="var">IPushZ</span></span> <span class="inlinecode">0;</span> <span class="inlinecode"><span class="id" title="var">IEndIf</span></span>,&nbsp;(Map&nbsp;<span class="inlinecode">((&quot;<span class="id" title="var">Carlsberg</span>&quot;,</span> <span class="inlinecode">0),</span> <span class="inlinecode">(<span class="id" title="var">ZVal</span></span> <span class="inlinecode">100));((&quot;<span class="id" title="var">Maturity</span>&quot;,</span> <span class="inlinecode">0),</span> <span class="inlinecode">(<span class="id" title="var">ZVal</span></span> <span class="inlinecode">90))</span>))&nbsp;*)</span><br/>
+
+<br/>
+<span class="comment">(*&nbsp;try-liquidty:&nbsp;estimated&nbsp;fee&nbsp;0.054191&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Example</span> <span class="id" title="var">run_call_option_in_the_money</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">env</span> := <span class="id" title="var">FMap.of_list</span> [(("Carlsberg", 0%<span class="id" title="var">Z</span>), (<span class="id" title="var">ZVal</span> 100));(("Maturity", 0%<span class="id" title="var">Z</span>), (<span class="id" title="var">ZVal</span> 90))] <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">interp</span> <span class="id" title="var">env</span> <span class="id" title="var">call_option</span> [] 0<br/>
+&nbsp;&nbsp;= <span class="id" title="var">Some</span> [<span class="id" title="var">ZVal</span> 50000].<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Example</span> <span class="id" title="var">run_call_option_out_the_money</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">env</span> := <span class="id" title="var">FMap.of_list</span> [(("Carlsberg", 0%<span class="id" title="var">Z</span>), (<span class="id" title="var">ZVal</span> 30));(("Maturity", 0%<span class="id" title="var">Z</span>), (<span class="id" title="var">ZVal</span> 90))] <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">interp</span> <span class="id" title="var">env</span> <span class="id" title="var">call_option</span> [] 0<br/>
+&nbsp;&nbsp;= <span class="id" title="var">Some</span> [<span class="id" title="var">ZVal</span> 0].<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;A&nbsp;bigger&nbsp;test&nbsp;program&nbsp;for&nbsp;running&nbsp;in&nbsp;try-liquidity&nbsp;with&nbsp;arithmetic&nbsp;operations,&nbsp;lookups&nbsp;and&nbsp;some&nbsp;<span class="inlinecode"><span class="id" title="var">Ifs</span></span>&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">blah</span> := [<span class="id" title="var">IPushZ</span> 100; <span class="id" title="var">IPushZ</span> 200; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 200; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100;<span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100;<span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 200; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100; <span class="id" title="var">IPushZ</span> 200; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 200; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100;<span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100;<span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 200; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100; <span class="id" title="var">IPushZ</span> 200; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 200; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100;<span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100;<span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 200; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 200; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100;<span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100;<span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 200; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IPushZ</span> 100;<span class="id" title="var">IOp</span> <span class="id" title="var">Mult</span>; <span class="id" title="var">IPushZ</span> 3000; <span class="id" title="var">IOp</span> <span class="id" title="var">Sub</span>; <span class="id" title="var">IPushZ</span> 10; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 10; <span class="id" title="var">IOp</span> <span class="id" title="var">Mult</span>; <span class="id" title="var">IPushB</span> <span class="id" title="var">true</span>; <span class="id" title="var">IIf</span>; <span class="id" title="var">IPushZ</span> 10; <span class="id" title="var">IPushZ</span> 10; <span class="id" title="var">IOp</span> <span class="id" title="var">Equal</span>; <span class="id" title="var">IIf</span>; <span class="id" title="var">IPushZ</span> 10; <span class="id" title="var">IPushZ</span> 10; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 10; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>;<span class="id" title="var">IElse</span>; <span class="id" title="var">IPushB</span> <span class="id" title="var">true</span>; <span class="id" title="var">IEndIf</span>;  <span class="id" title="var">IPushZ</span> 10;<span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 10; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 10; <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IPushZ</span> 10; <span class="id" title="var">IOp</span> <span class="id" title="var">Mult</span>; <span class="id" title="var">IObs</span> ("blah", 0); <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IObs</span> ("blah", 0); <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IObs</span> ("blah", 0); <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IObs</span> ("blah", 0); <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IObs</span> ("blah", 0); <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IObs</span> ("blah", 0); <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IObs</span> ("blah", 0); <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IObs</span> ("blah", 0); <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IObs</span> ("blah", 0); <span class="id" title="var">IOp</span> <span class="id" title="keyword">Add</span>; <span class="id" title="var">IElse</span>; <span class="id" title="var">IPushZ</span> 0; <span class="id" title="var">IPushZ</span> 0; <span class="id" title="var">IPushZ</span> 0; <span class="id" title="var">IPushZ</span> 0; <span class="id" title="var">IPushZ</span> 0; <span class="id" title="var">IPushZ</span> 0; <span class="id" title="var">IPushZ</span> 0; <span class="id" title="var">IPushZ</span> 0; <span class="id" title="var">IPushZ</span> 0; <span class="id" title="var">IEndIf</span> ].<br/>
+<span class="comment">(*&nbsp;Just&nbsp;add&nbsp;the&nbsp;global&nbsp;environment&nbsp;(Map&nbsp;<span class="inlinecode">((&quot;<span class="id" title="var">blah</span>&quot;,</span> <span class="inlinecode">0),</span> <span class="inlinecode">(<span class="id" title="var">ZVal</span></span> <span class="inlinecode">0))</span>))&nbsp;*)</span><br/>
+<span class="id" title="keyword">Compute</span> <span class="id" title="var">List.length</span> <span class="id" title="var">blah</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">print_finmap_type</span> (<span class="id" title="var">ty_key</span> <span class="id" title="var">ty_val</span> : <span class="id" title="var">string</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">parens</span> <span class="id" title="var">false</span> (<span class="id" title="var">ty_key</span> ++ "," ++ <span class="id" title="var">ty_val</span>) ++ " map".<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">LiquidityInterp</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">PREFIX</span> := "".<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">LiquidityExtract</span> <span class="id" title="var">LPretty</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table for various constants we want to rename 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[   <span class="comment">(*&nbsp;remapping&nbsp;types&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z</span> %%&gt; "int"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">bool</span> %%&gt; "bool"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">unit</span> %%&gt; "unit"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">option</span> %%&gt; "option"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Amount</span> %%&gt; "tez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">address_coq</span> %%&gt; "address"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">time_coq</span> %%&gt; "timestamp"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">list</span> %%&gt; "list"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">string</span> %%&gt; "string"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">ext_map</span> %%&gt; (<span class="id" title="var">print_finmap_type</span> "string * int" "value")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">action</span> %%&gt; "operation"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;remapping&nbsp;operations&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.add</span> %%&gt; "addInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.mul</span> %%&gt; "mulInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.sub</span> %%&gt; "subInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.eqb</span> %%&gt; "eqInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.leb</span> %%&gt; "leInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.ltb</span> %%&gt; "ltInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">lookup</span> %%&gt; "Map.find"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">fst</span> %%&gt; "fst"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">snd</span> %%&gt; "snd"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">andb</span> %%&gt; "andb"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">one</span> %%&gt; "1"].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_rename</span> : <span class="id" title="var">env</span> <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;constructors&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ ("Z0" ,"0")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; ("nil", "[]")].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">LiquidityExtract</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">INTERP_MODULE</span> : <span class="id" title="var">LiquidityMod</span> <span class="id" title="var">params</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">storage</span> <span class="id" title="var">action</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "liquidity_interp" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;ints,&nbsp;bools,&nbsp;pairs,&nbsp;ect.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> := <span class="id" title="var">prod_ops</span> ++ <span class="id" title="var">nl</span> ++ <span class="id" title="var">int_ops</span> ++ <span class="id" title="var">nl</span> ++ <span class="id" title="var">bool_ops</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">init</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> := "";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">receive</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">printWrapper</span> (<span class="id" title="var">PREFIX</span> ++ "receive")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">printMain</span> |}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We run the extraction procedure inside the <span class="inlinecode"><span class="id" title="library">TemplateMonad</span></span>.
+      It uses the certified erasure from <span class="inlinecode"><span class="id" title="var">MetaCoq</span></span> and the certified deboxing procedure
+      that removes application of boxes to constants and constructors. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">t</span> &lt;- <span class="id" title="var">liquidity_extraction</span> <span class="id" title="var">PREFIX</span> <span class="id" title="var">TT_remap</span> <span class="id" title="var">TT_rename</span> [] <span class="id" title="var">INTERP_MODULE</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tmDefinition</span> <span class="id" title="var">INTERP_MODULE</span>.(<span class="id" title="var">lmd_module_name</span>) <span class="id" title="var">t</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The extracted program can be printed and copy-pasted to the online Liquidity editor 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">liquidity_interp</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We redirect the extraction result for later processing and compiling with the Liquidity compiler 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "../extraction/tests/extracted-code/liquidity-extract/StackInterpreter.liq"<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">liquidity_interp</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">LiquidityInterp</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">CameLIGOInterp</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">CameLIGOExtract</span> <span class="id" title="var">CameLIGOPretty</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">PrintConfShortNames.PrintWithShortNames</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">init</span> (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">setup</span> : <span class="id" title="var">unit</span>) : <span class="id" title="var">option</span> <span class="id" title="var">storage</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ctx0</span> := <span class="id" title="var">ctx</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">setup0</span> := <span class="id" title="var">setup</span> <span class="id" title="tactic">in</span> <span class="comment">(*&nbsp;prevents&nbsp;optimisations&nbsp;from&nbsp;removing&nbsp;unused&nbsp;<span class="inlinecode"><span class="id" title="var">ctx</span></span>&nbsp;and&nbsp;<span class="inlinecode"><span class="id" title="var">setup</span></span>&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> [].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive_</span> (<span class="id" title="var">c</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">storage</span>) (<span class="id" title="var">msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">params</span>):=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;prevent&nbsp;optimizations&nbsp;from&nbsp;deleting&nbsp;these&nbsp;arguments&nbsp;from&nbsp;receive_'s&nbsp;type&nbsp;signature&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">c_</span> := <span class="id" title="var">c</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ctx_</span> := <span class="id" title="var">ctx</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">msg</span> =&gt; <span class="id" title="var">receive</span> <span class="id" title="var">msg</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap_ligo</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[   <span class="comment">(*&nbsp;remapping&nbsp;types&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z</span> %%&gt; "int"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">bool</span> %%&gt; "bool"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">unit</span> %%&gt; "unit"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">option</span> %%&gt; "option"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Amount</span> %%&gt; "tez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">address_coq</span> %%&gt; "address"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">time_coq</span> %%&gt; "timestamp"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">list</span> %%&gt; "list"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">string</span> %%&gt; "string"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">ext_map</span> %%&gt; (<span class="id" title="var">print_finmap_type</span> "string * int" "value")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">action</span> %%&gt; "operation"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;remapping&nbsp;operations&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.add</span> %%&gt; "addInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.mul</span> %%&gt; "multInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.sub</span> %%&gt; "subInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.eqb</span> %%&gt; "eqInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.leb</span> %%&gt; "leInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.ltb</span> %%&gt; "ltInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">lookup</span> %%&gt; "Map.find_opt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">fst</span> %%&gt; "fst"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">snd</span> %%&gt; "snd"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">andb</span> %%&gt; "andb"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">one</span> %%&gt; "1"].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">LIGO_INTERP_MODULE</span> : <span class="id" title="var">CameLIGOMod</span> <span class="id" title="var">params</span> <span class="id" title="var">ContractCallContext</span> <span class="id" title="var">unit</span> <span class="id" title="var">storage</span> <span class="id" title="var">action</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "cameligo_interp" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;ints,&nbsp;bools,&nbsp;pairs,&nbsp;ect.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> := <span class="id" title="var">CameLIGOPrelude</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">init</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> := "";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive_prelude</span> := "";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">receive_</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">CameLIGOPretty.printWrapper</span> "receive_" "params" "value list"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">CameLIGOPretty.printMain</span> "storage" |}.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">CameLIGO_prepare_extraction</span> [] <span class="id" title="var">TT_remap_ligo</span> <span class="id" title="var">TT_rename_ctors_default</span> [] "cctx_instance" <span class="id" title="var">LIGO_INTERP_MODULE</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">cameligo_interp</span> := <span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <span class="id" title="var">cameligo_interp_prepared</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">cameligo_interp</span>).<br/>
+</div>
+
+<div class="doc">
+We redirect the extraction result for later processing and compiling with the CameLIGO compiler 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "../extraction/tests/extracted-code/cameligo-extract/StackInterpreter.mligo"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">cameligo_interp</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CameLIGOInterp</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

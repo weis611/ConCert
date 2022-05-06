@@ -1,0 +1,819 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.AllTests</h1>
+
+<div class="code">
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Warnings</span> "-extraction-inside-module".<br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">BinNat</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">QCTest</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Congress</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">CongressTests</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Congress</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">Congress_BuggyTests</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Dexter</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">DexterTests</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.EIP20</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">EIP20TokenTests</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Escrow</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">EscrowTests</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.FA2</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">FA2TokenTests</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.iTokenBuggy</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">iTokenBuggyTests</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.BAT</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">BATTestCommon</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.BAT</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">BATTests</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.BAT</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">BATFixedTests</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.BAT</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">BATAltFixTests</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Congress</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">CongressTests</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">TN</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">true</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">congress_caddr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">receive_state_well_behaved_P</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">forAllBlocks</span> <span class="id" title="var">state_proposals_proposed_in_valid</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">chain5</span> ~~&gt; <span class="id" title="var">congress_has_votes_on_some_proposal</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Success&nbsp;-&nbsp;found&nbsp;witness&nbsp;satisfying&nbsp;the&nbsp;predicate!<br/>
+&nbsp;&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;4&nbsp;tests&nbsp;and&nbsp;0&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">chain5</span> ~~&gt; <span class="id" title="var">congress_finished_a_vote</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Success&nbsp;-&nbsp;found&nbsp;witness&nbsp;satisfying&nbsp;the&nbsp;predicate!<br/>
+&nbsp;&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;11&nbsp;tests&nbsp;and&nbsp;0&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Congress</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Congress_Buggy</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Congress_BuggyTests</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">TN</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">expectFailure</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">true</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">congress_caddr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">receive_state_well_behaved_P</span>}}<br/>
+&nbsp;&nbsp;)).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;***&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;10&nbsp;tests&nbsp;and&nbsp;1&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Congress_Buggy</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Dexter</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">DexterTests</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">expectFailure</span> <span class="id" title="var">tokens_to_asset_correct</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;***&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;1&nbsp;tests&nbsp;and&nbsp;1&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Dexter</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">EIP20Token</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">EIP20TokenTests</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">TestInfo</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">TN</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">true</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">post_not_payable</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">true</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">post_no_new_acts</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">true</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">post_total_supply_constant</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_transfer</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">post_transfer_correct</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_transfer_from</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">post_transfer_from_correct</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_approve</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">post_approve_correct</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">forAllBlocks</span> (<span class="id" title="var">checker_get_state</span> <span class="id" title="var">sum_balances_eq_total_supply</span>)).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">forAllBlocks</span> (<span class="id" title="var">checker_get_state</span> <span class="id" title="var">init_supply_eq_total_supply</span>)).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">expectFailure</span> (<span class="id" title="var">sum_allowances_le_init_supply_P</span>)).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;***&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;21&nbsp;tests&nbsp;and&nbsp;8&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">token_cb</span> ~~&gt; (<span class="id" title="var">person_has_tokens</span> <span class="id" title="var">person_3</span> 12)).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Success&nbsp;-&nbsp;found&nbsp;witness&nbsp;satisfying&nbsp;the&nbsp;predicate!<br/>
+&nbsp;&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;1&nbsp;tests&nbsp;and&nbsp;0&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Test&nbsp;doesn't&nbsp;work&nbsp;*)</span><span class="comment">(*<br/>
+&nbsp;&nbsp;Time&nbsp;QuickChick&nbsp;(chain_with_token_deployed&nbsp;~~&gt;&nbsp;(fun&nbsp;lc&nbsp;=&gt;&nbsp;isSome&nbsp;(person_has_tokens&nbsp;person_3&nbsp;12&nbsp;lc))).*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Test&nbsp;doesn't&nbsp;work&nbsp;*)</span><span class="comment">(*<br/>
+&nbsp;&nbsp;Time&nbsp;QuickChick&nbsp;(chain_with_token_deployed&nbsp;~~&gt;&nbsp;person_has_tokens&nbsp;creator&nbsp;0).*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Test&nbsp;doesn't&nbsp;work&nbsp;*)</span><span class="comment">(*<br/>
+&nbsp;&nbsp;Time&nbsp;QuickChick&nbsp;(token_reachableFrom_implies_reachable<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;chain_with_token_deployed<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(person_has_tokens&nbsp;creator&nbsp;10)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(person_has_tokens&nbsp;creator&nbsp;0)<br/>
+&nbsp;&nbsp;).*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Test&nbsp;doesn't&nbsp;work&nbsp;*)</span><span class="comment">(*<br/>
+&nbsp;&nbsp;Time&nbsp;QuickChick&nbsp;(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;chain_with_token_deployed<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~~~&gt;&nbsp;(person_has_tokens&nbsp;creator&nbsp;5&nbsp;o&nbsp;next_lc_of_lcstep)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;===&gt;&nbsp;(fun&nbsp;_&nbsp;_&nbsp;post_trace&nbsp;=&gt;&nbsp;isSome&nbsp;(person_has_tokens&nbsp;creator&nbsp;10&nbsp;(last_state&nbsp;post_trace)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;).*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">expectFailure</span> <span class="id" title="var">reapprove_transfer_from_safe_P</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;***&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;1&nbsp;tests&nbsp;and&nbsp;4&nbsp;shrinks.&nbsp;(14&nbsp;discards)&nbsp;*)</span><br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">EIP20Token</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Escrow</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">EscrowTests</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">MG</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">forAllEscrowChainBuilder</span> <span class="id" title="var">gEscrowTrace</span> 7 <span class="id" title="var">escrow_chain</span> <span class="id" title="var">escrow_correct_P</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;***&nbsp;Gave&nbsp;up!&nbsp;Passed&nbsp;only&nbsp;8529&nbsp;tests<br/>
+&nbsp;&nbsp;Discarded:&nbsp;20000&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">forAllEscrowChainBuilder</span> <span class="id" title="var">gEscrowTraceBetter</span> 7 <span class="id" title="var">escrow_chain</span> <span class="id" title="var">escrow_correct_P</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">escrow_valid_steps_P</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Escrow</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">FA2Token</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">FA2TokenTests</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">TestInfo</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">TN</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="var">msg_is_transfer</span> }}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_contract_base_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="id" title="var">post_transfer_correct</span> }}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">chain_without_transfer_hook</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">forAllChainStatePairs</span> <span class="id" title="var">transfer_balances_correct</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">forAllChainStatePairs</span> <span class="id" title="var">transfer_satisfies_policy_P</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_update_operator</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_contract_base_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">post_last_update_operator_occurrence_takes_effect</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">chain_without_transfer_hook</span><br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">FA2Token</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">iTokenBuggy</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">iTokenBuggyTests</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">TN</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">expectFailure</span> <span class="id" title="var">token_supply_preserved</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;***&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;5&nbsp;tests&nbsp;and&nbsp;1000&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">expectFailure</span> (<span class="id" title="var">forAllBlocks</span> (<span class="id" title="var">checker_get_state</span> <span class="id" title="var">sum_balances_eq_init_supply_checker</span>))).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;***&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;1&nbsp;tests&nbsp;and&nbsp;7&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">expectFailure</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_not_mint_or_burn</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_caddr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">sum_balances_unchanged</span>}}<br/>
+&nbsp;&nbsp;)).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;***&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;3&nbsp;tests&nbsp;and&nbsp;8&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">iTokenBuggy</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">BAT</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">BATTests</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">TestInfo</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">MG</span> <span class="id" title="var">TN</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">BATTestCommon</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">state</span> <span class="id" title="var">msg</span> =&gt; <span class="id" title="var">negb</span> (<span class="id" title="var">msg_is_create_tokens</span> <span class="id" title="var">state</span> <span class="id" title="var">msg</span>)}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">amount_is_zero</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_create_tokens</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">amount_is_positive</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_eip_msg</span> ||| <span class="id" title="var">msg_is_create_tokens</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">produces_no_actions</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_refund</span> ||| <span class="id" title="var">msg_is_finalize</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">produces_one_action</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">state</span> <span class="id" title="var">msg</span> =&gt; <span class="id" title="var">true</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">constants_unchanged</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_create_tokens</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_create_tokens_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_create_tokens</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">create_tokens_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_create_tokens</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_create_tokens_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_finalize</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_finalize_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_finalize</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">finalize_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_finalize</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_finalize_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_refund</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_refund_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_refund</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">refund_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_refund</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_refund_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">transfer_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer_from</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_from_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer_from</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">transfer_from_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer_from</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_from_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_approve</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_approve_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_approve</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">approve_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_approve</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_approve_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">contract_balance_lower_bound</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">expectFailure</span> ({{<span class="id" title="var">contract_balance_lower_bound'</span>}})).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;2&nbsp;tests&nbsp;and&nbsp;7&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">partially_funded_cb</span> ~~&gt; <span class="id" title="var">is_fully_refunded</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Success&nbsp;-&nbsp;found&nbsp;witness&nbsp;satisfying&nbsp;the&nbsp;predicate!<br/>
+&nbsp;&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;140&nbsp;tests&nbsp;and&nbsp;0&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">expectFailure</span> ({{<span class="id" title="var">can_always_fully_refund</span>}})).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;6&nbsp;tests&nbsp;and&nbsp;7&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">token_cb</span> ~~&gt; <span class="id" title="var">is_finalized</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Success&nbsp;-&nbsp;found&nbsp;witness&nbsp;satisfying&nbsp;the&nbsp;predicate!<br/>
+&nbsp;&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;6&nbsp;tests&nbsp;and&nbsp;0&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_is_final</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(6329&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">can_only_finalize_once</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_implies_total_supply_in_range</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(6125&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_implies_total_supply_constant</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(6246&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_implies_contract_balance_is_zero</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(6179&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">expectFailure</span> ({{<span class="id" title="var">total_supply_bounds</span>}})).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;3&nbsp;tests&nbsp;and&nbsp;7&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">total_supply_eq_sum_balances</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">paid_tokens_modulo_exchange_rate</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">BAT</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">BATFixed</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">BATFixedTests</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">TestInfo</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">MG</span> <span class="id" title="var">TN</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">BATTestCommon</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">state</span> <span class="id" title="var">msg</span> =&gt; <span class="id" title="var">negb</span> (<span class="id" title="var">msg_is_create_tokens</span> <span class="id" title="var">state</span> <span class="id" title="var">msg</span>)}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">amount_is_zero</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_create_tokens</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">amount_is_positive</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_eip_msg</span> ||| <span class="id" title="var">msg_is_create_tokens</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">produces_no_actions</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_refund</span> ||| <span class="id" title="var">msg_is_finalize</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">produces_one_action</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">state</span> <span class="id" title="var">msg</span> =&gt; <span class="id" title="var">true</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">constants_unchanged</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_create_tokens</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_create_tokens_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_create_tokens</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">create_tokens_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_create_tokens</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_create_tokens_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_finalize</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_finalize_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_finalize</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">finalize_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_finalize</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_finalize_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_refund</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_refund_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_refund</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">refund_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_refund</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_refund_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">transfer_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer_from</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_from_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer_from</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">transfer_from_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer_from</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_from_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_approve</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_approve_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_approve</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">approve_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_approve</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_approve_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">contract_balance_lower_bound</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">contract_balance_lower_bound'</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">partially_funded_cb</span> ~~&gt; <span class="id" title="var">is_fully_refunded</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Success&nbsp;-&nbsp;found&nbsp;witness&nbsp;satisfying&nbsp;the&nbsp;predicate!<br/>
+&nbsp;&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;140&nbsp;tests&nbsp;and&nbsp;0&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">can_always_fully_refund</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">token_cb</span> ~~&gt; <span class="id" title="var">is_finalized</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Success&nbsp;-&nbsp;found&nbsp;witness&nbsp;satisfying&nbsp;the&nbsp;predicate!<br/>
+&nbsp;&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;6&nbsp;tests&nbsp;and&nbsp;0&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_is_final</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(4310&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">can_only_finalize_once</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_implies_total_supply_in_range</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(4281&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_implies_total_supply_constant</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(4223&nbsp;discards))&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_implies_contract_balance_is_zero</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(4153&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">total_supply_bounds</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">total_supply_eq_sum_balances</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">paid_tokens_modulo_exchange_rate</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">BATFixed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">BATAltFix</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">BATAltFixTests</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">TestInfo</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">MG</span> <span class="id" title="var">TN</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">BATTestCommon</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">state</span> <span class="id" title="var">msg</span> =&gt; <span class="id" title="var">negb</span> (<span class="id" title="var">msg_is_create_tokens</span> <span class="id" title="var">state</span> <span class="id" title="var">msg</span>)}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">amount_is_zero</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_create_tokens</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">amount_is_positive</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_eip_msg</span> ||| <span class="id" title="var">msg_is_create_tokens</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">produces_no_actions</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">msg_is_refund</span> ||| <span class="id" title="var">msg_is_finalize</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">produces_one_action</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="keyword">fun</span> <span class="id" title="var">state</span> <span class="id" title="var">msg</span> =&gt; <span class="id" title="var">true</span>}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="id" title="var">constants_unchanged</span>}}<br/>
+&nbsp;&nbsp;).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_create_tokens</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_create_tokens_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_create_tokens</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">create_tokens_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_create_tokens</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_create_tokens_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_finalize</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_finalize_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_finalize</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">finalize_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_finalize</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_finalize_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_refund</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_refund_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_refund</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">refund_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_refund</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_refund_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">transfer_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer_from</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_from_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer_from</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">transfer_from_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_transfer_from</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_transfer_from_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_approve</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_approve_update_correct</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_approve</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">approve_valid</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">msg_is_approve</span>}} <span class="id" title="var">contract_addr</span> {{<span class="id" title="var">post_approve_safe</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">contract_balance_lower_bound</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">partially_funded_cb</span> ~~&gt; <span class="id" title="var">is_fully_refunded</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Success&nbsp;-&nbsp;found&nbsp;witness&nbsp;satisfying&nbsp;the&nbsp;predicate!<br/>
+&nbsp;&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;13&nbsp;tests&nbsp;and&nbsp;0&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">can_always_fully_refund</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> (<span class="id" title="var">token_cb</span> ~~&gt; <span class="id" title="var">is_finalized</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Success&nbsp;-&nbsp;found&nbsp;witness&nbsp;satisfying&nbsp;the&nbsp;predicate!<br/>
+&nbsp;&nbsp;+++&nbsp;Failed&nbsp;(as&nbsp;expected)&nbsp;after&nbsp;7&nbsp;tests&nbsp;and&nbsp;0&nbsp;shrinks.&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_is_final</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(4517&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">can_only_finalize_once</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_implies_total_supply_in_range</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(4529&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_implies_total_supply_constant</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(4662&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> <span class="id" title="var">final_implies_contract_balance_is_zero</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(4424&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">total_supply_bounds</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">total_supply_eq_sum_balances</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">QuickChick</span> ({{<span class="id" title="var">paid_tokens_modulo_exchange_rate</span>}}).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">BATAltFix</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

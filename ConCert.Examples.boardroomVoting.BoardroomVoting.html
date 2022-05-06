@@ -1,0 +1,952 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.boardroomVoting.BoardroomVoting</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Znumtheory</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Permutation</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Psatz</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Automation</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Extras</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">RecordUpdate</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Monads</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">ContractMonads</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ContractCommon</span>. <span class="id" title="keyword">Import</span> <span class="id" title="var">AddressMap</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.BoardroomVoting</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">BoardroomMath</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Type</span> <span class="id" title="var">BoardroomParams</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">A</span> : <span class="id" title="keyword">Type</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">H</span> : <span class="id" title="var">list</span> <span class="id" title="var">positive</span> -&gt; <span class="id" title="var">positive</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">ser</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">A</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">axioms</span> : <span class="id" title="var">BoardroomAxioms</span> <span class="id" title="var">A</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">gen</span> : <span class="id" title="var">Generator</span> <span class="id" title="var">axioms</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">discr_log</span> : <span class="id" title="var">DiscreteLog</span> <span class="id" title="var">axioms</span> <span class="id" title="var">gen</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">Base</span> : <span class="id" title="var">ChainBase</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">BoardroomParams</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">BoardroomVoting</span> (<span class="id" title="var">Params</span> : <span class="id" title="var">BoardroomParams</span>).<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Params</span>.<br/>
+<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">ser</span>.<br/>
+<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">axioms</span>.<br/>
+<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">gen</span>.<br/>
+<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">discr_log</span>.<br/>
+<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">Base</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Allow&nbsp;us&nbsp;to&nbsp;automatically&nbsp;derive&nbsp;Serializable&nbsp;instances&nbsp;*)</span><br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Nonrecursive</span> <span class="id" title="var">Elimination</span> <span class="id" title="var">Schemes</span>.<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">Setup</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_setup</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">eligible_voters</span> : <span class="id" title="var">AddrMap</span> <span class="id" title="var">unit</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">finish_registration_by</span> : <span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">finish_commit_by</span> : <span class="id" title="var">option</span> <span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">finish_vote_by</span> : <span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">registration_deposit</span> : <span class="id" title="var">Amount</span>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">VoterInfo</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_voter_info</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">voter_index</span> : <span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">vote_hash</span> : <span class="id" title="var">positive</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">public_vote</span> : <span class="id" title="var">A</span>;<br/>
+}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_state</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">owner</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">registered_voters</span> : <span class="id" title="var">AddrMap</span> <span class="id" title="var">VoterInfo</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">public_keys</span> : <span class="id" title="var">list</span> <span class="id" title="var">A</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">setup</span> : <span class="id" title="var">Setup</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tally</span> : <span class="id" title="var">option</span> <span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;w,&nbsp;a1,&nbsp;b1,&nbsp;a2,&nbsp;b2,&nbsp;d1,&nbsp;d2&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">VoteProof</span> := (<span class="id" title="var">Z</span> * <span class="id" title="var">A</span> * <span class="id" title="var">A</span> * <span class="id" title="var">A</span> * <span class="id" title="var">A</span> * <span class="id" title="var">Z</span> * <span class="id" title="var">Z</span> * <span class="id" title="var">Z</span> * <span class="id" title="var">Z</span>)%<span class="id" title="keyword">type</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <span class="id" title="var">Msg</span> :=<br/>
+| <span class="id" title="var">signup</span> (<span class="id" title="var">pk</span> : <span class="id" title="var">A</span>) (<span class="id" title="var">proof</span> : <span class="id" title="var">A</span> * <span class="id" title="var">Z</span>)<br/>
+| <span class="id" title="var">commit_to_vote</span> (<span class="id" title="var">hash</span> : <span class="id" title="var">positive</span>)<br/>
+| <span class="id" title="var">submit_vote</span> (<span class="id" title="var">v</span> : <span class="id" title="var">A</span>) (<span class="id" title="var">proof</span> : <span class="id" title="var">VoteProof</span>)<br/>
+| <span class="id" title="var">tally_votes</span>.<br/>
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">VoterInfo</span>).<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">State</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">Setup_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">Setup</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">Setup_rect</span>&lt;<span class="id" title="var">build_setup</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">VoterInfo_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">VoterInfo</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">VoterInfo_rect</span>&lt;<span class="id" title="var">build_voter_info</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">State_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">State_rect</span>&lt;<span class="id" title="var">build_state</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">Msg_serializable</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">Msg</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="var">Serializable</span> <span class="id" title="var">Msg_rect</span>&lt;<span class="id" title="var">signup</span>, <span class="id" title="var">commit_to_vote</span>, <span class="id" title="var">submit_vote</span>, <span class="id" title="var">tally_votes</span>&gt;.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ContractMonads</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">broom</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">encodeA</span> : <span class="id" title="var">A</span> -&gt; <span class="id" title="var">positive</span> := <span class="id" title="var">countable.encode</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">encodeNat</span> : <span class="id" title="var">nat</span> -&gt; <span class="id" title="var">positive</span> := <span class="id" title="var">countable.encode</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">hash_sk_data</span> (<span class="id" title="var">gv</span> <span class="id" title="var">pk</span> : <span class="id" title="var">A</span>) (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) : <span class="id" title="var">positive</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">H</span> [<span class="id" title="var">encodeA</span> (<span class="id" title="var">generator</span> : <span class="id" title="var">A</span>); <span class="id" title="var">encodeA</span> <span class="id" title="var">gv</span>; <span class="id" title="var">encodeA</span> <span class="id" title="var">pk</span>; <span class="id" title="var">encodeNat</span> <span class="id" title="var">i</span>].<br/>
+
+<br/>
+<span class="comment">(*&nbsp;This&nbsp;follows&nbsp;the&nbsp;original&nbsp;open&nbsp;vote&nbsp;protocol&nbsp;paper.&nbsp;It&nbsp;is&nbsp;a&nbsp;schnorr&nbsp;signature<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;the&nbsp;fiat-shamir&nbsp;heuristic&nbsp;applied.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">secret_key_proof</span> (<span class="id" title="var">sk</span> : <span class="id" title="var">Z</span>) (<span class="id" title="var">v</span> : <span class="id" title="var">Z</span>) (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) : <span class="id" title="var">A</span> * <span class="id" title="var">Z</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">gv</span> : <span class="id" title="var">A</span> := <span class="id" title="var">generator</span>^<span class="id" title="var">v</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">pk</span> := <span class="id" title="var">compute_public_key</span> <span class="id" title="var">sk</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">z</span> := <span class="id" title="var">Zpos</span> (<span class="id" title="var">hash_sk_data</span> <span class="id" title="var">gv</span> <span class="id" title="var">pk</span> <span class="id" title="var">i</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">r</span> := (<span class="id" title="var">v</span> - <span class="id" title="var">sk</span> * <span class="id" title="var">z</span>)%<span class="id" title="var">Z</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;(<span class="id" title="var">gv</span>, <span class="id" title="var">r</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">verify_secret_key_proof</span> (<span class="id" title="var">pk</span> : <span class="id" title="var">A</span>) (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) (<span class="id" title="var">proof</span> : <span class="id" title="var">A</span> * <span class="id" title="var">Z</span>) : <span class="id" title="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> (<span class="id" title="var">gv</span>, <span class="id" title="var">r</span>) := <span class="id" title="var">proof</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">z</span> := <span class="id" title="var">Zpos</span> (<span class="id" title="var">hash_sk_data</span> <span class="id" title="var">gv</span> <span class="id" title="var">pk</span> <span class="id" title="var">i</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">elmeqb</span> <span class="id" title="var">gv</span> (<span class="id" title="var">generator</span>^<span class="id" title="var">r</span> * (<span class="id" title="var">pk</span>^<span class="id" title="var">z</span>)).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">hash_sv_data</span> (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) (<span class="id" title="var">pk</span> <span class="id" title="var">rk</span> <span class="id" title="var">a1</span> <span class="id" title="var">b1</span> <span class="id" title="var">a2</span> <span class="id" title="var">b2</span> : <span class="id" title="var">A</span>) : <span class="id" title="var">positive</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">H</span> (<span class="id" title="var">encodeNat</span> <span class="id" title="var">i</span> :: <span class="id" title="var">map</span> <span class="id" title="var">encodeA</span> [<span class="id" title="var">pk</span>; <span class="id" title="var">rk</span>; <span class="id" title="var">a1</span>; <span class="id" title="var">b1</span>; <span class="id" title="var">a2</span>; <span class="id" title="var">b2</span>]).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">secret_vote_proof</span> (<span class="id" title="var">sk</span> : <span class="id" title="var">Z</span>) (<span class="id" title="var">rk</span> : <span class="id" title="var">A</span>) (<span class="id" title="var">sv</span> : <span class="id" title="var">bool</span>) (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) (<span class="id" title="var">w</span> <span class="id" title="var">r</span> <span class="id" title="var">d</span> : <span class="id" title="var">Z</span>) : <span class="id" title="var">VoteProof</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">pk</span> : <span class="id" title="var">A</span> := <span class="id" title="var">compute_public_key</span> <span class="id" title="var">sk</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">pv</span> : <span class="id" title="var">A</span> := <span class="id" title="var">compute_public_vote</span> <span class="id" title="var">rk</span> <span class="id" title="var">sk</span> <span class="id" title="var">sv</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">sv</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">a1</span> : <span class="id" title="var">A</span> := <span class="id" title="var">generator</span>^<span class="id" title="var">r</span> * <span class="id" title="var">pk</span>^<span class="id" title="var">d</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">b1</span> : <span class="id" title="var">A</span> := <span class="id" title="var">rk</span>^<span class="id" title="var">r</span> * <span class="id" title="var">pv</span>^<span class="id" title="var">d</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">a2</span> : <span class="id" title="var">A</span> := <span class="id" title="var">generator</span>^<span class="id" title="var">w</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">b2</span> : <span class="id" title="var">A</span> := <span class="id" title="var">rk</span>^<span class="id" title="var">w</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">c</span> := <span class="id" title="var">Zpos</span> (<span class="id" title="var">hash_sv_data</span> <span class="id" title="var">i</span> <span class="id" title="var">pk</span> <span class="id" title="var">rk</span> <span class="id" title="var">a1</span> <span class="id" title="var">b1</span> <span class="id" title="var">a2</span> <span class="id" title="var">b2</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">d2</span> := <span class="id" title="var">c</span> - <span class="id" title="var">d</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">r2</span> := <span class="id" title="var">w</span> - <span class="id" title="var">sk</span>*<span class="id" title="var">d2</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">w</span>, <span class="id" title="var">a1</span>, <span class="id" title="var">b1</span>, <span class="id" title="var">a2</span>, <span class="id" title="var">b2</span>, <span class="id" title="var">d</span>, <span class="id" title="var">d2</span>, <span class="id" title="var">r</span>, <span class="id" title="var">r2</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">a1</span> := <span class="id" title="var">generator</span>^<span class="id" title="var">w</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">b1</span> := <span class="id" title="var">rk</span>^<span class="id" title="var">w</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">a2</span> := <span class="id" title="var">generator</span>^<span class="id" title="var">r</span> * <span class="id" title="var">pk</span>^<span class="id" title="var">d</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">b2</span> := <span class="id" title="var">rk</span>^<span class="id" title="var">r</span> * (<span class="id" title="var">pv</span> * <span class="id" title="var">inv</span> <span class="id" title="var">generator</span>)^<span class="id" title="var">d</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">c</span> := <span class="id" title="var">Zpos</span> (<span class="id" title="var">hash_sv_data</span> <span class="id" title="var">i</span> <span class="id" title="var">pk</span> <span class="id" title="var">rk</span> <span class="id" title="var">a1</span> <span class="id" title="var">b1</span> <span class="id" title="var">a2</span> <span class="id" title="var">b2</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">d1</span> := <span class="id" title="var">c</span> - <span class="id" title="var">d</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">r1</span> := <span class="id" title="var">w</span> - <span class="id" title="var">sk</span>*<span class="id" title="var">d1</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">w</span>, <span class="id" title="var">a1</span>, <span class="id" title="var">b1</span>, <span class="id" title="var">a2</span>, <span class="id" title="var">b2</span>, <span class="id" title="var">d1</span>, <span class="id" title="var">d</span>, <span class="id" title="var">r1</span>, <span class="id" title="var">r</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">verify_secret_vote_proof</span> (<span class="id" title="var">pk</span> <span class="id" title="var">rk</span> <span class="id" title="var">pv</span> : <span class="id" title="var">A</span>) (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) (<span class="id" title="var">proof</span> : <span class="id" title="var">VoteProof</span>) : <span class="id" title="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> '(<span class="id" title="var">w</span>, <span class="id" title="var">a1</span>, <span class="id" title="var">b1</span>, <span class="id" title="var">a2</span>, <span class="id" title="var">b2</span>, <span class="id" title="var">d1</span>, <span class="id" title="var">d2</span>, <span class="id" title="var">r1</span>, <span class="id" title="var">r2</span>) := <span class="id" title="var">proof</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">c</span> := <span class="id" title="var">hash_sv_data</span> <span class="id" title="var">i</span> <span class="id" title="var">pk</span> <span class="id" title="var">rk</span> <span class="id" title="var">a1</span> <span class="id" title="var">b1</span> <span class="id" title="var">a2</span> <span class="id" title="var">b2</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;(<span class="id" title="var">Zpos</span> <span class="id" title="var">c</span> =? <span class="id" title="var">d1</span> + <span class="id" title="var">d2</span>)%<span class="id" title="var">Z</span> &amp;&amp;<br/>
+&nbsp;&nbsp;(<span class="id" title="var">a1</span> =? <span class="id" title="var">generator</span>^<span class="id" title="var">r1</span> * <span class="id" title="var">pk</span>^<span class="id" title="var">d1</span>)%<span class="id" title="var">broom</span> &amp;&amp;<br/>
+&nbsp;&nbsp;(<span class="id" title="var">b1</span> =? <span class="id" title="var">rk</span>^<span class="id" title="var">r1</span> * <span class="id" title="var">pv</span>^<span class="id" title="var">d1</span>)%<span class="id" title="var">broom</span> &amp;&amp;<br/>
+&nbsp;&nbsp;(<span class="id" title="var">a2</span> =? <span class="id" title="var">generator</span>^<span class="id" title="var">r2</span> * <span class="id" title="var">pk</span>^<span class="id" title="var">d2</span>)%<span class="id" title="var">broom</span> &amp;&amp;<br/>
+&nbsp;&nbsp;(<span class="id" title="var">b2</span> =? <span class="id" title="var">rk</span>^<span class="id" title="var">r2</span> * (<span class="id" title="var">pv</span> * <span class="id" title="var">inv</span> <span class="id" title="var">generator</span>)^<span class="id" title="var">d2</span>)%<span class="id" title="var">broom</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">make_signup_msg</span> (<span class="id" title="var">sk</span> : <span class="id" title="var">Z</span>) (<span class="id" title="var">v</span> : <span class="id" title="var">Z</span>) (<span class="id" title="var">i</span> : <span class="id" title="var">nat</span>) : <span class="id" title="var">Msg</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">signup</span> (<span class="id" title="var">compute_public_key</span> <span class="id" title="var">sk</span>) (<span class="id" title="var">secret_key_proof</span> <span class="id" title="var">sk</span> <span class="id" title="var">v</span> <span class="id" title="var">i</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">make_commit_msg</span> (<span class="id" title="var">pks</span> : <span class="id" title="var">list</span> <span class="id" title="var">A</span>) (<span class="id" title="var">my_index</span> : <span class="id" title="var">nat</span>) (<span class="id" title="var">sk</span> : <span class="id" title="var">Z</span>) (<span class="id" title="var">sv</span> : <span class="id" title="var">bool</span>) : <span class="id" title="var">Msg</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">pv</span> := <span class="id" title="var">compute_public_vote</span> (<span class="id" title="var">reconstructed_key</span> <span class="id" title="var">pks</span> <span class="id" title="var">my_index</span>) <span class="id" title="var">sk</span> <span class="id" title="var">sv</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">commit_to_vote</span> (<span class="id" title="var">H</span> [<span class="id" title="var">encodeA</span> <span class="id" title="var">pv</span>]).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">make_vote_msg</span> (<span class="id" title="var">pks</span> : <span class="id" title="var">list</span> <span class="id" title="var">A</span>) (<span class="id" title="var">my_index</span> : <span class="id" title="var">nat</span>) (<span class="id" title="var">sk</span> : <span class="id" title="var">Z</span>) (<span class="id" title="var">sv</span> : <span class="id" title="var">bool</span>) (<span class="id" title="var">w</span> <span class="id" title="var">r</span> <span class="id" title="var">d</span> : <span class="id" title="var">Z</span>) : <span class="id" title="var">Msg</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">rk</span> := <span class="id" title="var">reconstructed_key</span> <span class="id" title="var">pks</span> <span class="id" title="var">my_index</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">submit_vote</span> (<span class="id" title="var">compute_public_vote</span> <span class="id" title="var">rk</span> <span class="id" title="var">sk</span> <span class="id" title="var">sv</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">secret_vote_proof</span> <span class="id" title="var">sk</span> <span class="id" title="var">rk</span> <span class="id" title="var">sv</span> <span class="id" title="var">my_index</span> <span class="id" title="var">w</span> <span class="id" title="var">r</span> <span class="id" title="var">d</span>).<br/>
+
+<br/>
+<span class="comment">(*&nbsp;A&nbsp;necessary&nbsp;aliasing&nbsp;to&nbsp;make&nbsp;extraction&nbsp;work&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">ContractIniterSetupState</span> := <span class="id" title="var">ContractIniter</span> <span class="id" title="var">Setup</span> <span class="id" title="var">State</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">init</span> : <span class="id" title="var">ContractIniterSetupState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">owner</span> &lt;- <span class="id" title="var">lift</span> <span class="id" title="var">caller_addr</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">setup</span> &lt;- <span class="id" title="var">deployment_setup</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">finish_registration_by</span> <span class="id" title="var">setup</span> &lt;? <span class="id" title="var">finish_vote_by</span> <span class="id" title="var">setup</span> <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span> <span class="id" title="keyword">else</span> <span class="id" title="var">None</span>)%<span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">accept_deployment</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">owner</span> := <span class="id" title="var">owner</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">registered_voters</span> := <span class="id" title="var">AddressMap.empty</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">public_keys</span> := [];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">setup</span> := <span class="id" title="var">setup</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tally</span> := <span class="id" title="var">None</span>; |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">ContractReceiverStateMsgState</span> := <span class="id" title="var">ContractReceiver</span> <span class="id" title="var">State</span> <span class="id" title="var">Msg</span> <span class="id" title="var">State</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">handle_signup</span> <span class="id" title="var">pk</span> <span class="id" title="var">prf</span> <span class="id" title="var">state</span> <span class="id" title="var">caller</span> <span class="id" title="var">cur_slot</span> : <span class="id" title="var">ContractReceiverStateMsgState</span> := <br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">finish_registration_by</span> (<span class="id" title="var">setup</span> <span class="id" title="var">state</span>) &lt;? <span class="id" title="var">cur_slot</span> <span class="id" title="keyword">then</span> <span class="id" title="var">None</span> <span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span>)%<span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">AddressMap.find</span> <span class="id" title="var">caller</span> (<span class="id" title="var">eligible_voters</span> (<span class="id" title="var">setup</span> <span class="id" title="var">state</span>)) <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span> <span class="id" title="keyword">else</span> <span class="id" title="var">None</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">AddressMap.find</span> <span class="id" title="var">caller</span> (<span class="id" title="var">registered_voters</span> <span class="id" title="var">state</span>) <span class="id" title="keyword">then</span> <span class="id" title="var">None</span> <span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">amt</span> &lt;- <span class="id" title="var">lift</span> <span class="id" title="var">call_amount</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> (<span class="id" title="var">amt</span> =? (<span class="id" title="var">registration_deposit</span> (<span class="id" title="var">setup</span> <span class="id" title="var">state</span>)))%<span class="id" title="var">Z</span> <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span> <span class="id" title="keyword">else</span> <span class="id" title="var">None</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">Z.of_nat</span> (<span class="id" title="var">length</span> (<span class="id" title="var">public_keys</span> <span class="id" title="var">state</span>)) &lt;? <span class="id" title="var">order</span> - 2 <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span> <span class="id" title="keyword">else</span> <span class="id" title="var">None</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">index</span> := <span class="id" title="var">length</span> (<span class="id" title="var">public_keys</span> <span class="id" title="var">state</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">verify_secret_key_proof</span> <span class="id" title="var">pk</span> <span class="id" title="var">index</span> <span class="id" title="var">prf</span> <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span> <span class="id" title="keyword">else</span> <span class="id" title="var">None</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">inf</span> := {| <span class="id" title="var">voter_index</span> := <span class="id" title="var">index</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">vote_hash</span> := 1%<span class="id" title="var">positive</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">public_vote</span> := <span class="id" title="var">zero</span>; |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_state</span> := <span class="id" title="var">state</span>&lt;|<span class="id" title="var">registered_voters</span> ::= <span class="id" title="var">AddressMap.add</span> <span class="id" title="var">caller</span> <span class="id" title="var">inf</span>|&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;|<span class="id" title="var">public_keys</span> ::= <span class="id" title="keyword">fun</span> <span class="id" title="var">l</span> =&gt; <span class="id" title="var">l</span> ++ [<span class="id" title="var">pk</span>]|&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">accept_call</span> <span class="id" title="var">new_state</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">handle_commit_to_vote</span> <span class="id" title="var">hash</span> <span class="id" title="var">state</span> <span class="id" title="var">caller</span> <span class="id" title="var">cur_slot</span> : <span class="id" title="var">ContractReceiverStateMsgState</span> := <br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">commit_by</span> &lt;- <span class="id" title="var">lift</span> (<span class="id" title="var">finish_commit_by</span> (<span class="id" title="var">setup</span> <span class="id" title="var">state</span>));<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">commit_by</span> &lt;? <span class="id" title="var">cur_slot</span> <span class="id" title="keyword">then</span> <span class="id" title="var">None</span> <span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span>)%<span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">inf</span> &lt;- <span class="id" title="var">lift</span> (<span class="id" title="var">AddressMap.find</span> <span class="id" title="var">caller</span> (<span class="id" title="var">registered_voters</span> <span class="id" title="var">state</span>));<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">inf</span> := <span class="id" title="var">inf</span>&lt;|<span class="id" title="var">vote_hash</span> := <span class="id" title="var">hash</span>|&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">accept_call</span> (<span class="id" title="var">state</span>&lt;|<span class="id" title="var">registered_voters</span> ::= <span class="id" title="var">AddressMap.add</span> <span class="id" title="var">caller</span> <span class="id" title="var">inf</span>|&gt;).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">handle_submit_vote</span> <span class="id" title="var">v</span> <span class="id" title="var">proof</span> <span class="id" title="var">state</span> <span class="id" title="var">caller</span> <span class="id" title="var">cur_slot</span> : <span class="id" title="var">ContractReceiverStateMsgState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">finish_vote_by</span> (<span class="id" title="var">setup</span> <span class="id" title="var">state</span>) &lt;? <span class="id" title="var">cur_slot</span> <span class="id" title="keyword">then</span> <span class="id" title="var">None</span> <span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span>)%<span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">inf</span> &lt;- <span class="id" title="var">lift</span> (<span class="id" title="var">AddressMap.find</span> <span class="id" title="var">caller</span> (<span class="id" title="var">registered_voters</span> <span class="id" title="var">state</span>));<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">finish_commit_by</span> (<span class="id" title="var">setup</span> <span class="id" title="var">state</span>) <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">H</span> [<span class="id" title="var">encodeA</span> <span class="id" title="var">v</span>] =? <span class="id" title="var">vote_hash</span> <span class="id" title="var">inf</span>)%<span class="id" title="var">positive</span> <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span> <span class="id" title="keyword">else</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> <span class="id" title="var">tt</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">verify_secret_vote_proof</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">nth</span> (<span class="id" title="var">voter_index</span> <span class="id" title="var">inf</span>) (<span class="id" title="var">public_keys</span> <span class="id" title="var">state</span>) 0)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">reconstructed_key</span> (<span class="id" title="var">public_keys</span> <span class="id" title="var">state</span>) (<span class="id" title="var">voter_index</span> <span class="id" title="var">inf</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">v</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">voter_index</span> <span class="id" title="var">inf</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">proof</span> <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span> <span class="id" title="keyword">else</span> <span class="id" title="var">None</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">inf</span> := <span class="id" title="var">inf</span>&lt;|<span class="id" title="var">public_vote</span> := <span class="id" title="var">v</span>|&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">accept_call</span> (<span class="id" title="var">state</span>&lt;|<span class="id" title="var">registered_voters</span> ::= <span class="id" title="var">AddressMap.add</span> <span class="id" title="var">caller</span> <span class="id" title="var">inf</span>|&gt;).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">handle_tally_votes</span> <span class="id" title="var">state</span> <span class="id" title="var">cur_slot</span> : <span class="id" title="var">ContractReceiverStateMsgState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">cur_slot</span> &lt;? <span class="id" title="var">finish_vote_by</span> (<span class="id" title="var">setup</span> <span class="id" title="var">state</span>) <span class="id" title="keyword">then</span> <span class="id" title="var">None</span> <span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span>)%<span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">match</span> <span class="id" title="var">tally</span> <span class="id" title="var">state</span> <span class="id" title="keyword">with</span> | <span class="id" title="var">Some</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span> | <span class="id" title="var">None</span> =&gt; <span class="id" title="var">Some</span> <span class="id" title="var">tt</span> <span class="id" title="keyword">end</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">voters</span> := <span class="id" title="var">AddressMap.values</span> (<span class="id" title="var">registered_voters</span> <span class="id" title="var">state</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">lift</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">existsb</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">vi</span> =&gt; <span class="id" title="keyword">if</span> <span class="id" title="var">elmeqb</span> (<span class="id" title="var">public_vote</span> <span class="id" title="var">vi</span>) <span class="id" title="var">zero</span> <span class="id" title="keyword">then</span> <span class="id" title="var">true</span> <span class="id" title="keyword">else</span> <span class="id" title="var">false</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">voters</span> <span class="id" title="keyword">then</span> <span class="id" title="var">None</span> <span class="id" title="keyword">else</span> <span class="id" title="var">Some</span> <span class="id" title="var">tt</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">votes</span> := <span class="id" title="var">map</span> <span class="id" title="var">public_vote</span> <span class="id" title="var">voters</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">res</span> &lt;- <span class="id" title="var">lift</span> (<span class="id" title="var">bruteforce_tally</span> <span class="id" title="var">votes</span>);<br/>
+&nbsp;&nbsp;<span class="id" title="var">accept_call</span> (<span class="id" title="var">state</span>&lt;|<span class="id" title="var">tally</span> := <span class="id" title="var">Some</span> <span class="id" title="var">res</span>|&gt;).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive</span> : <span class="id" title="var">ContractReceiverStateMsgState</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">state</span> &lt;- <span class="id" title="var">my_state</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">caller</span> &lt;- <span class="id" title="var">lift</span> <span class="id" title="var">caller_addr</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">cur_slot</span> &lt;- <span class="id" title="var">lift</span> <span class="id" title="var">current_slot</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">msg</span> &lt;- <span class="id" title="var">call_msg</span> &gt;&gt;= <span class="id" title="var">lift</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">signup</span> <span class="id" title="var">pk</span> <span class="id" title="var">prf</span> =&gt; <span class="id" title="var">handle_signup</span> <span class="id" title="var">pk</span> <span class="id" title="var">prf</span> <span class="id" title="var">state</span> <span class="id" title="var">caller</span> <span class="id" title="var">cur_slot</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">commit_to_vote</span> <span class="id" title="var">hash</span> =&gt; <span class="id" title="var">handle_commit_to_vote</span> <span class="id" title="var">hash</span> <span class="id" title="var">state</span> <span class="id" title="var">caller</span> <span class="id" title="var">cur_slot</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">submit_vote</span> <span class="id" title="var">v</span> <span class="id" title="var">proof</span> =&gt; <span class="id" title="var">handle_submit_vote</span> <span class="id" title="var">v</span> <span class="id" title="var">proof</span> <span class="id" title="var">state</span> <span class="id" title="var">caller</span> <span class="id" title="var">cur_slot</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">tally_votes</span> =&gt; <span class="id" title="var">handle_tally_votes</span> <span class="id" title="var">state</span> <span class="id" title="var">cur_slot</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">boardroom_voting</span> : <span class="id" title="var">Contract</span> <span class="id" title="var">Setup</span> <span class="id" title="var">Msg</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_contract</span> <span class="id" title="var">init</span> <span class="id" title="var">receive</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">Theories</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <span class="id" title="var">SecretVoterInfo</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_secret_voter_info</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">svi_index</span> : <span class="id" title="var">nat</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Secret&nbsp;key&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">svi_sk</span> : <span class="id" title="var">Z</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Chosen&nbsp;randomness&nbsp;for&nbsp;knowledge&nbsp;of&nbsp;secret&nbsp;key&nbsp;proof&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">svi_sk_r</span> : <span class="id" title="var">Z</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Secret&nbsp;vot&nbsp;e*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">svi_sv</span> : <span class="id" title="var">bool</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Chosen&nbsp;random&nbsp;w&nbsp;for&nbsp;vote&nbsp;proof&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">svi_sv_w</span> : <span class="id" title="var">Z</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Chosen&nbsp;random&nbsp;r&nbsp;for&nbsp;vote&nbsp;proof&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">svi_sv_r</span> : <span class="id" title="var">Z</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Chosen&nbsp;random&nbsp;d&nbsp;for&nbsp;vote&nbsp;proof&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">svi_sv_d</span> : <span class="id" title="var">Z</span>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">make_setters</span> <span class="id" title="var">SecretVoterInfo</span>).<br/>
+
+<br/>
+<span class="comment">(*&nbsp;For&nbsp;correctness&nbsp;we&nbsp;assume&nbsp;that&nbsp;all&nbsp;signups&nbsp;and&nbsp;vote&nbsp;messages&nbsp;were<br/>
+&nbsp;&nbsp;&nbsp;created&nbsp;using&nbsp;the&nbsp;make_signup_msg&nbsp;and&nbsp;make_vote_msg&nbsp;functions&nbsp;from<br/>
+&nbsp;&nbsp;&nbsp;the&nbsp;contract&nbsp;*)</span><br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">MsgAssumption</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">pks</span> : <span class="id" title="var">list</span> <span class="id" title="var">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">parties</span> : <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">SecretVoterInfo</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">calls</span> : <span class="id" title="var">list</span> (<span class="id" title="var">ContractCallInfo</span> <span class="id" title="var">Msg</span>)) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">calls</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">call</span> :: <span class="id" title="var">calls</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">party</span> := <span class="id" title="var">parties</span> (<span class="id" title="var">Blockchain.call_from</span> <span class="id" title="var">call</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">Blockchain.call_msg</span> <span class="id" title="var">call</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">signup</span> <span class="id" title="var">pk</span> <span class="id" title="var">prf</span> <span class="id" title="keyword">as</span> <span class="id" title="var">m</span>) =&gt; <span class="id" title="var">m</span> = <span class="id" title="var">make_signup_msg</span> (<span class="id" title="var">svi_sk</span> <span class="id" title="var">party</span>) (<span class="id" title="var">svi_sk_r</span> <span class="id" title="var">party</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">svi_index</span> <span class="id" title="var">party</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">submit_vote</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="keyword">as</span> <span class="id" title="var">m</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">m</span> = <span class="id" title="var">make_vote_msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">pks</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">svi_index</span> <span class="id" title="var">party</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">svi_sk</span> <span class="id" title="var">party</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">svi_sv</span> <span class="id" title="var">party</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">svi_sv_w</span> <span class="id" title="var">party</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">svi_sv_r</span> <span class="id" title="var">party</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">svi_sv_d</span> <span class="id" title="var">party</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">True</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> /\ <span class="id" title="var">MsgAssumption</span> <span class="id" title="var">pks</span> <span class="id" title="var">parties</span> <span class="id" title="var">calls</span><br/>
+&nbsp;&nbsp;| [] =&gt; <span class="id" title="var">True</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">signups</span> (<span class="id" title="var">calls</span> : <span class="id" title="var">list</span> (<span class="id" title="var">ContractCallInfo</span> <span class="id" title="var">Msg</span>)) : <span class="id" title="var">list</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">A</span>) :=<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;reverse&nbsp;the&nbsp;signups&nbsp;since&nbsp;the&nbsp;calls&nbsp;will&nbsp;have&nbsp;the&nbsp;last&nbsp;one&nbsp;at&nbsp;the&nbsp;head&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">rev</span> (<span class="id" title="var">map_option</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">call</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">Blockchain.call_msg</span> <span class="id" title="var">call</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">signup</span> <span class="id" title="var">pk</span> <span class="id" title="var">prf</span>) =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">Blockchain.call_from</span> <span class="id" title="var">call</span>, <span class="id" title="var">pk</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>) <span class="id" title="var">calls</span>).<br/>
+
+<br/>
+<span class="comment">(*&nbsp;The&nbsp;index&nbsp;map&nbsp;and&nbsp;public&nbsp;keys&nbsp;list&nbsp;provided&nbsp;also&nbsp;needs&nbsp;to&nbsp;match&nbsp;the<br/>
+&nbsp;&nbsp;&nbsp;order&nbsp;in&nbsp;which&nbsp;parties&nbsp;signed&nbsp;up&nbsp;in&nbsp;the&nbsp;contract.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">SignupOrderAssumption</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">pks</span> : <span class="id" title="var">list</span> <span class="id" title="var">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">parties</span> : <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">SecretVoterInfo</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">calls</span> : <span class="id" title="var">list</span> (<span class="id" title="var">ContractCallInfo</span> <span class="id" title="var">Msg</span>)) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">All</span> (<span class="id" title="keyword">fun</span> '((<span class="id" title="var">addr</span>, <span class="id" title="var">pk</span>), <span class="id" title="var">i</span>) =&gt; <span class="id" title="var">svi_index</span> (<span class="id" title="var">parties</span> <span class="id" title="var">addr</span>) = <span class="id" title="var">i</span> /\ <span class="id" title="var">nth_error</span> <span class="id" title="var">pks</span> <span class="id" title="var">i</span> = <span class="id" title="var">Some</span> <span class="id" title="var">pk</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">zip</span> (<span class="id" title="var">signups</span> <span class="id" title="var">calls</span>) (<span class="id" title="var">seq</span> 0 (<span class="id" title="var">length</span> (<span class="id" title="var">signups</span> <span class="id" title="var">calls</span>)))).<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">nat</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">no_outgoing</span> <span class="id" title="var">bstate</span> <span class="id" title="var">caddr</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">reachable</span> <span class="id" title="var">bstate</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">env_contracts</span> <span class="id" title="var">bstate</span> <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">boardroom_voting</span> : <span class="id" title="var">WeakContract</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">outgoing_acts</span> <span class="id" title="var">bstate</span> <span class="id" title="var">caddr</span> = [].<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">lift_outgoing_acts_nil</span> <span class="id" title="var">boardroom_voting</span>); <span class="id" title="tactic">try</span> <span class="id" title="var">easy</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">msg</span>|]; <span class="id" title="var">cbn</span> -[<span class="id" title="var">Nat.ltb</span>] <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">AddressMap.find</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">AddressMap.find</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> =? <span class="id" title="var">_</span>)%<span class="id" title="var">Z</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>)%<span class="id" title="var">Z</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">verify_secret_key_proof</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">finish_commit_by</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> -[<span class="id" title="var">Nat.ltb</span>] <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">AddressMap.find</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">AddressMap.find</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">finish_commit_by</span> <span class="id" title="var">_</span> <span class="id" title="keyword">then</span> <span class="id" title="var">_</span> <span class="id" title="keyword">else</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">verify_secret_vote_proof</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">tally</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">existsb</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">bruteforce_tally</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">congruence</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">Permutation_modify</span> <span class="id" title="var">k</span> <span class="id" title="var">vold</span> <span class="id" title="var">vnew</span> (<span class="id" title="var">m</span> : <span class="id" title="var">AddrMap</span> <span class="id" title="var">VoterInfo</span>) :<br/>
+&nbsp;&nbsp;<span class="id" title="var">FMap.find</span> <span class="id" title="var">k</span> <span class="id" title="var">m</span> = <span class="id" title="var">Some</span> <span class="id" title="var">vold</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">voter_index</span> <span class="id" title="var">vold</span> = <span class="id" title="var">voter_index</span> <span class="id" title="var">vnew</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">Permutation</span> (<span class="id" title="var">map</span> (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">_</span>, <span class="id" title="var">v</span>) =&gt; <span class="id" title="var">voter_index</span> <span class="id" title="var">v</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">FMap.elements</span> <span class="id" title="var">m</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">seq</span> 0 (<span class="id" title="var">FMap.size</span> <span class="id" title="var">m</span>)) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">Permutation</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">map</span> (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">_</span>, <span class="id" title="var">v0</span>) =&gt; <span class="id" title="var">voter_index</span> <span class="id" title="var">v0</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">FMap.elements</span> (<span class="id" title="var">FMap.add</span> <span class="id" title="var">k</span> <span class="id" title="var">vnew</span> <span class="id" title="var">m</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">seq</span> 0 (<span class="id" title="var">FMap.size</span> <span class="id" title="var">m</span>)).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">find_some</span> <span class="id" title="var">index</span> <span class="id" title="var">old_perm</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">old_perm</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- (<span class="id" title="var">FMap.add_id</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">find_some</span>) <span class="id" title="tactic">at</span> 2.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- (<span class="id" title="var">FMap.add_remove</span> <span class="id" title="var">k</span> <span class="id" title="var">vold</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">FMap.elements_add_existing</span> <span class="id" title="var">k</span> <span class="id" title="var">vold</span> <span class="id" title="var">vnew</span>) <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.elements_add</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">index</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">all_signups</span> <span class="id" title="var">pks</span> <span class="id" title="var">parties</span> <span class="id" title="var">calls</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">SignupOrderAssumption</span> <span class="id" title="var">pks</span> <span class="id" title="var">parties</span> <span class="id" title="var">calls</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">length</span> (<span class="id" title="var">signups</span> <span class="id" title="var">calls</span>) = <span class="id" title="var">length</span> <span class="id" title="var">pks</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">map</span> <span class="id" title="var">snd</span> (<span class="id" title="var">signups</span> <span class="id" title="var">calls</span>) = <span class="id" title="var">pks</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">order</span> <span class="id" title="var">len_signups</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">SignupOrderAssumption</span> <span class="id" title="tactic">in</span> <span class="id" title="var">order</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="var">parties</span> <span class="id" title="var">pks</span> <span class="id" title="var">len_signups</span> <span class="id" title="var">order</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> (<span class="id" title="var">signups</span> <span class="id" title="var">calls</span>) <span class="id" title="keyword">as</span> [|[<span class="id" title="var">addr</span> <span class="id" title="var">pk</span>] <span class="id" title="var">xs</span> <span class="id" title="var">IH</span>]; <span class="id" title="tactic">intros</span> <span class="id" title="var">parties</span> <span class="id" title="var">pks</span> <span class="id" title="var">len_signups</span> <span class="id" title="var">order</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> <span class="id" title="var">pks</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">pks</span> <span class="id" title="keyword">as</span> [|<span class="id" title="var">pk'</span> <span class="id" title="var">pks</span>]; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">order</span> <span class="id" title="keyword">as</span> [[<span class="id" title="var">index_eq</span> <span class="id" title="var">nth_eq</span>] <span class="id" title="var">all</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">f_equal</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">IH</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">addr</span> =&gt; (<span class="id" title="var">parties</span> <span class="id" title="var">addr</span>)&lt;|<span class="id" title="var">svi_index</span> ::= <span class="id" title="keyword">fun</span> <span class="id" title="var">i</span> =&gt; <span class="id" title="var">i</span> - 1|&gt;));<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">clear</span> -<span class="id" title="var">all</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- (<span class="id" title="var">map_id</span> <span class="id" title="var">xs</span>) <span class="id" title="tactic">in</span> <span class="id" title="var">all</span> <span class="id" title="tactic">at</span> 1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">seq_shift</span> <span class="id" title="tactic">in</span> <span class="id" title="var">all</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">zip_map</span> <span class="id" title="tactic">in</span> <span class="id" title="var">all</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">All_map</span> <span class="id" title="tactic">in</span> <span class="id" title="var">all</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> (<span class="id" title="var">All_ext_in</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">all</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">a</span>, <span class="id" title="var">p</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [|<span class="id" title="tactic">tauto</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H1</span>; <span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">broom</span>.<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">elmeqb_eq</span> (<span class="id" title="var">a</span> <span class="id" title="var">a'</span> : <span class="id" title="var">A</span>) :<br/>
+&nbsp;&nbsp;(<span class="id" title="var">a</span> =? <span class="id" title="var">a'</span>) = <span class="id" title="var">true</span> &lt;-&gt; <span class="id" title="var">a</span> == <span class="id" title="var">a'</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">elmeqb_spec</span> <span class="id" title="var">a</span> <span class="id" title="var">a'</span>); [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="tactic">congruence</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Hint Resolve</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">pow_nonzero</span> <span class="id" title="var">generator_nonzero</span> <span class="id" title="var">int_domain</span> <span class="id" title="var">generator_nonzero</span> <span class="id" title="var">compute_public_key_unit</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">reconstructed_key_unit</span><br/>
+&nbsp;&nbsp;: <span class="id" title="var">broom</span>.<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">verify_secret_key_proof_spec</span> <span class="id" title="var">sk</span> <span class="id" title="var">v</span> <span class="id" title="var">i</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">verify_secret_key_proof</span> (<span class="id" title="var">compute_public_key</span> <span class="id" title="var">sk</span>) <span class="id" title="var">i</span> (<span class="id" title="var">secret_key_proof</span> <span class="id" title="var">sk</span> <span class="id" title="var">v</span> <span class="id" title="var">i</span>) = <span class="id" title="var">true</span>.<br/>
+<span class="id" title="keyword">Proof</span> <span class="id" title="keyword">with</span> <span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">broom</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">elmeqb_eq</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">log_both</span>...<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">log_pow</span>...<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">log_mul</span>...<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> "exp=".<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">order</span> - 1 &lt;&gt; 0)%<span class="id" title="var">Z</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> <span class="id" title="var">order_ge_2</span>; <span class="id" title="var">lia</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.add_mod</span>...<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> !<span class="id" title="var">log_pow</span>...<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">log_generator</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> !<span class="id" title="var">Z.mul_1_r</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">compute_public_key</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">Z.mul_mod_idemp_r</span>...<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">log_pow</span>...<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">log_generator</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.mul_1_r</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.mul_mod_idemp_r</span>...<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">Z.add_mod</span>...<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">f_equal</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">verify_secret_vote_proof_spec</span> <span class="id" title="var">sk</span> <span class="id" title="var">pks</span> <span class="id" title="var">sv</span> <span class="id" title="var">i</span> <span class="id" title="var">w</span> <span class="id" title="var">r</span> <span class="id" title="var">d</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">All</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">pk</span> =&gt; <span class="id" title="var">pk</span> !== 0) <span class="id" title="var">pks</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">verify_secret_vote_proof</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">compute_public_key</span> <span class="id" title="var">sk</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">reconstructed_key</span> <span class="id" title="var">pks</span> <span class="id" title="var">i</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">compute_public_vote</span> (<span class="id" title="var">reconstructed_key</span> <span class="id" title="var">pks</span> <span class="id" title="var">i</span>) <span class="id" title="var">sk</span> <span class="id" title="var">sv</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">i</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">secret_vote_proof</span> <span class="id" title="var">sk</span> (<span class="id" title="var">reconstructed_key</span> <span class="id" title="var">pks</span> <span class="id" title="var">i</span>) <span class="id" title="var">sv</span> <span class="id" title="var">i</span> <span class="id" title="var">w</span> <span class="id" title="var">r</span> <span class="id" title="var">d</span>) = <span class="id" title="var">true</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">all_units</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">set</span> (<span class="id" title="var">rk</span> := <span class="id" title="var">reconstructed_key</span> <span class="id" title="var">pks</span> <span class="id" title="var">i</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">verify_secret_vote_proof</span>, <span class="id" title="var">secret_vote_proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">sv</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">set</span> (<span class="id" title="var">h</span> := <span class="id" title="var">hash_sv_data</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Zplus_minus</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Pos.eqb_refl</span>, !<span class="id" title="var">elmeqb_refl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">compute_public_key</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">pow_pow</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">broom</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">pow_plus</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">broom</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.sub_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">elmeqb_refl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">compute_public_vote</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- (<span class="id" title="var">mul_assoc</span> (<span class="id" title="var">rk</span>^<span class="id" title="var">sk</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">mul_comm</span> <span class="id" title="var">generator</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">inv_inv_l</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">broom</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">mul_comm</span> (<span class="id" title="var">rk</span>^<span class="id" title="var">sk</span>)), <span class="id" title="var">mul_1_l</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">pow_pow</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">subst</span> <span class="id" title="var">rk</span>; <span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">broom</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">pow_plus</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">subst</span> <span class="id" title="var">rk</span>; <span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">broom</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.sub_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">elmeqb_refl</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">set</span> (<span class="id" title="var">h</span> := <span class="id" title="var">hash_sv_data</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.sub_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Pos.eqb_refl</span>, !<span class="id" title="var">elmeqb_refl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">compute_public_key</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">pow_pow</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">broom</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">pow_plus</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">broom</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.sub_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">elmeqb_refl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">compute_public_vote</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">mul_comm</span> (<span class="id" title="var">rk</span>^<span class="id" title="var">sk</span>)), <span class="id" title="var">mul_1_l</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">pow_pow</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">subst</span> <span class="id" title="var">rk</span>; <span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">broom</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">pow_plus</span> <span class="id" title="tactic">by</span> (<span class="id" title="tactic">subst</span> <span class="id" title="var">rk</span>; <span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">broom</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.sub_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">elmeqb_refl</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local</span> <span class="id" title="keyword">Set</span> <span class="id" title="var">Keyed</span> <span class="id" title="var">Unification</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">has_tallied</span> (<span class="id" title="var">calls</span> : <span class="id" title="var">list</span> (<span class="id" title="var">ContractCallInfo</span> <span class="id" title="var">Msg</span>)) : <span class="id" title="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">existsb</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">c</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">Blockchain.call_msg</span> <span class="id" title="var">c</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">tally_votes</span> =&gt; <span class="id" title="var">true</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>) <span class="id" title="var">calls</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <span class="id" title="var">boardroom_voting_correct_strong</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">bstate</span> : <span class="id" title="var">ChainState</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">caddr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">trace</span> : <span class="id" title="var">ChainTrace</span> <span class="id" title="var">empty_state</span> <span class="id" title="var">bstate</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">parties</span> : <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">SecretVoterInfo</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">pks</span> : <span class="id" title="var">list</span> <span class="id" title="var">A</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">env_contracts</span> <span class="id" title="var">bstate</span> <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">boardroom_voting</span> : <span class="id" title="var">WeakContract</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> (<span class="id" title="var">cstate</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">depinfo</span> : <span class="id" title="var">DeploymentInfo</span> <span class="id" title="var">Setup</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">inc_calls</span> : <span class="id" title="var">list</span> (<span class="id" title="var">ContractCallInfo</span> <span class="id" title="var">Msg</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">deployment_info</span> <span class="id" title="var">Setup</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> <span class="id" title="var">depinfo</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_state</span> <span class="id" title="var">bstate</span> <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> <span class="id" title="var">cstate</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">incoming_calls</span> <span class="id" title="var">Msg</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> <span class="id" title="var">inc_calls</span> /\<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">finish_registration_by</span> (<span class="id" title="var">setup</span> <span class="id" title="var">cstate</span>) &lt; <span class="id" title="var">finish_vote_by</span> (<span class="id" title="var">setup</span> <span class="id" title="var">cstate</span>) /\<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Blockchain.current_slot</span> <span class="id" title="var">bstate</span> &lt; <span class="id" title="var">finish_vote_by</span> (<span class="id" title="var">setup</span> <span class="id" title="var">cstate</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">has_tallied</span> <span class="id" title="var">inc_calls</span> = <span class="id" title="var">false</span>) /\<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">length</span> (<span class="id" title="var">public_keys</span> <span class="id" title="var">cstate</span>) = <span class="id" title="var">FMap.size</span> (<span class="id" title="var">registered_voters</span> <span class="id" title="var">cstate</span>) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">public_keys</span> <span class="id" title="var">cstate</span> = <span class="id" title="var">map</span> <span class="id" title="var">snd</span> (<span class="id" title="var">signups</span> <span class="id" title="var">inc_calls</span>) /\<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Z.of_nat</span> (<span class="id" title="var">length</span> (<span class="id" title="var">public_keys</span> <span class="id" title="var">cstate</span>)) &lt; <span class="id" title="var">order</span> - 1)%<span class="id" title="var">Z</span> /\<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">MsgAssumption</span> <span class="id" title="var">pks</span> <span class="id" title="var">parties</span> <span class="id" title="var">inc_calls</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">SignupOrderAssumption</span> <span class="id" title="var">pks</span> <span class="id" title="var">parties</span> <span class="id" title="var">inc_calls</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">finish_registration_by</span> (<span class="id" title="var">setup</span> <span class="id" title="var">cstate</span>) &lt; <span class="id" title="var">Blockchain.current_slot</span> <span class="id" title="var">bstate</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">length</span> <span class="id" title="var">pks</span> = <span class="id" title="var">length</span> (<span class="id" title="var">signups</span> <span class="id" title="var">inc_calls</span>)) -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Permutation</span> (<span class="id" title="var">map</span> (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">_</span>, <span class="id" title="var">v</span>) =&gt; <span class="id" title="var">voter_index</span> <span class="id" title="var">v</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">FMap.elements</span> (<span class="id" title="var">registered_voters</span> <span class="id" title="var">cstate</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">seq</span> 0 (<span class="id" title="var">length</span> (<span class="id" title="var">public_keys</span> <span class="id" title="var">cstate</span>))) /\<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Permutation</span> (<span class="id" title="var">FMap.keys</span> (<span class="id" title="var">registered_voters</span> <span class="id" title="var">cstate</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">map</span> <span class="id" title="var">fst</span> (<span class="id" title="var">signups</span> <span class="id" title="var">inc_calls</span>)) /\<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">addr</span> <span class="id" title="var">inf</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">FMap.find</span> <span class="id" title="var">addr</span> (<span class="id" title="var">registered_voters</span> <span class="id" title="var">cstate</span>) = <span class="id" title="var">Some</span> <span class="id" title="var">inf</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">voter_index</span> <span class="id" title="var">inf</span> &lt; <span class="id" title="var">length</span> (<span class="id" title="var">public_keys</span> <span class="id" title="var">cstate</span>) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">voter_index</span> <span class="id" title="var">inf</span> = <span class="id" title="var">svi_index</span> (<span class="id" title="var">parties</span> <span class="id" title="var">addr</span>) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">nth_error</span> (<span class="id" title="var">public_keys</span> <span class="id" title="var">cstate</span>) (<span class="id" title="var">voter_index</span> <span class="id" title="var">inf</span>) =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">compute_public_key</span> (<span class="id" title="var">svi_sk</span> (<span class="id" title="var">parties</span> <span class="id" title="var">addr</span>))) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">public_vote</span> <span class="id" title="var">inf</span> == <span class="id" title="var">zero</span> \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">public_vote</span> <span class="id" title="var">inf</span> = <span class="id" title="var">compute_public_vote</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">reconstructed_key</span> <span class="id" title="var">pks</span> (<span class="id" title="var">voter_index</span> <span class="id" title="var">inf</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">svi_sk</span> (<span class="id" title="var">parties</span> <span class="id" title="var">addr</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">svi_sv</span> (<span class="id" title="var">parties</span> <span class="id" title="var">addr</span>)))) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((<span class="id" title="var">has_tallied</span> <span class="id" title="var">inc_calls</span> = <span class="id" title="var">false</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tally</span> <span class="id" title="var">cstate</span> = <span class="id" title="var">None</span>) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">has_tallied</span> <span class="id" title="var">inc_calls</span> = <span class="id" title="var">true</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tally</span> <span class="id" title="var">cstate</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">sumnat</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">party</span> =&gt; <span class="id" title="keyword">if</span> <span class="id" title="var">svi_sv</span> (<span class="id" title="var">parties</span> <span class="id" title="var">party</span>) <span class="id" title="keyword">then</span> 1 <span class="id" title="keyword">else</span> 0)%<span class="id" title="var">nat</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">map</span> <span class="id" title="var">fst</span> (<span class="id" title="var">signups</span> <span class="id" title="var">inc_calls</span>)))))).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">contract_induction</span>; <span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;- [<span class="id" title="var">AddBlockFacts</span>]: <span class="id" title="tactic">exact</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">old_slot</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">new_slot</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">old_slot</span> &lt; <span class="id" title="var">new_slot</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">AddBlockFacts</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> <span class="id" title="var">facts</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">destruct_and_split</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">tauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">eauto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">intros</span>; <span class="id" title="tactic">eauto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">cbn</span> -[<span class="id" title="var">Nat.ltb</span>] <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">ltb</span>; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.ltb_lt</span> <span class="id" title="tactic">in</span> <span class="id" title="var">ltb</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion_clear</span> <span class="id" title="var">init_some</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">symmetry</span>; <span class="id" title="tactic">apply</span> <span class="id" title="var">FMap.size_empty</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">auto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> <span class="id" title="var">order_ge_2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">FMap.keys</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">AddressMap.empty</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> @<span class="id" title="var">FMap.elements_empty</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">auto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">auto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [|<span class="id" title="var">easy</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> ? ? <span class="id" title="var">find</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> @<span class="id" title="var">FMap.find_empty</span> <span class="id" title="tactic">in</span> <span class="id" title="var">find</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="var">cbn</span> -[<span class="id" title="var">Nat.ltb</span>] <span class="id" title="tactic">in</span> <span class="id" title="var">receive_some</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">msg</span>|]; <span class="id" title="var">cbn</span> -[<span class="id" title="var">Nat.ltb</span>] <span class="id" title="tactic">in</span> *; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">AddressMap.add</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">unfold</span> <span class="id" title="var">AddressMap.find</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;signup&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>)%<span class="id" title="var">nat</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">intime</span> <span class="id" title="tactic">in</span> <span class="id" title="var">receive_some</span>; <span class="id" title="var">cbn</span> -[<span class="id" title="var">Nat.ltb</span>] <span class="id" title="tactic">in</span> *; [<span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.ltb_ge</span> <span class="id" title="tactic">in</span> <span class="id" title="var">intime</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">FMap.find</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="tactic">in</span> <span class="id" title="var">receive_some</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">FMap.find</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">new</span> <span class="id" title="tactic">in</span> <span class="id" title="var">receive_some</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [<span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> =? <span class="id" title="var">_</span>)%<span class="id" title="var">Z</span> <span class="id" title="tactic">in</span> <span class="id" title="var">receive_some</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>)%<span class="id" title="var">Z</span> <span class="id" title="var">eqn</span>:<span class="id" title="var">lt</span> <span class="id" title="tactic">in</span> <span class="id" title="var">receive_some</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">verify_secret_key_proof</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">verify_zkp</span> <span class="id" title="tactic">in</span> <span class="id" title="var">receive_some</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion_clear</span> <span class="id" title="var">receive_some</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">app_length</span>, <span class="id" title="var">FMap.size_add_new</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>; <span class="id" title="var">cbn</span>; <span class="id" title="var">lia</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Z.ltb_lt</span> <span class="id" title="tactic">in</span> <span class="id" title="var">lt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">app_length</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">fold</span> (<span class="id" title="var">has_tallied</span> <span class="id" title="var">prev_inc_calls</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">fold</span> (<span class="id" title="var">signups</span> <span class="id" title="var">prev_inc_calls</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">app_length</span>, <span class="id" title="var">map_app</span>; <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="var">destruct_and_split</span>; <span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">signup_assum</span> <span class="id" title="var">msg_assum</span>] <span class="id" title="var">order_assum</span> <span class="id" title="var">num_signups_assum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">reg_lt</span> &amp; <span class="id" title="var">cur_lt</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">pks_signups</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">IH</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unshelve</span> <span class="id" title="var">epose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">IH</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">IH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">rewrite</span> <span class="id" title="var">seq_app</span> <span class="id" title="tactic">in</span> <span class="id" title="var">order_assum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">zip_app</span> <span class="id" title="tactic">in</span> <span class="id" title="var">order_assum</span> <span class="id" title="tactic">by</span> (<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">seq_length</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">All_app</span> <span class="id" title="tactic">in</span> <span class="id" title="var">order_assum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">tauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">perm</span> &amp; <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.elements_add</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">seq_app</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">perm_simplify</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">_</span> &amp; <span class="id" title="var">perm</span> &amp; <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">map_app</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">FMap.keys</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.elements_add</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="var">perm_simplify</span>. }<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="var">cycle</span> 1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="var">easy</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">tallied</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">cur_lt</span> <span class="id" title="keyword">ltac</span>:(<span class="id" title="var">lia</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">addr</span> <span class="id" title="var">inf</span> <span class="id" title="var">find_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_eqb_spec</span> <span class="id" title="var">addr</span> (<span class="id" title="var">ctx_from</span> <span class="id" title="var">ctx</span>)) <span class="id" title="keyword">as</span> [-&gt;|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id" title="tactic">rewrite</span> (<span class="id" title="var">FMap.find_add</span> (<span class="id" title="var">ctx_from</span> <span class="id" title="var">ctx</span>)) <span class="id" title="tactic">in</span> <span class="id" title="var">find_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion_clear</span> <span class="id" title="var">find_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">make_signup_msg</span> <span class="id" title="tactic">in</span> <span class="id" title="var">signup_assum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">nth_error_snoc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">seq_app</span>, <span class="id" title="var">zip_app</span> <span class="id" title="tactic">in</span> <span class="id" title="var">order_assum</span> <span class="id" title="tactic">by</span> (<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">seq_length</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">All_app</span> <span class="id" title="tactic">in</span> <span class="id" title="var">order_assum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> <span class="id" title="var">order_assum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">order_assum</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">_</span> []].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">pks_signups</span>, <span class="id" title="var">map_length</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">symmetry</span>; <span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">left</span>; <span class="id" title="var">easy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- <span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.find_add_ne</span> <span class="id" title="tactic">in</span> <span class="id" title="var">find_add</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">_</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">IH</span> &amp; <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">IH</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">find_add</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">nth_error_app1</span> <span class="id" title="tactic">by</span> <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;commit_to_vote&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">finish_commit_by</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> -[<span class="id" title="var">Nat.ltb</span>] <span class="id" title="tactic">in</span> *; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [<span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">AddressMap.find</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">FMap.find</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">found</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion_clear</span> <span class="id" title="var">receive_some</span>; <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">AddressMap.add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{  <span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.size_add_existing</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">congruence</span>; <span class="id" title="tactic">tauto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">_</span> <span class="id" title="var">msg_assum</span>] <span class="id" title="var">order_assum</span> <span class="id" title="var">num_signups_assum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">_</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">len_pks</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">IH</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">IH</span> <span class="id" title="var">msg_assum</span> <span class="id" title="var">order_assum</span> <span class="id" title="var">num_signups_assum</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">setoid_rewrite</span> (<span class="id" title="var">FMap.keys_already</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">found</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">perm</span> &amp; <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">len_pks</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Permutation_modify</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">vold</span> := <span class="id" title="var">v</span>); <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [|<span class="id" title="tactic">tauto</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">addr</span> <span class="id" title="var">inf</span> <span class="id" title="var">find_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">AddressMap.add</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">_</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">IH</span> &amp; <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_eqb_spec</span> <span class="id" title="var">addr</span> (<span class="id" title="var">ctx_from</span> <span class="id" title="var">ctx</span>)) <span class="id" title="keyword">as</span> [-&gt;|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.find_add</span> <span class="id" title="tactic">in</span> <span class="id" title="var">find_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion_clear</span> <span class="id" title="var">find_add</span>; <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.find_add_ne</span> <span class="id" title="tactic">in</span> <span class="id" title="var">find_add</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;submit_vote&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> -[<span class="id" title="var">Nat.ltb</span>] <span class="id" title="tactic">in</span> *; [<span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">AddressMap.find</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">FMap.find</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">found</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="keyword">if</span> <span class="id" title="var">finish_commit_by</span> <span class="id" title="var">_</span> <span class="id" title="keyword">then</span> <span class="id" title="var">_</span> <span class="id" title="keyword">else</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">verify_secret_vote_proof</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion_clear</span> <span class="id" title="var">receive_some</span>; <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.size_add_existing</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> [<span class="id" title="var">vote_assum</span> <span class="id" title="var">msg_assum</span>] <span class="id" title="var">order_assum</span> <span class="id" title="var">num_signups_assum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">_</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">len_pks</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">IH</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">IH</span> <span class="id" title="var">msg_assum</span> <span class="id" title="var">order_assum</span> <span class="id" title="var">num_signups_assum</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">setoid_rewrite</span> (<span class="id" title="var">FMap.keys_already</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">found</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">perm</span> &amp; <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">len_pks</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Permutation_modify</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">vold</span> := <span class="id" title="var">v0</span>); <span class="id" title="tactic">auto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [|<span class="id" title="tactic">tauto</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">addr</span> <span class="id" title="var">inf</span> <span class="id" title="var">find_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">_</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">IH</span> &amp; <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_eqb_spec</span> <span class="id" title="var">addr</span> (<span class="id" title="var">ctx_from</span> <span class="id" title="var">ctx</span>)) <span class="id" title="keyword">as</span> [-&gt;|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.find_add</span> <span class="id" title="tactic">in</span> <span class="id" title="var">find_add</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion_clear</span> <span class="id" title="var">find_add</span>; <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">IH</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">found</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">split</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">tauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">make_vote_msg</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">vote_assum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">destruct_hyps</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">replace</span> (<span class="id" title="var">svi_index</span> (<span class="id" title="var">parties</span> (<span class="id" title="var">ctx_from</span> <span class="id" title="var">ctx</span>))) <span class="id" title="keyword">with</span> (<span class="id" title="var">voter_index</span> <span class="id" title="var">v0</span>) <span class="id" title="tactic">by</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">easy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.find_add_ne</span> <span class="id" title="tactic">in</span> <span class="id" title="var">find_add</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;tally_votes&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_</span> &lt;? <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">intime</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [<span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">tally</span> <span class="id" title="var">prev_state</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [<span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">existsb</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">all_voted</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; [<span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">bruteforce_tally</span> <span class="id" title="var">_</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">bruteforce</span>; <span class="id" title="var">cbn</span> -[<span class="id" title="var">Nat.ltb</span>] <span class="id" title="tactic">in</span> *; [|<span class="id" title="tactic">congruence</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion_clear</span> <span class="id" title="var">receive_some</span>; <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.ltb_ge</span> <span class="id" title="tactic">in</span> <span class="id" title="var">intime</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">intros</span>; <span class="id" title="var">lia</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> (<span class="id" title="var">_</span> &amp; <span class="id" title="var">msg_assum</span>) <span class="id" title="var">order_assum</span> <span class="id" title="var">num_signups_assum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="tactic">tauto</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [<span class="id" title="var">easy</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">_</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="tactic">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">finish_before_vote</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">len_pks</span> &amp; <span class="id" title="var">pks_signups</span> &amp; <span class="id" title="var">party_count</span> &amp; <span class="id" title="var">IH</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">IH</span> <span class="id" title="var">msg_assum</span> <span class="id" title="var">order_assum</span> <span class="id" title="var">num_signups_assum</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">IH</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">perm</span> &amp; <span class="id" title="var">perm'</span> &amp; <span class="id" title="var">addrs</span> &amp; <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">AddressMap.values</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">FMap.values</span> <span class="id" title="tactic">in</span> <span class="id" title="var">bruteforce</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">map_map</span> <span class="id" title="tactic">in</span> <span class="id" title="var">bruteforce</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">map_ext_in</span> <span class="id" title="var">_</span> (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">_</span>, <span class="id" title="var">v</span>) =&gt; <span class="id" title="var">public_vote</span> <span class="id" title="var">v</span>)) <span class="id" title="tactic">in</span> <span class="id" title="var">bruteforce</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> (<span class="id" title="var">now</span> <span class="id" title="tactic">intros</span> []).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">bruteforce_tally_correct</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">FMap.elements</span> (<span class="id" title="var">registered_voters</span> <span class="id" title="var">prev_state</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">_</span>, <span class="id" title="var">v</span>) =&gt; <span class="id" title="var">voter_index</span> <span class="id" title="var">v</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">addr</span>, <span class="id" title="var">_</span>) =&gt; <span class="id" title="var">svi_sk</span> (<span class="id" title="var">parties</span> <span class="id" title="var">addr</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">public_keys</span> <span class="id" title="var">prev_state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">kvp</span> =&gt; <span class="id" title="var">svi_sv</span> (<span class="id" title="var">parties</span> (<span class="id" title="var">fst</span> <span class="id" title="var">kvp</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">_</span>, <span class="id" title="var">v</span>) =&gt; <span class="id" title="var">public_vote</span> <span class="id" title="var">v</span>)) <span class="id" title="tactic">in</span> <span class="id" title="var">bruteforce</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">inversion</span> <span class="id" title="var">bruteforce</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- (<span class="id" title="var">sumnat_map</span> <span class="id" title="var">fst</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">a</span> =&gt; <span class="id" title="keyword">if</span> <span class="id" title="var">svi_sv</span> (<span class="id" title="var">parties</span> <span class="id" title="var">a</span>) <span class="id" title="keyword">then</span> 1 <span class="id" title="keyword">else</span> 0))%<span class="id" title="var">nat</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">setoid_rewrite</span> <span class="id" title="var">perm'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.length_elements</span>, &lt;- <span class="id" title="var">len_pks</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">FMap.length_elements</span>, &lt;- <span class="id" title="var">len_pks</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">intros</span> [<span class="id" title="var">k</span> <span class="id" title="var">v</span>] <span class="id" title="var">kvpin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">FMap.In_elements</span> <span class="id" title="tactic">in</span> <span class="id" title="var">kvpin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">addrs</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">kvpin</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">tauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">intros</span> [<span class="id" title="var">k</span> <span class="id" title="var">v</span>] <span class="id" title="var">kvpin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">existsb_forallb</span> <span class="id" title="tactic">in</span> <span class="id" title="var">all_voted</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.negb_false_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">all_voted</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">forallb_forall</span> <span class="id" title="tactic">in</span> <span class="id" title="var">all_voted</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unshelve</span> <span class="id" title="var">epose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">all_voted</span> <span class="id" title="var">v</span> <span class="id" title="var">_</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">all_voted</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">in_map_iff</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> (<span class="id" title="var">k</span>, <span class="id" title="var">v</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">tauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Bool.negb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">all_voted</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">elmeqb_spec</span> (<span class="id" title="var">public_vote</span> <span class="id" title="var">v</span>) <span class="id" title="var">zero</span>); [<span class="id" title="tactic">congruence</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">FMap.In_elements</span> <span class="id" title="tactic">in</span> <span class="id" title="var">kvpin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">addrs</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">kvpin</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">addrs</span> <span class="id" title="keyword">as</span> (<span class="id" title="var">_</span> &amp; <span class="id" title="var">_</span> &amp; <span class="id" title="var">_</span> &amp; []); [<span class="id" title="var">easy</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">fold</span> (<span class="id" title="var">signups</span> <span class="id" title="var">prev_inc_calls</span>) (<span class="id" title="var">SignupOrderAssumption</span> <span class="id" title="var">pks</span> <span class="id" title="var">parties</span> <span class="id" title="var">prev_inc_calls</span>) <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">pks_signups</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">num_signups_assum</span> <span class="id" title="keyword">ltac</span>:(<span class="id" title="var">lia</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> (<span class="id" title="var">all_signups</span> <span class="id" title="var">pks</span> <span class="id" title="var">parties</span>) <span class="id" title="tactic">by</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- [<span class="id" title="var">CallFacts</span>]: <span class="id" title="tactic">exact</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">ctx</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">ctx_from</span> <span class="id" title="var">ctx</span> &lt;&gt; <span class="id" title="var">ctx_contract_address</span> <span class="id" title="var">ctx</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">CallFacts</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;- [<span class="id" title="var">DeployFacts</span>]: <span class="id" title="tactic">exact</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">True</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unset_all</span>; <span class="id" title="tactic">subst</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">destruct_chain_step</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> <span class="id" title="var">valid_header</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">destruct_action_eval</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">pose</span> <span class="id" title="var">proof</span> (<span class="id" title="var">no_outgoing</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">from_reachable</span> <span class="id" title="var">H0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">outgoing_acts</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">queue_prev</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_eqb_spec</span> (<span class="id" title="var">act_from</span> <span class="id" title="var">act</span>) <span class="id" title="var">to_addr</span>); <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">congruence</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <span class="id" title="var">boardroom_voting_correct</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">bstate</span> : <span class="id" title="var">ChainState</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">caddr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">trace</span> : <span class="id" title="var">ChainTrace</span> <span class="id" title="var">empty_state</span> <span class="id" title="var">bstate</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;list&nbsp;of&nbsp;all&nbsp;public&nbsp;keys,&nbsp;in&nbsp;the&nbsp;order&nbsp;of&nbsp;signups&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">pks</span> : <span class="id" title="var">list</span> <span class="id" title="var">A</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;function&nbsp;mapping&nbsp;a&nbsp;party&nbsp;to&nbsp;information&nbsp;about&nbsp;him&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">parties</span> : <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">SecretVoterInfo</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">env_contracts</span> <span class="id" title="var">bstate</span> <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">boardroom_voting</span> : <span class="id" title="var">WeakContract</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> (<span class="id" title="var">cstate</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">depinfo</span> : <span class="id" title="var">DeploymentInfo</span> <span class="id" title="var">Setup</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">inc_calls</span> : <span class="id" title="var">list</span> (<span class="id" title="var">ContractCallInfo</span> <span class="id" title="var">Msg</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">deployment_info</span> <span class="id" title="var">Setup</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> <span class="id" title="var">depinfo</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_state</span> <span class="id" title="var">bstate</span> <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> <span class="id" title="var">cstate</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">incoming_calls</span> <span class="id" title="var">Msg</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> <span class="id" title="var">inc_calls</span> /\<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;assuming&nbsp;that&nbsp;the&nbsp;message&nbsp;sent&nbsp;were&nbsp;created&nbsp;with&nbsp;the<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;functions&nbsp;provided&nbsp;by&nbsp;this&nbsp;smart&nbsp;contract&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">MsgAssumption</span> <span class="id" title="var">pks</span> <span class="id" title="var">parties</span> <span class="id" title="var">inc_calls</span> -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;..and&nbsp;that&nbsp;people&nbsp;signed&nbsp;up&nbsp;in&nbsp;the&nbsp;order&nbsp;given&nbsp;by&nbsp;'index'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;'pks'&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">SignupOrderAssumption</span> <span class="id" title="var">pks</span> <span class="id" title="var">parties</span> <span class="id" title="var">inc_calls</span> -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;..and&nbsp;that&nbsp;the&nbsp;correct&nbsp;number&nbsp;of&nbsp;people&nbsp;register&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">finish_registration_by</span> (<span class="id" title="var">setup</span> <span class="id" title="var">cstate</span>) &lt; <span class="id" title="var">Blockchain.current_slot</span> <span class="id" title="var">bstate</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">length</span> <span class="id" title="var">pks</span> = <span class="id" title="var">length</span> (<span class="id" title="var">signups</span> <span class="id" title="var">inc_calls</span>)) -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;then&nbsp;if&nbsp;we&nbsp;have&nbsp;not&nbsp;tallied&nbsp;yet,&nbsp;the&nbsp;tally&nbsp;is&nbsp;none&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((<span class="id" title="var">has_tallied</span> <span class="id" title="var">inc_calls</span> = <span class="id" title="var">false</span> -&gt; <span class="id" title="var">tally</span> <span class="id" title="var">cstate</span> = <span class="id" title="var">None</span>) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;or&nbsp;if&nbsp;we&nbsp;have&nbsp;tallied&nbsp;yet,&nbsp;the&nbsp;tally&nbsp;is&nbsp;correct&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">has_tallied</span> <span class="id" title="var">inc_calls</span> = <span class="id" title="var">true</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tally</span> <span class="id" title="var">cstate</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">sumnat</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">party</span> =&gt; <span class="id" title="keyword">if</span> <span class="id" title="var">svi_sv</span> (<span class="id" title="var">parties</span> <span class="id" title="var">party</span>) <span class="id" title="keyword">then</span> 1 <span class="id" title="keyword">else</span> 0)%<span class="id" title="var">nat</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">map</span> <span class="id" title="var">fst</span> (<span class="id" title="var">signups</span> <span class="id" title="var">inc_calls</span>))))).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">deployed</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">boardroom_voting_correct_strong</span> <span class="id" title="var">bstate</span> <span class="id" title="var">caddr</span> <span class="id" title="var">trace</span> <span class="id" title="var">parties</span> <span class="id" title="var">pks</span> <span class="id" title="var">deployed</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">as</span> (<span class="id" title="var">cstate</span> &amp; <span class="id" title="var">depinfo</span> &amp; <span class="id" title="var">inc_calls</span> &amp; <span class="id" title="var">P</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">cstate</span>, <span class="id" title="var">depinfo</span>, <span class="id" title="var">inc_calls</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">tauto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Theories</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">BoardroomVoting</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

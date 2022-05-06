@@ -1,0 +1,400 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.counter.extraction.CounterSubsetTypes</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab232"></a><h1 class="section">Extraction of a counter contract with subset types to Liquidity and CameLIGO</h1>
+
+<div class="paragraph"> </div>
+
+ The contract uses refinement types to specify some functional correctness properties 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Notations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">PreludeExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">CameLIGOExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">CameLIGOPretty</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">LPretty</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">LiquidityExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Common</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Automation</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Bool</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Lia</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">CounterRefinementTypes</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Enabling recursors for records allows for deriving <span class="inlinecode"><a class="idref" href="ConCert.Execution.Serializable.html#Serializable"><span class="id" title="record">Serializable</span></a></span> instances. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Set</span> <span class="id" title="var">Nonrecursive</span> <span class="id" title="var">Elimination</span> <span class="id" title="var">Schemes</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> <span class="id" title="var">address</span> := <span class="id" title="var">nat</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Transaction</span> := <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Transaction_none</span> : <span class="id" title="var">Transaction</span> := [].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">storage</span> := <span class="id" title="var">Z</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">init</span> (<span class="id" title="var">ctx</span> : <span class="id" title="var">SimpleCallCtx</span>) (<span class="id" title="var">setup</span> : <span class="id" title="var">Z</span>) : <span class="id" title="var">option</span> <span class="id" title="var">storage</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ctx_</span> := <span class="id" title="var">ctx</span> <span class="id" title="tactic">in</span> <span class="comment">(*&nbsp;prevents&nbsp;optimisations&nbsp;from&nbsp;removing&nbsp;unused&nbsp;<span class="inlinecode"><span class="id" title="var">ctx</span></span>&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> <span class="id" title="var">setup</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Inductive</span> <span class="id" title="var">msg</span> := <span class="id" title="var">Inc</span> (<span class="id" title="var">_</span> : <span class="id" title="var">Z</span>) | <span class="id" title="var">Dec</span> (<span class="id" title="var">_</span> : <span class="id" title="var">Z</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Program Definition</span> <span class="id" title="var">inc_counter</span> (<span class="id" title="var">st</span> : <span class="id" title="var">storage</span>) (<span class="id" title="var">inc</span> : {<span class="id" title="var">z</span> : <span class="id" title="var">Z</span> | 0 &lt;? <span class="id" title="var">z</span>}) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{<span class="id" title="var">new_st</span> : <span class="id" title="var">storage</span> | <span class="id" title="var">st</span> &lt;? <span class="id" title="var">new_st</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">st</span> + <span class="id" title="var">inc</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Next</span> <span class="id" title="keyword">Obligation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">st</span> <span class="id" title="var">inc</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">is_true</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">inc</span>;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">propify</span>. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Program Definition</span> <span class="id" title="var">dec_counter</span> (<span class="id" title="var">st</span> : <span class="id" title="var">storage</span>) (<span class="id" title="var">dec</span> : {<span class="id" title="var">z</span> : <span class="id" title="var">Z</span> | 0 &lt;? <span class="id" title="var">z</span>}) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{<span class="id" title="var">new_st</span> : <span class="id" title="var">storage</span> | <span class="id" title="var">new_st</span> &lt;? <span class="id" title="var">st</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">st</span> - <span class="id" title="var">dec</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Next</span> <span class="id" title="keyword">Obligation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">st</span> <span class="id" title="var">dec</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">is_true</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">dec</span>;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">propify</span>. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">counter</span> (<span class="id" title="var">msg</span> : <span class="id" title="var">msg</span>) (<span class="id" title="var">st</span> : <span class="id" title="var">storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">Transaction</span> * <span class="id" title="var">storage</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Inc</span> <span class="id" title="var">i</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> (<span class="id" title="var">bool_dec</span> <span class="id" title="var">true</span> (0 &lt;? <span class="id" title="var">i</span>)) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="tactic">left</span> <span class="id" title="var">H</span> =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">Transaction_none</span>, <span class="id" title="var">proj1_sig</span> (<span class="id" title="var">inc_counter</span> <span class="id" title="var">st</span> (<span class="id" title="var">exist</span> <span class="id" title="var">i</span> (<span class="id" title="var">eq_sym</span> <span class="id" title="var">H</span>))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="tactic">right</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Dec</span> <span class="id" title="var">i</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> (<span class="id" title="var">bool_dec</span> <span class="id" title="var">true</span> (0 &lt;? <span class="id" title="var">i</span>)) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="tactic">left</span> <span class="id" title="var">h</span> =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">Transaction_none</span>, <span class="id" title="var">proj1_sig</span> (<span class="id" title="var">dec_counter</span> <span class="id" title="var">st</span> (<span class="id" title="var">exist</span> <span class="id" title="var">i</span> (<span class="id" title="var">eq_sym</span> <span class="id" title="var">h</span>))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="tactic">right</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CounterRefinementTypes</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">CounterRefinementTypes</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">LiquidityExtractionSetup</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">LPretty</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">LiquidityExtract</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">PREFIX</span> := "coq_".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#sig"><span class="id" title="inductive">sig</span></a></span> and <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#exist"><span class="id" title="constructor">exist</span></a></span> becomes just wrappers 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">sig_def</span> := "type 'a sig_ = 'a".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">exist_def</span> := "let exist_ a = a".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table for definitions we want to remap. The corresponding top-level definitions will be *ignored* 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[ <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">bool</span> %%&gt; "bool"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">list</span> %%&gt; "list"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Amount</span> %%&gt; "tez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">address_coq</span> %%&gt; "address"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">time_coq</span> %%&gt; "timestamp"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">option</span> %%&gt; "option"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.add</span> %%&gt; "addInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.sub</span> %%&gt; "subInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.leb</span> %%&gt; "leInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.ltb</span> %%&gt; "ltInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">sig</span> %%&gt; "sig_" <span class="comment">(*&nbsp;remapping&nbsp;<span class="inlinecode"><span class="id" title="var">sig</span></span>&nbsp;to&nbsp;the&nbsp;wrapper&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">proj1_sig</span> %%&gt; "(fun x -&gt; x)" <span class="comment">(*&nbsp;this&nbsp;is&nbsp;a&nbsp;safe,&nbsp;but&nbsp;ad-hoc&nbsp;optimisation*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z</span> %%&gt; "int"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">nat</span> %%&gt; "key_hash" <span class="comment">(*&nbsp;type&nbsp;of&nbsp;account&nbsp;addresses*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Transaction</span> %%&gt; "operation list"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Transaction_none</span> %%&gt; "[]"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">fst</span> %%&gt; "fst"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">snd</span> %%&gt; "snd" ].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table of constructors and some constants. The corresponding definitions will be extracted and renamed. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_rename</span> : <span class="id" title="var">list</span> (<span class="id" title="var">string</span> * <span class="id" title="var">string</span>):=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[ ("Some", "Some")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("None", "None")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("Z0" ,"0")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("nil", "[]")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("true", "true")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("exist", "exist_") <span class="comment">(*&nbsp;remapping&nbsp;<span class="inlinecode"><span class="id" title="var">exist</span></span>&nbsp;to&nbsp;the&nbsp;wrapper&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; (<span class="id" title="var">string_of_kername</span> &lt;%% <span class="id" title="var">storage</span> %%&gt;, "storage")  <span class="comment">(*&nbsp;we&nbsp;add&nbsp;<span class="inlinecode"><span class="id" title="var">storage</span></span>&nbsp;so&nbsp;it&nbsp;is&nbsp;printed&nbsp;without&nbsp;the&nbsp;prefix&nbsp;*)</span> ].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">COUNTER_MODULE</span> : <span class="id" title="var">LiquidityMod</span> <span class="id" title="var">msg</span> <span class="id" title="var">_</span> <span class="id" title="var">Z</span> <span class="id" title="var">storage</span> <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "liquidity_counter" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;pairs&nbsp;and&nbsp;ints&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> := <span class="id" title="var">concat</span> <span class="id" title="var">nl</span> [<span class="id" title="var">prod_ops</span>;<span class="id" title="var">int_ops</span>; <span class="id" title="var">sig_def</span>; <span class="id" title="var">exist_def</span>];<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;initial&nbsp;storage&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">init</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;no&nbsp;extra&nbsp;operations&nbsp;in&nbsp;<span class="inlinecode"><span class="id" title="var">init</span></span>&nbsp;are&nbsp;required&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> := "" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;main&nbsp;functionality&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">counter</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> := <span class="id" title="var">printWrapper</span> (<span class="id" title="var">PREFIX</span> ++ "counter") ++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">printMain</span> |}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We run the extraction procedure inside the <span class="inlinecode"><span class="id" title="library">TemplateMonad</span></span>.
+      It uses the certified erasure from <span class="inlinecode"><span class="id" title="var">MetaCoq</span></span> and the certified deboxing procedure
+      that removes application of boxes to constants and constructors. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">to_inline</span> := [&lt;%% <span class="id" title="var">bool_rect</span> %%&gt;; &lt;%% <span class="id" title="var">bool_rec</span> %%&gt;].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">t</span> &lt;- <span class="id" title="var">liquidity_extraction</span> <span class="id" title="var">PREFIX</span> <span class="id" title="var">TT_remap</span> <span class="id" title="var">TT_rename</span> <span class="id" title="var">to_inline</span> <span class="id" title="var">COUNTER_MODULE</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tmDefinition</span> <span class="id" title="var">COUNTER_MODULE</span>.(<span class="id" title="var">lmd_module_name</span>) <span class="id" title="var">t</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We redirect the extraction result for later processing and compiling with the Liquidity compiler
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "../extraction/tests/extracted-code/liquidity-extract/CounterSubsetTypes.liq"<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">liquidity_counter</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">LiquidityExtractionSetup</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">CameLIGOExtractionSetup</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">CameLIGOPretty</span> <span class="id" title="var">CameLIGOExtract</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Exposing a printing configuration for CameLIGO 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">PrintConfAddModuleNames.PrintWithModuleNames</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">init</span> (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">setup</span> : <span class="id" title="var">Z</span>) : <span class="id" title="var">option</span> <span class="id" title="var">storage</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;prevents&nbsp;optimisations&nbsp;from&nbsp;removing&nbsp;unused&nbsp;<span class="inlinecode"><span class="id" title="var">ctx</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TODO:&nbsp;override&nbsp;masks&nbsp;instead.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ctx_</span> := <span class="id" title="var">ctx</span> <span class="id" title="tactic">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> <span class="id" title="var">setup</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table for definitions we want to remap. The corresponding top-level definitions will be *ignored* 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap_ligo</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">address</span> %%&gt; "address"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.add</span> %%&gt; "addInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.sub</span> %%&gt; "subInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.leb</span> %%&gt; "leInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.ltb</span> %%&gt; "ltInt"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z</span> %%&gt; "int"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Transaction</span> %%&gt; "operation list"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table of constructors and some constants. The corresponding definitions will be extracted and renamed. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_rename_ligo</span> : <span class="id" title="var">list</span> (<span class="id" title="var">string</span> * <span class="id" title="var">string</span>):=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[ ("true", "true")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("false", "false")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("Some", "Some")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("None", "None")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">counter_wrapper</span> (<span class="id" title="var">c</span> : <span class="id" title="var">Chain</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">s</span> : <span class="id" title="var">storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">m</span> : <span class="id" title="var">option</span> <span class="id" title="var">msg</span>) := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">c_</span> := <span class="id" title="var">c</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ctx_</span> := <span class="id" title="var">ctx</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">m</span> =&gt; <span class="id" title="var">counter</span> <span class="id" title="var">m</span> <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">COUNTER_MODULE_LIGO</span> : <span class="id" title="var">CameLIGOMod</span> <span class="id" title="var">msg</span> <span class="id" title="var">_</span> <span class="id" title="var">Z</span> <span class="id" title="var">storage</span> <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "cameligo_counter" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;pairs&nbsp;and&nbsp;ints&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> := <span class="id" title="var">CameLIGOPrelude</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;initial&nbsp;storage&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">init</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;no&nbsp;extra&nbsp;operations&nbsp;in&nbsp;<span class="inlinecode"><span class="id" title="var">init</span></span>&nbsp;are&nbsp;required&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> := "" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;main&nbsp;functionality&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">counter_wrapper</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive_prelude</span> := "";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> := <span class="id" title="var">print_default_entry_point</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% <span class="id" title="var">storage</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% <span class="id" title="var">counter_wrapper</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% <span class="id" title="var">msg</span> %%&gt; |}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We run the extraction procedure inside the <span class="inlinecode"><span class="id" title="library">TemplateMonad</span></span>.
+      It uses the certified erasure from <span class="inlinecode"><span class="id" title="var">MetaCoq</span></span> and the certified deboxing procedure
+      that removes application of boxes to constants and constructors. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">to_inline_ligo</span> := [&lt;%% <span class="id" title="var">bool_rect</span> %%&gt;; &lt;%% <span class="id" title="var">bool_rec</span> %%&gt;; &lt;%% @<span class="id" title="var">proj1_sig</span> %%&gt;].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;(<span class="id" title="var">CameLIGO_prepare_extraction</span> <span class="id" title="var">to_inline_ligo</span> <span class="id" title="var">TT_remap_ligo</span> <span class="id" title="var">TT_rename_ligo</span> [] "cctx_instance" <span class="id" title="var">COUNTER_MODULE_LIGO</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">cameLIGO_counter</span> := <span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <span class="id" title="var">cameligo_counter_prepared</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">cameLIGO_counter</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "../extraction/tests/extracted-code/cameligo-extract/CounterSubsetTypes.mligo"<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">cameLIGO_counter</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CameLIGOExtractionSetup</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

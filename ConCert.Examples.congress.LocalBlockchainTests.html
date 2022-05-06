@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.congress.LocalBlockchainTests</h1>
+
+<div class="code">
+<span class="comment">(*&nbsp;This&nbsp;file&nbsp;computes&nbsp;with&nbsp;the&nbsp;Congress&nbsp;and&nbsp;an&nbsp;actual&nbsp;blockchain<br/>
+implementation,&nbsp;showing&nbsp;that&nbsp;everything&nbsp;computes&nbsp;from&nbsp;within&nbsp;Coq.&nbsp;It<br/>
+also&nbsp;contains&nbsp;specializations&nbsp;of&nbsp;the&nbsp;results&nbsp;proven&nbsp;in&nbsp;Congress.v&nbsp;to<br/>
+our&nbsp;particular&nbsp;implementations&nbsp;of&nbsp;blockchains.&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Monads</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">BoundedN</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ResultMonad</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">LocalBlockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Congress</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Congress</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">LocalBlockchainTests</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Let</span> <span class="id" title="var">AddrSize</span> := (2^128)%<span class="id" title="var">N</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Instance</span> <span class="id" title="var">Base</span> : <span class="id" title="var">ChainBase</span> := <span class="id" title="var">LocalChainBase</span> <span class="id" title="var">AddrSize</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Instance</span> <span class="id" title="var">ChainBuilder</span> : <span class="id" title="var">ChainBuilderType</span> := <span class="id" title="var">LocalChainBuilderImpl</span> <span class="id" title="var">AddrSize</span> <span class="id" title="var">true</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Addresses&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">creator</span> : <span class="id" title="var">Address</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">BoundedN.of_Z_const</span> <span class="id" title="var">AddrSize</span> 10.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">person_1</span> : <span class="id" title="var">Address</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">BoundedN.of_Z_const</span> <span class="id" title="var">AddrSize</span> 11.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">person_2</span> : <span class="id" title="var">Address</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">BoundedN.of_Z_const</span> <span class="id" title="var">AddrSize</span> 12.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">person_3</span> : <span class="id" title="var">Address</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">BoundedN.of_Z_const</span> <span class="id" title="var">AddrSize</span> 13.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">chain1</span> : <span class="id" title="var">ChainBuilder</span> := <span class="id" title="var">builder_initial</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">add_block</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">ChainBuilder</span>) <span class="id" title="var">acts</span> : <span class="id" title="var">result</span> <span class="id" title="var">ChainBuilder</span> <span class="id" title="var">AddBlockError</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">header</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">block_height</span> := <span class="id" title="var">S</span> (<span class="id" title="var">chain_height</span> <span class="id" title="var">chain</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">block_slot</span> := <span class="id" title="var">S</span> (<span class="id" title="var">current_slot</span> <span class="id" title="var">chain</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">block_finalized_height</span> := <span class="id" title="var">finalized_height</span> <span class="id" title="var">chain</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">block_creator</span> := <span class="id" title="var">creator</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">block_reward</span> := 50; |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">builder_add_block</span> <span class="id" title="var">chain</span> <span class="id" title="var">header</span> <span class="id" title="var">acts</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Creator&nbsp;created&nbsp;an&nbsp;empty&nbsp;block&nbsp;(and&nbsp;gets&nbsp;some&nbsp;coins)&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">chain2</span> : <span class="id" title="var">ChainBuilder</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unpack_result</span> (<span class="id" title="var">add_block</span> <span class="id" title="var">chain1</span> []).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain2</span> <span class="id" title="var">person_1</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain2</span> <span class="id" title="var">creator</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Creator&nbsp;transfers&nbsp;10&nbsp;coins&nbsp;to&nbsp;person_1&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">chain3</span> : <span class="id" title="var">ChainBuilder</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unpack_result</span> (<span class="id" title="var">add_block</span> <span class="id" title="var">chain2</span> [<span class="id" title="var">build_act</span> <span class="id" title="var">creator</span> <span class="id" title="var">creator</span> (<span class="id" title="var">act_transfer</span> <span class="id" title="var">person_1</span> 10)]).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain3</span> <span class="id" title="var">person_1</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain3</span> <span class="id" title="var">creator</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;person_1&nbsp;deploys&nbsp;a&nbsp;Congress&nbsp;contract&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">setup_rules</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">min_vote_count_permille</span> := 200; <span class="comment">(*&nbsp;20*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">margin_needed_permille</span> := 501;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">debating_period_in_blocks</span> := 0; |}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">setup</span> := <span class="id" title="var">Congress.build_setup</span> <span class="id" title="var">setup_rules</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">deploy_congress</span> : <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">create_deployment</span> 5 <span class="id" title="var">Congress.contract</span> <span class="id" title="var">setup</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">chain4</span> : <span class="id" title="var">ChainBuilder</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unpack_result</span> (<span class="id" title="var">add_block</span> <span class="id" title="var">chain3</span> [<span class="id" title="var">build_act</span> <span class="id" title="var">person_1</span> <span class="id" title="var">person_1</span> <span class="id" title="var">deploy_congress</span>]).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">congress_1</span> : <span class="id" title="var">Address</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">outgoing_txs</span> (<span class="id" title="var">builder_trace</span> <span class="id" title="var">chain4</span>) <span class="id" title="var">person_1</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">tx</span> :: <span class="id" title="var">_</span> =&gt; <span class="id" title="var">tx_to</span> <span class="id" title="var">tx</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">person_1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain4</span> <span class="id" title="var">person_1</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain4</span> <span class="id" title="var">creator</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain4</span> <span class="id" title="var">congress_1</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">congress_ifc</span> : <span class="id" title="var">ContractInterface</span> <span class="id" title="var">Congress.Msg</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">get_contract_interface</span> <span class="id" title="var">chain4</span> <span class="id" title="var">congress_1</span> <span class="id" title="var">Congress.Msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">x</span> =&gt; <span class="id" title="var">x</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Using&nbsp;unpack_option&nbsp;here&nbsp;is&nbsp;extremely&nbsp;slow&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id" title="var">build_contract_interface</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_</span> <span class="id" title="var">_</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">creator</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">a</span> <span class="id" title="var">m</span> =&gt; <span class="id" title="var">deploy_congress</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">congress_state</span> <span class="id" title="var">lc</span> : <span class="id" title="var">Congress.State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">env_contract_states</span> <span class="id" title="var">lc</span> <span class="id" title="var">congress_1</span> &gt;&gt;= <span class="id" title="var">deserialize</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">s</span> =&gt; <span class="id" title="var">s</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;And&nbsp;also&nbsp;here&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; {| <span class="id" title="var">owner</span> := <span class="id" title="var">creator</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">state_rules</span> := <span class="id" title="var">setup_rules</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">proposals</span> := <span class="id" title="var">FMap.empty</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">next_proposal_id</span> := 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">members</span> := <span class="id" title="var">FMap.empty</span> |}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">congress_state</span> <span class="id" title="var">chain4</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">FMap.elements</span> (<span class="id" title="var">congress_state</span> <span class="id" title="var">chain4</span>).(<span class="id" title="var">members</span>)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;person_1&nbsp;adds&nbsp;person_1&nbsp;and&nbsp;person_2&nbsp;as&nbsp;members&nbsp;of&nbsp;congress&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">add_person</span> <span class="id" title="var">p</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">congress_ifc</span>.(<span class="id" title="var">send</span>) 0 (<span class="id" title="var">Some</span> (<span class="id" title="var">add_member</span> <span class="id" title="var">p</span>)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">chain5</span> : <span class="id" title="var">ChainBuilder</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">acts</span> := [<span class="id" title="var">build_act</span> <span class="id" title="var">person_1</span> <span class="id" title="var">person_1</span> (<span class="id" title="var">add_person</span> <span class="id" title="var">person_1</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">person_1</span> <span class="id" title="var">person_1</span> (<span class="id" title="var">add_person</span> <span class="id" title="var">person_2</span>)] <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unpack_result</span> (<span class="id" title="var">add_block</span> <span class="id" title="var">chain4</span> <span class="id" title="var">acts</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">FMap.elements</span> (<span class="id" title="var">congress_state</span> <span class="id" title="var">chain5</span>).(<span class="id" title="var">members</span>)).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain5</span> <span class="id" title="var">congress_1</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;person_1&nbsp;creates&nbsp;a&nbsp;proposal&nbsp;to&nbsp;send&nbsp;3&nbsp;coins&nbsp;to&nbsp;person_3&nbsp;using&nbsp;funds<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;contract&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">create_proposal_call</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">congress_ifc</span>.(<span class="id" title="var">send</span>) 0 (<span class="id" title="var">Some</span> (<span class="id" title="var">create_proposal</span> [<span class="id" title="var">cact_transfer</span> <span class="id" title="var">person_3</span> 3])).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">chain6</span> : <span class="id" title="var">ChainBuilder</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unpack_result</span> (<span class="id" title="var">add_block</span> <span class="id" title="var">chain5</span> [<span class="id" title="var">build_act</span> <span class="id" title="var">person_1</span> <span class="id" title="var">person_1</span> <span class="id" title="var">create_proposal_call</span>]).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">FMap.elements</span> (<span class="id" title="var">congress_state</span> <span class="id" title="var">chain6</span>).(<span class="id" title="var">proposals</span>)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;person_1&nbsp;and&nbsp;person_2&nbsp;vote&nbsp;for&nbsp;the&nbsp;proposal&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">vote_proposal</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">congress_ifc</span>.(<span class="id" title="var">send</span>) 0 (<span class="id" title="var">Some</span> (<span class="id" title="var">vote_for_proposal</span> 1)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">chain7</span> : <span class="id" title="var">ChainBuilder</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">acts</span> := [<span class="id" title="var">build_act</span> <span class="id" title="var">person_1</span> <span class="id" title="var">person_1</span> <span class="id" title="var">vote_proposal</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">person_2</span> <span class="id" title="var">person_2</span> <span class="id" title="var">vote_proposal</span>] <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unpack_result</span> (<span class="id" title="var">add_block</span> <span class="id" title="var">chain6</span> <span class="id" title="var">acts</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">FMap.elements</span> (<span class="id" title="var">congress_state</span> <span class="id" title="var">chain7</span>).(<span class="id" title="var">proposals</span>)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Person&nbsp;3&nbsp;finishes&nbsp;the&nbsp;proposal&nbsp;(anyone&nbsp;can&nbsp;finish&nbsp;it&nbsp;after&nbsp;voting)&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">finish_proposal</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">congress_ifc</span>.(<span class="id" title="var">send</span>) 0 (<span class="id" title="var">Some</span> (<span class="id" title="var">finish_proposal</span> 1)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">chain8</span> : <span class="id" title="var">ChainBuilder</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unpack_result</span> (<span class="id" title="var">add_block</span> <span class="id" title="var">chain7</span> [<span class="id" title="var">build_act</span> <span class="id" title="var">person_3</span> <span class="id" title="var">person_3</span> <span class="id" title="var">finish_proposal</span>]).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">FMap.elements</span> (<span class="id" title="var">congress_state</span> <span class="id" title="var">chain8</span>).(<span class="id" title="var">proposals</span>)).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Balances&nbsp;before:&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain7</span> <span class="id" title="var">congress_1</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain7</span> <span class="id" title="var">person_3</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Balances&nbsp;after:&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain8</span> <span class="id" title="var">congress_1</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> (<span class="id" title="var">env_account_balances</span> <span class="id" title="var">chain8</span> <span class="id" title="var">person_3</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Print</span> <span class="id" title="keyword">Assumptions</span> <span class="id" title="var">chain8</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Hint Resolve</span> <span class="id" title="var">congress_correct_after_block</span> : <span class="id" title="var">core</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">BuilderDF</span> := <span class="id" title="var">LocalChainBuilderImpl</span> <span class="id" title="var">AddrSize</span> <span class="id" title="var">true</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;The&nbsp;congress&nbsp;satisfies&nbsp;a&nbsp;property&nbsp;specialized&nbsp;to&nbsp;the&nbsp;local&nbsp;blockchain&nbsp;DFS:&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">congress_txs_after_local_chain_block</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">prev</span> <span class="id" title="var">new</span> : <span class="id" title="var">BuilderDF</span>) <span class="id" title="var">header</span> <span class="id" title="var">acts</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">builder_add_block</span> <span class="id" title="var">prev</span> <span class="id" title="var">header</span> <span class="id" title="var">acts</span> = <span class="id" title="var">Ok</span> <span class="id" title="var">new</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">caddr</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">env_contracts</span> <span class="id" title="var">new</span> <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">Congress.contract</span> : <span class="id" title="var">WeakContract</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">inc_calls</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">incoming_calls</span> <span class="id" title="var">Congress.Msg</span> (<span class="id" title="var">builder_trace</span> <span class="id" title="var">new</span>) <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> <span class="id" title="var">inc_calls</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">length</span> (<span class="id" title="var">outgoing_txs</span> (<span class="id" title="var">builder_trace</span> <span class="id" title="var">new</span>) <span class="id" title="var">caddr</span>) &lt;=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">num_acts_created_in_proposals</span> <span class="id" title="var">inc_calls</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">eauto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;And&nbsp;of&nbsp;course,&nbsp;it&nbsp;is&nbsp;satisfied&nbsp;for&nbsp;the&nbsp;breadth&nbsp;first&nbsp;chain&nbsp;as&nbsp;well.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">BuilderBF</span> := <span class="id" title="var">LocalChainBuilderImpl</span> <span class="id" title="var">AddrSize</span> <span class="id" title="var">false</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">congress_txs_after_local_chain_bf_block</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">prev</span> <span class="id" title="var">new</span> : <span class="id" title="var">BuilderBF</span>) <span class="id" title="var">header</span> <span class="id" title="var">acts</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">builder_add_block</span> <span class="id" title="var">prev</span> <span class="id" title="var">header</span> <span class="id" title="var">acts</span> = <span class="id" title="var">Ok</span> <span class="id" title="var">new</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">caddr</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">env_contracts</span> <span class="id" title="var">new</span> <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> (<span class="id" title="var">Congress.contract</span> : <span class="id" title="var">WeakContract</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">inc_calls</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">incoming_calls</span> <span class="id" title="var">Congress.Msg</span> (<span class="id" title="var">builder_trace</span> <span class="id" title="var">new</span>) <span class="id" title="var">caddr</span> = <span class="id" title="var">Some</span> <span class="id" title="var">inc_calls</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">length</span> (<span class="id" title="var">outgoing_txs</span> (<span class="id" title="var">builder_trace</span> <span class="id" title="var">new</span>) <span class="id" title="var">caddr</span>) &lt;=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">num_acts_created_in_proposals</span> <span class="id" title="var">inc_calls</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">eauto</span>. <span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">LocalBlockchainTests</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

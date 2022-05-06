@@ -1,0 +1,330 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.bat.BATGens</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">QCTest</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.BAT</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">BATCommon</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.BAT</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">BATPrinters</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.EIP20</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">EIP20TokenGens</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Type</span> <span class="id" title="var">BATGensInfo</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">trace_length</span> : <span class="id" title="var">nat</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">gAccount</span> : <span class="id" title="var">G</span> <span class="id" title="var">Address</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">contract_addr</span> : <span class="id" title="var">Address</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">accounts</span> : <span class="id" title="var">list</span> <span class="id" title="var">Address</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">accounts_total_balance</span> : <span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">bat_addr</span> : <span class="id" title="var">Address</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">fund_addr</span> : <span class="id" title="var">Address</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">bat_addr_refundable</span> : <span class="id" title="var">bool</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">bat_addr_fundable</span> : <span class="id" title="var">bool</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">eip20_transactions_before_finalized</span> : <span class="id" title="var">bool</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">BATGensInfo</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">BATGens</span> (<span class="id" title="var">Info</span> : <span class="id" title="var">BATGensInfo</span>).<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Info</span>.<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">SerializedValue</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">deserialize</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">serialize</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">account_balance</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) (<span class="id" title="var">addr</span> : <span class="id" title="var">Address</span>) : <span class="id" title="var">Amount</span> :=<br/>
+&nbsp;&nbsp;(<span class="id" title="var">env_account_balances</span> <span class="id" title="var">env</span>) <span class="id" title="var">addr</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_refundable_accounts</span> <span class="id" title="var">state</span> : <span class="id" title="var">list</span> (<span class="id" title="var">G</span> (<span class="id" title="var">option</span> <span class="id" title="var">Address</span>)) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">balances_list</span> := <span class="id" title="var">FMap.elements</span> (<span class="id" title="var">balances</span> <span class="id" title="var">state</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">filtered_balances</span> := <span class="id" title="var">filter</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">x</span> =&gt; (<span class="id" title="var">bat_addr_refundable</span> || (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">bat_addr</span> (<span class="id" title="var">fst</span> <span class="id" title="var">x</span>)))) &amp;&amp; (0 &lt;? (<span class="id" title="var">snd</span> <span class="id" title="var">x</span>))%<span class="id" title="var">N</span>) <span class="id" title="var">balances_list</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">map</span> <span class="id" title="var">returnGen</span> (<span class="id" title="var">map</span> <span class="id" title="var">Some</span> (<span class="id" title="var">map</span> <span class="id" title="var">fst</span> <span class="id" title="var">filtered_balances</span>)).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_fundable_accounts</span> <span class="id" title="var">env</span> : <span class="id" title="var">G</span> (<span class="id" title="var">option</span> <span class="id" title="var">Address</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">freq_accounts</span> := <span class="id" title="var">map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">addr</span> =&gt; (<span class="id" title="keyword">if</span> <span class="id" title="var">bat_addr_fundable</span> || (<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">addr</span> <span class="id" title="var">bat_addr</span>)) <span class="id" title="keyword">then</span> <span class="id" title="var">Z.to_nat</span> (<span class="id" title="var">account_balance</span> <span class="id" title="var">env</span> <span class="id" title="var">addr</span>) <span class="id" title="keyword">else</span> 0, <span class="id" title="var">returnGenSome</span> <span class="id" title="var">addr</span>)) <span class="id" title="var">accounts</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">freq_</span> (<span class="id" title="var">returnGen</span> <span class="id" title="var">None</span>) <span class="id" title="var">freq_accounts</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gFund_amount</span> <span class="id" title="var">env</span> <span class="id" title="var">state</span> <span class="id" title="var">addr</span> : <span class="id" title="var">G</span> <span class="id" title="var">Z</span> :=<br/>
+&nbsp;&nbsp;(<span class="id" title="var">choose</span> (1, <span class="id" title="var">Z.min</span> (<span class="id" title="var">account_balance</span> <span class="id" title="var">env</span> <span class="id" title="var">addr</span>) (<span class="id" title="var">Z.of_N</span> ((<span class="id" title="var">state</span>.(<span class="id" title="var">tokenCreationCap</span>) - (<span class="id" title="var">total_supply</span> <span class="id" title="var">state</span>)) / <span class="id" title="var">state</span>.(<span class="id" title="var">tokenExchangeRate</span>)))))%<span class="id" title="var">Z</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gCreateTokens</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) (<span class="id" title="var">state</span> : <span class="id" title="var">BATCommon.State</span>) : <span class="id" title="var">GOpt</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Amount</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">current_slot</span> := <span class="id" title="var">S</span> (<span class="id" title="var">current_slot</span> (<span class="id" title="var">env_chain</span> <span class="id" title="var">env</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">state</span>.(<span class="id" title="var">isFinalized</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| (<span class="id" title="var">Nat.ltb</span> <span class="id" title="var">current_slot</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fundingStart</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| (<span class="id" title="var">Nat.ltb</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fundingEnd</span>) <span class="id" title="var">current_slot</span>) <span class="comment">(*&nbsp;Funding&nbsp;can&nbsp;only&nbsp;happen&nbsp;in&nbsp;funding&nbsp;period&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| (<span class="id" title="var">N.ltb</span> (<span class="id" title="var">state</span>.(<span class="id" title="var">tokenCreationCap</span>) - (<span class="id" title="var">total_supply</span> <span class="id" title="var">state</span>)) <span class="id" title="var">state</span>.(<span class="id" title="var">tokenExchangeRate</span>))) <span class="comment">(*&nbsp;No&nbsp;funding&nbsp;if&nbsp;cap&nbsp;was&nbsp;hit&nbsp;or&nbsp;we&nbsp;are&nbsp;too&nbsp;close&nbsp;to&nbsp;it&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGen</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">from_addr</span> &lt;- <span class="id" title="var">get_fundable_accounts</span> <span class="id" title="var">env</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">value</span> &lt;- <span class="id" title="var">bindGen</span> (<span class="id" title="var">gFund_amount</span> <span class="id" title="var">env</span> <span class="id" title="var">state</span> <span class="id" title="var">from_addr</span>) <span class="id" title="var">returnGenSome</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> (<span class="id" title="var">from_addr</span>, <span class="id" title="var">value</span>, <span class="id" title="var">create_tokens</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gCreateTokensInvalid</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) (<span class="id" title="var">state</span> : <span class="id" title="var">BATCommon.State</span>) : <span class="id" title="var">GOpt</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Amount</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">from_addr</span> &lt;- <span class="id" title="var">get_fundable_accounts</span> <span class="id" title="var">env</span> ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">value</span> &lt;- <span class="id" title="var">bindGen</span> (<span class="id" title="var">choose</span> (1, <span class="id" title="var">account_balance</span> <span class="id" title="var">env</span> <span class="id" title="var">from_addr</span>)%<span class="id" title="var">Z</span>) <span class="id" title="var">returnGenSome</span> ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> (<span class="id" title="var">from_addr</span>, <span class="id" title="var">value</span>, <span class="id" title="var">create_tokens</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gRefund</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) (<span class="id" title="var">state</span> : <span class="id" title="var">BATCommon.State</span>) : <span class="id" title="var">GOpt</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">current_slot</span> := <span class="id" title="var">S</span> (<span class="id" title="var">current_slot</span> (<span class="id" title="var">env_chain</span> <span class="id" title="var">env</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">accounts</span> := <span class="id" title="var">get_refundable_accounts</span> <span class="id" title="var">state</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> ((<span class="id" title="var">state</span>.(<span class="id" title="var">isFinalized</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| (<span class="id" title="var">Nat.leb</span> <span class="id" title="var">current_slot</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fundingEnd</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| (<span class="id" title="var">state</span>.(<span class="id" title="var">tokenCreationMin</span>) &lt;=? (<span class="id" title="var">total_supply</span> <span class="id" title="var">state</span>))%<span class="id" title="var">N</span>))<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGen</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">from_addr</span> &lt;- <span class="id" title="var">oneOf_</span> (<span class="id" title="var">returnGen</span> <span class="id" title="var">None</span>) <span class="id" title="var">accounts</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> (<span class="id" title="var">from_addr</span>, <span class="id" title="var">refund</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gRefundInvalid</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) (<span class="id" title="var">state</span> : <span class="id" title="var">BATCommon.State</span>) : <span class="id" title="var">G</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">from_addr</span> &lt;- <span class="id" title="var">gAccount</span> ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">returnGen</span> (<span class="id" title="var">from_addr</span>, <span class="id" title="var">refund</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gFinalize</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) (<span class="id" title="var">state</span> : <span class="id" title="var">BATCommon.State</span>) : <span class="id" title="var">GOpt</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">current_slot</span> := <span class="id" title="var">S</span> (<span class="id" title="var">current_slot</span> (<span class="id" title="var">env_chain</span> <span class="id" title="var">env</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">state</span>.(<span class="id" title="var">isFinalized</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| ((<span class="id" title="var">total_supply</span> <span class="id" title="var">state</span>) &lt;? <span class="id" title="var">state</span>.(<span class="id" title="var">tokenCreationMin</span>))%<span class="id" title="var">N</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| ((<span class="id" title="var">Nat.leb</span> <span class="id" title="var">current_slot</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fundingEnd</span>)) &amp;&amp; <span class="id" title="var">negb</span> ((<span class="id" title="var">total_supply</span> <span class="id" title="var">state</span>) =? <span class="id" title="var">state</span>.(<span class="id" title="var">tokenCreationCap</span>))%<span class="id" title="var">N</span>))<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGen</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> (<span class="id" title="var">fund_addr</span>, <span class="id" title="var">finalize</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gFinalizeInvalid</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) (<span class="id" title="var">state</span> : <span class="id" title="var">BATCommon.State</span>) : <span class="id" title="var">G</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">from_addr</span> &lt;- <span class="id" title="var">gAccount</span> ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">returnGen</span> (<span class="id" title="var">from_addr</span>, <span class="id" title="var">finalize</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">EIP20</span> := <span class="id" title="var">EIP20Gens</span> <span class="id" title="var">Info</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gTransfer</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) (<span class="id" title="var">state</span> : <span class="id" title="var">BATCommon.State</span>) : <span class="id" title="var">GOpt</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">eip20_transactions_before_finalized</span> || <span class="id" title="var">state</span>.(<span class="id" title="var">isFinalized</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;'(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) &lt;- <span class="id" title="var">EIP20.gTransfer</span> <span class="id" title="var">env</span> (<span class="id" title="var">token_state</span> <span class="id" title="var">state</span>) ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> (<span class="id" title="var">caller</span>, <span class="id" title="var">tokenMsg</span> <span class="id" title="var">msg</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGen</span> <span class="id" title="var">None</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gApprove</span> (<span class="id" title="var">state</span> : <span class="id" title="var">BATCommon.State</span>) : <span class="id" title="var">GOpt</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">eip20_transactions_before_finalized</span> || <span class="id" title="var">state</span>.(<span class="id" title="var">isFinalized</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">EIP20.gApprove</span> (<span class="id" title="var">token_state</span> <span class="id" title="var">state</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) =&gt; <span class="id" title="var">returnGenSome</span> (<span class="id" title="var">caller</span>, <span class="id" title="var">tokenMsg</span> <span class="id" title="var">msg</span>))<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGen</span> <span class="id" title="var">None</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gTransfer_from</span> (<span class="id" title="var">state</span> : <span class="id" title="var">BATCommon.State</span>) : <span class="id" title="var">GOpt</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">Msg</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">eip20_transactions_before_finalized</span> || <span class="id" title="var">state</span>.(<span class="id" title="var">isFinalized</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">EIP20.gTransfer_from</span> (<span class="id" title="var">token_state</span> <span class="id" title="var">state</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) =&gt; <span class="id" title="var">returnGenSome</span> (<span class="id" title="var">caller</span>, <span class="id" title="var">tokenMsg</span> <span class="id" title="var">msg</span>))<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGen</span> <span class="id" title="var">None</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;BAT&nbsp;valid&nbsp;call&nbsp;generator&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;Generator&nbsp;that&nbsp;will&nbsp;always&nbsp;return&nbsp;BAToken&nbsp;contract&nbsp;calls&nbsp;that&nbsp;are&nbsp;valid&nbsp;on&nbsp;their&nbsp;own,<br/>
+&nbsp;&nbsp;&nbsp;i.e.&nbsp;guaranteed&nbsp;to&nbsp;be&nbsp;valid&nbsp;if&nbsp;it&nbsp;is&nbsp;the&nbsp;first&nbsp;action&nbsp;executed&nbsp;in&nbsp;the&nbsp;block.<br/>
+*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gBATActionValid</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) : <span class="id" title="var">GOpt</span> <span class="id" title="var">Action</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller_addr</span> <span class="id" title="var">value</span> <span class="id" title="var">msg</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> (<span class="id" title="var">build_act</span> <span class="id" title="var">caller_addr</span> <span class="id" title="var">caller_addr</span> (<span class="id" title="var">act_call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">value</span> ((@<span class="id" title="var">serialize</span> <span class="id" title="var">BATCommon.Msg</span> <span class="id" title="var">_</span>) <span class="id" title="var">msg</span>))) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">state</span> &lt;- <span class="id" title="var">returnGen</span> (<span class="id" title="var">get_contract_state</span> <span class="id" title="var">BATCommon.State</span> <span class="id" title="var">env</span> <span class="id" title="var">contract_addr</span>) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">backtrack</span> [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;transfer&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(1, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">gTransfer</span> <span class="id" title="var">env</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> (0%<span class="id" title="var">Z</span>) <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;transfer_from&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(2, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">gTransfer_from</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> (0%<span class="id" title="var">Z</span>) <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;approve&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(1, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">gApprove</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> (0%<span class="id" title="var">Z</span>) <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;create_tokens&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(5, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">gCreateTokens</span> <span class="id" title="var">env</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">value</span>, <span class="id" title="var">msg</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> <span class="id" title="var">value</span> <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;refund&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(10, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">gRefund</span> <span class="id" title="var">env</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> (0%<span class="id" title="var">Z</span>) <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;finalize&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(10, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">gFinalize</span> <span class="id" title="var">env</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> (0%<span class="id" title="var">Z</span>) <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+<span class="comment">(*&nbsp;BAT&nbsp;invalid&nbsp;call&nbsp;generator&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;Generator&nbsp;likely&nbsp;to&nbsp;generate&nbsp;invalid&nbsp;BAToken&nbsp;contract&nbsp;calls.<br/>
+&nbsp;&nbsp;&nbsp;It&nbsp;treats&nbsp;the&nbsp;BAToken&nbsp;code&nbsp;mostly&nbsp;as&nbsp;blackbox&nbsp;and&nbsp;only&nbsp;know&nbsp;the&nbsp;expected&nbsp;types&nbsp;of&nbsp;input<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;does&nbsp;not&nbsp;make&nbsp;any&nbsp;assumptions/checks&nbsp;on&nbsp;which&nbsp;values&nbsp;will&nbsp;result&nbsp;in&nbsp;valid&nbsp;or&nbsp;invalid&nbsp;calls<br/>
+*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gBATActionInvalid</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) : <span class="id" title="var">GOpt</span> <span class="id" title="var">Action</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller_addr</span> <span class="id" title="var">value</span> <span class="id" title="var">msg</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> (<span class="id" title="var">build_act</span> <span class="id" title="var">caller_addr</span> <span class="id" title="var">caller_addr</span> (<span class="id" title="var">act_call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">value</span> ((@<span class="id" title="var">serialize</span> <span class="id" title="var">BATCommon.Msg</span> <span class="id" title="var">_</span>) <span class="id" title="var">msg</span>))) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">state</span> &lt;- <span class="id" title="var">returnGen</span> (<span class="id" title="var">get_contract_state</span> <span class="id" title="var">BATCommon.State</span> <span class="id" title="var">env</span> <span class="id" title="var">contract_addr</span>) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">backtrack</span> [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;transfer&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(1, '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) &lt;- <span class="id" title="var">EIP20.gTransfer</span> <span class="id" title="var">env</span> (<span class="id" title="var">token_state</span> <span class="id" title="var">state</span>) ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> (0%<span class="id" title="var">Z</span>) (<span class="id" title="var">tokenMsg</span> <span class="id" title="var">msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;transfer_from&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(2, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">EIP20.gTransfer_from</span> (<span class="id" title="var">token_state</span> <span class="id" title="var">state</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> (0%<span class="id" title="var">Z</span>) (<span class="id" title="var">tokenMsg</span> <span class="id" title="var">msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;approve&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(1, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">EIP20.gApprove</span> (<span class="id" title="var">token_state</span> <span class="id" title="var">state</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> (0%<span class="id" title="var">Z</span>) (<span class="id" title="var">tokenMsg</span> <span class="id" title="var">msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;create_tokens&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(5, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">gCreateTokensInvalid</span> <span class="id" title="var">env</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">caller</span>, <span class="id" title="var">value</span>, <span class="id" title="var">msg</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> <span class="id" title="var">value</span> <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;refund&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(1, '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) &lt;- <span class="id" title="var">gRefundInvalid</span> <span class="id" title="var">env</span> <span class="id" title="var">state</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> (0%<span class="id" title="var">Z</span>) <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;finalize&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(1, '(<span class="id" title="var">caller</span>, <span class="id" title="var">msg</span>) &lt;- <span class="id" title="var">gFinalizeInvalid</span> <span class="id" title="var">env</span> <span class="id" title="var">state</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">call</span> <span class="id" title="var">contract_addr</span> <span class="id" title="var">caller</span> (0%<span class="id" title="var">Z</span>) <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+<span class="comment">(*&nbsp;BAT&nbsp;call&nbsp;generator<br/>
+&nbsp;&nbsp;&nbsp;Has&nbsp;a&nbsp;7&nbsp;chance&nbsp;of&nbsp;generating&nbsp;a&nbsp;valid&nbsp;call&nbsp;and&nbsp;then&nbsp;replacing&nbsp;the&nbsp;amount&nbsp;of&nbsp;money&nbsp;sent&nbsp;with&nbsp;that&nbsp;call.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;BAT&nbsp;contract&nbsp;this&nbsp;is&nbsp;likely&nbsp;to&nbsp;result&nbsp;in&nbsp;an&nbsp;invalid&nbsp;call&nbsp;as&nbsp;most&nbsp;contract&nbsp;calls&nbsp;on&nbsp;BAToken&nbsp;are&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;not&nbsp;allowed&nbsp;to&nbsp;include&nbsp;money&nbsp;in&nbsp;them.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;6.5&nbsp;of&nbsp;the&nbsp;time&nbsp;it&nbsp;will&nbsp;generate&nbsp;a&nbsp;call&nbsp;that&nbsp;is&nbsp;guaranteed&nbsp;to&nbsp;be&nbsp;valid&nbsp;(only&nbsp;guaranteed&nbsp;to<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;valid&nbsp;on&nbsp;its&nbsp;own,&nbsp;since&nbsp;the&nbsp;generator&nbsp;cannot&nbsp;know&nbsp;what&nbsp;other&nbsp;calls&nbsp;may&nbsp;be&nbsp;included&nbsp;in&nbsp;the&nbsp;same&nbsp;block&nbsp;and<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;which&nbsp;order&nbsp;they&nbsp;will&nbsp;be&nbsp;executed&nbsp;in)<br/>
+*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gBATAction</span> (<span class="id" title="var">env</span> : <span class="id" title="var">Environment</span>) : <span class="id" title="var">GOpt</span> <span class="id" title="var">Action</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">state</span> &lt;- <span class="id" title="var">returnGen</span> (<span class="id" title="var">get_contract_state</span> <span class="id" title="var">BATCommon.State</span> <span class="id" title="var">env</span> <span class="id" title="var">contract_addr</span>) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">freq</span> [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(5, <span class="id" title="var">bindGenOpt</span> (<span class="id" title="var">gBATActionValid</span> <span class="id" title="var">env</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '(<span class="id" title="var">action</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">action</span>.(<span class="id" title="var">act_body</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">act_transfer</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">returnGen</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">act_deploy</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">returnGen</span> <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">act_call</span> <span class="id" title="var">to</span> <span class="id" title="var">_</span> <span class="id" title="var">msg</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">amount</span> &lt;- <span class="id" title="var">choose</span> (0, <span class="id" title="var">account_balance</span> <span class="id" title="var">env</span> <span class="id" title="var">action</span>.(<span class="id" title="var">act_from</span>))%<span class="id" title="var">Z</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">returnGenSome</span> (<span class="id" title="var">build_act</span> <span class="id" title="var">action</span>.(<span class="id" title="var">act_from</span>) <span class="id" title="var">action</span>.(<span class="id" title="var">act_from</span>) (<span class="id" title="var">act_call</span> <span class="id" title="var">to</span> <span class="id" title="var">amount</span> <span class="id" title="var">msg</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;));<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(65, <span class="id" title="var">gBATActionInvalid</span> <span class="id" title="var">env</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(930, <span class="id" title="var">gBATActionValid</span> <span class="id" title="var">env</span>)<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">gBATSetup</span> : <span class="id" title="var">G</span> <span class="id" title="var">Setup</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">fundingStart</span> &lt;- <span class="id" title="var">choose</span> (0, (<span class="id" title="var">trace_length</span> - 1)) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">fundingEnd</span> &lt;- <span class="id" title="var">choose</span> (0, (<span class="id" title="var">trace_length</span> - 1)) ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">exchangeRate</span> &lt;- <span class="id" title="var">choose</span> (0, <span class="id" title="var">Z.to_N</span> <span class="id" title="var">accounts_total_balance</span>)%<span class="id" title="var">N</span> ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">initSupply</span> &lt;- <span class="id" title="var">choose</span> (0, <span class="id" title="var">Z.to_N</span> <span class="id" title="var">accounts_total_balance</span>)%<span class="id" title="var">N</span> ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">tokenMin</span> &lt;- <span class="id" title="var">choose</span> (0, <span class="id" title="var">Z.to_N</span> <span class="id" title="var">accounts_total_balance</span>)%<span class="id" title="var">N</span> ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">tokenCap</span> &lt;- <span class="id" title="var">choose</span> (0, <span class="id" title="var">Z.to_N</span> <span class="id" title="var">accounts_total_balance</span>)%<span class="id" title="var">N</span> ;;<br/>
+&nbsp;&nbsp;<span class="id" title="var">returnGen</span> (<span class="id" title="var">BATCommon.build_setup</span> <span class="id" title="var">initSupply</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fund_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">bat_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fundingStart</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fundingEnd</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">exchangeRate</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenCap</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenMin</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">BATGens</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

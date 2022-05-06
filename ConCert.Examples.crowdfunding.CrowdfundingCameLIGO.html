@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.crowdfunding.CrowdfundingCameLIGO</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab219"></a><h1 class="section">Extraction of various contracts to CameLIGO</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Notations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">PreludeExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">SimpleBlockchainExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Crowdfunding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">CrowdfundingExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Crowdfunding</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">CrowdfundingDataExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Common</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">CameLIGOPretty</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">CameLIGOExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z</span>.<br/>
+
+<br/>
+<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">PrintConfShortNames.PrintWithShortNames</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Crowdfunding</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Local</span> <span class="id" title="var">Program</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">CB</span> : <span class="id" title="var">ChainBase</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_chain_base</span> <span class="id" title="var">nat</span> <span class="id" title="var">Nat.eqb</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">Nat.odd</span>. <span class="comment">(*&nbsp;Odd&nbsp;addresses&nbsp;are&nbsp;addresses&nbsp;of&nbsp;contracts&nbsp;:)&nbsp;*)</span><br/>
+<span class="id" title="keyword">Next</span> <span class="id" title="keyword">Obligation</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">NPeano.Nat.eqb_spec</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> <span class="id" title="var">storage</span> := ((<span class="id" title="var">time_coq</span> × <span class="id" title="var">Z</span> × <span class="id" title="var">address_coq</span>) × <span class="id" title="var">Maps.addr_map_coq</span> × <span class="id" title="var">bool</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">crowdfunding_init</span> (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">setup</span> : (<span class="id" title="var">time_coq</span> × <span class="id" title="var">Z</span> × <span class="id" title="var">address_coq</span>)) : <span class="id" title="var">option</span> <span class="id" title="var">storage</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>) =? 0 <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">setup</span>, (<span class="id" title="var">Maps.mnil</span>, <span class="id" title="var">false</span>)) <span class="id" title="keyword">else</span> <span class="id" title="var">None</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">SimpleBlockchainExt.AcornBlockchain</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">CrowdfundingDataExt</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">CrowdfundingContract.Receive</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">to_simple_ctx_addr</span> (<span class="id" title="var">addr</span> : <span class="id" title="var">Blockchain.Address</span>) : <span class="id" title="var">address_coq</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">address_is_contract</span> <span class="id" title="var">addr</span> <span class="id" title="keyword">then</span> <span class="id" title="var">ContractAddr_coq</span> <span class="id" title="var">addr</span> <span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">UserAddr_coq</span> <span class="id" title="var">addr</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">crowdfunding_receive_inner</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">c</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">params</span> : <span class="id" title="var">msg_coq</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">st</span> : <span class="id" title="var">storage</span>) : <span class="id" title="var">option</span> (<span class="id" title="var">list</span> <span class="id" title="var">SimpleActionBody_coq</span> × <span class="id" title="var">storage</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">receive</span> <span class="id" title="var">params</span> <span class="id" title="var">st</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Time_coq</span> <span class="id" title="var">c</span>.(<span class="id" title="var">current_slot</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">to_simple_ctx_addr</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_balance</span>)))).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">crowdfunding_receive</span> (<span class="id" title="var">c</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>) <span class="id" title="var">st</span> <span class="id" title="var">msg</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">msg</span> =&gt; <span class="id" title="var">crowdfunding_receive_inner</span> <span class="id" title="var">c</span> <span class="id" title="var">ctx</span> <span class="id" title="var">msg</span> <span class="id" title="var">st</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">CF_MODULE</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">CameLIGOMod</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> (<span class="id" title="var">time_coq</span> × <span class="id" title="var">Z</span> × <span class="id" title="var">address_coq</span>) <span class="id" title="var">storage</span> <span class="id" title="var">SimpleActionBody_coq</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "cameLIGO_crowdfunding" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;pairs&nbsp;and&nbsp;ints&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">CameLIGOPrelude</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "let test_account : address = (""tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx"" : address)"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "let init_storage :  (timestamp * (tez * address)) =
+          (Tezos.now, (42tez,(""tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx"": address)))";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;initial&nbsp;storage&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">crowdfunding_init</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;init&nbsp;requires&nbsp;some&nbsp;extra&nbsp;operations&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> := "";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive_prelude</span> := "";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;main&nbsp;functionality&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">crowdfunding_receive</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"type storage = ((time_coq * (tez * address)) * ((address,tez) map * bool))" ++ <span class="id" title="var">CameLIGOPretty.printWrapper</span> ("crowdfunding_receive")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"msg_coq"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"storage"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">CameLIGOPretty.printMain</span> "storage" |}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We run the extraction procedure inside the <span class="inlinecode"><span class="id" title="library">TemplateMonad</span></span>.
+      It uses the certified erasure from <span class="inlinecode"><span class="id" title="var">MetaCoq</span></span> and the certified deboxing procedure
+      that removes application of boxes to constants and constructors. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Crowdfunding</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">CrowdfundingExtraction</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Crowdfunding</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">SimpleBlockchainExt.AcornBlockchain</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">CrowdfundingDataExt</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">CrowdfundingContract.Receive</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap_crowdfunding</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+<br/>
+&nbsp;&nbsp;[  <span class="comment">(*&nbsp;types&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">address_coq</span> %%&gt; "address"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">SimpleActionBody_coq</span> %%&gt; "operation"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Maps.addr_map_coq</span> %%&gt; "(address,tez) map"<br/>
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;simple&nbsp;addresses&nbsp;and&nbsp;the&nbsp;execution&nbsp;layer&nbsp;addresses&nbsp;are&nbsp;treated&nbsp;as&nbsp;the&nbsp;same&nbsp;*)</span><br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">to_simple_ctx_addr</span> %%&gt; "(fun (x : address) -&gt; x)"<br/>
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;operations&nbsp;*)</span><br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">eqb_addr</span> %%&gt; "eq_addr"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Maps.add_map</span> %%&gt; "Map.add"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">lookup_map'</span> %%&gt; "Map.find_opt"<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table of constructors and some constants. The corresponding definitions will be extracted and renamed. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_rename</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[ ("nil", "[]");<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("mnil", "Map.empty") ].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">CameLIGO_prepare_extraction</span> [] <span class="id" title="var">TT_remap_crowdfunding</span> (<span class="id" title="var">TT_rename</span> ++ <span class="id" title="var">TT_rename_ctors_default</span>) [] "cctx_instance" <span class="id" title="var">CF_MODULE</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">cameLIGO_crowdfunding</span> := <span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <span class="id" title="var">cameLIGO_crowdfunding_prepared</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">cameLIGO_crowdfunding</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We redirect the extraction result for later processing and compiling with the CameLIGO compiler 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "../extraction/tests/extracted-code/cameligo-extract/CrowdfundingCertifiedExtraction.mligo"<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">cameLIGO_crowdfunding</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CrowdfundingExtraction</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.boardroomVoting.BoardroomVotingExtractionCameLIGO</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab269"></a><h1 class="section">Extraction of the Boardroom voting contract CameLIGO</h1>
+
+<div class="paragraph"> </div>
+
+ We provide a configuration required for the contract extraction:
+    additional remappings, definitions to inline, etc. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">CameLIGOExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Common</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ContractCommon</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">LocalBlockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.BoardroomVoting</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">BoardroomVotingZ</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">PREFIX</span> := "".<br/>
+
+<br/>
+<span class="comment">(*&nbsp;In&nbsp;this&nbsp;example&nbsp;we&nbsp;just&nbsp;use&nbsp;xor&nbsp;for&nbsp;the&nbsp;hash&nbsp;function,&nbsp;which&nbsp;is<br/>
+&nbsp;&nbsp;&nbsp;obviously&nbsp;not&nbsp;cryptographically&nbsp;secure.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">modulus</span> : <span class="id" title="var">Z</span> := 201697267445741585806196628073.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">generator</span> : <span class="id" title="var">Z</span> := 3.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">hash_func</span> (<span class="id" title="var">l</span> : <span class="id" title="var">list</span> <span class="id" title="var">positive</span>) : <span class="id" title="var">positive</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">N.succ_pos</span> (<span class="id" title="var">fold_left</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">a</span> <span class="id" title="var">p</span> =&gt; <span class="id" title="var">N.lxor</span> (<span class="id" title="var">Npos</span> <span class="id" title="var">p</span>) <span class="id" title="var">a</span>) <span class="id" title="var">l</span> 1%<span class="id" title="var">N</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Instance&nbsp;Base&nbsp;:&nbsp;ChainBase&nbsp;:=&nbsp;LocalChainBase&nbsp;AddrSize.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">AddrSize</span> := (2^128)%<span class="id" title="var">N</span>.<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">Base</span> : <span class="id" title="var">ChainBase</span> := <span class="id" title="var">LocalBlockchain.LocalChainBase</span> <span class="id" title="var">AddrSize</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Params</span> &lt;: <span class="id" title="var">BoardroomParams</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">H</span> : <span class="id" title="var">list</span> <span class="id" title="var">positive</span> -&gt; <span class="id" title="var">positive</span> := <span class="id" title="var">hash_func</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Base</span> := <span class="id" title="var">Base</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">prime</span> := <span class="id" title="var">modulus</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">generator</span> := <span class="id" title="var">generator</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Params</span>.<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">BV</span> := <span class="id" title="var">BoardroomVoting</span> <span class="id" title="var">Params</span>. <span class="id" title="keyword">Import</span> <span class="id" title="var">BV</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Get&nbsp;string&nbsp;representation&nbsp;of&nbsp;modulus,&nbsp;and&nbsp;remap&nbsp;it.&nbsp;This&nbsp;way&nbsp;we&nbsp;avoid&nbsp;having&nbsp;the&nbsp;extraction&nbsp;compute&nbsp;the&nbsp;number.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">modulus_</span> := <span class="id" title="var">StringExtra.string_of_Z</span> <span class="id" title="var">modulus</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ContractMonads</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">setupWchain</span> := (<span class="id" title="var">BV.Setup</span> × <span class="id" title="var">Chain</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">init_wrapper</span> (<span class="id" title="var">cctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">setupWchain</span>) := (<span class="id" title="var">run_contract_initer</span> <span class="id" title="var">BV.init</span>) <span class="id" title="var">s</span>.2 <span class="id" title="var">cctx</span> <span class="id" title="var">s</span>.1.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive_wrapper</span> (<span class="id" title="var">c</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">st</span> : <span class="id" title="var">BV.State</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">BV.Msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span> * <span class="id" title="var">BV.State</span>):= <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;None.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> (<span class="id" title="var">run_contract_receiver</span> <span class="id" title="var">BV.receive</span>) <span class="id" title="var">c</span> <span class="id" title="var">ctx</span> <span class="id" title="var">st</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">st</span>, <span class="id" title="var">acts</span>) =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">acts</span>, <span class="id" title="var">st</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">storage_alias</span> := "type storage = state".<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">bruteforce_tally_def</span> := <br/>
+&nbsp;"(fun (votes :  (a) list) -&gt; 
+  let rec bruteforce_tally_aux  (n, votes_product : nat * a) : nat option = 
+    if elmeqb (pow_p generator (int n)) votes_product then 
+        Some (n) 
+    else if n = 0n then 
+      None
+    else
+      let n0 = n - 1n in
+        (bruteforce_tally_aux (unsafe_int_to_nat n0, votes_product))
+  in bruteforce_tally_aux ((List.length votes), (prod votes)))".<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">extra_ops</span> := <br/>
+&nbsp;"let unsafe_int_to_nat (n : int) = abs(n)
+  let predN (n : nat) = unsafe_int_to_nat (n - 1n)
+  let mod_pow (a : int) (e : int) (p : int) : int = failwith (""unimplemented"")
+  let egcd (a : int) (p : int) : int * int = failwith (""unimplemented"")
+  
+  let nth  = let rec nth  (n, l, default : nat * int list * int) : int = 
+  if n = 0n then (match l with 
+  []  -&gt; default
+   | x :: r -&gt; x)
+  else let m = predN n in (match l with 
+  []  -&gt; default
+   | x :: t -&gt; (nth (m, t, default)))
+   in fun (n:nat) (l:int list) (default:int) -&gt; nth (n, l, default)
+   
+   
+  let prod (l : int list) =
+    List.fold (fun (a, b: int*int) -&gt; multInt a b) l 1
+  
+  let firstn (n : nat) (l : int list) : int list =
+    let (_,r) = List.fold_left (fun ((n, a),b : (nat * int list) * int) -&gt;
+        if n = 0n then (0n, a)
+        else (predN n, b :: a)) (n,([] : int list)) l in
+   r
+  
+  let skipn  = let rec skipn  (n, l : nat * int list) : int list = 
+   if n = 0n then l
+    else let n0 = predN n in (match l with 
+    | []  -&gt; ([]:int list)
+    | a :: l0 -&gt; (skipn (n0, l0 : nat * int list)))
+    in fun (n : nat) (l : int list) -&gt; skipn (n, l : nat * int list)".<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">existsb_def</span> := <br/>
+&nbsp;&nbsp;"(let existsb (f : voterInfo -&gt; bool) = let rec existsb  (l: voterInfo list) : bool = 
+  match l with 
+  []  -&gt; false
+  | a :: l0 -&gt; (if (f a) then true else (existsb (l0)))
+  in fun (l: voterInfo list) -&gt; existsb (l) in existsb)".<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">hash_func_def</span> := "let hash_func (l :  (nat) list) = addN 1n (List.fold_left (fun (a, p : nat * nat) -&gt; Bitwise.xor p a) 1n l)".<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">callctx</span> := "(Tezos.sender,(Tezos.self_address,(Tezos.amount,Tezos.balance)))".<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">BV_MODULE</span> : <span class="id" title="var">CameLIGOMod</span> <span class="id" title="var">BV.Msg</span> <span class="id" title="var">ContractCallContext</span> <span class="id" title="var">setupWchain</span> <span class="id" title="var">BV.State</span> <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "cameligo_boardroomvoting" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;pairs&nbsp;and&nbsp;ints&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> := <span class="id" title="var">concat</span> <span class="id" title="var">nl</span> [<span class="id" title="var">CameLIGOPretty.CameLIGOPrelude</span>; <span class="id" title="var">extra_ops</span>; <span class="id" title="var">hash_func_def</span>];<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;initial&nbsp;storage&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">init_wrapper</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;no&nbsp;extra&nbsp;operations&nbsp;in&nbsp;<span class="inlinecode"><span class="id" title="var">init</span></span>&nbsp;are&nbsp;required&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> := "";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive_prelude</span> := "";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;main&nbsp;functionality&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">receive_wrapper</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> := <span class="id" title="var">CameLIGOPretty.printWrapper</span> (<span class="id" title="var">PREFIX</span> ++ "receive_wrapper")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"msg"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"state"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">CameLIGOPretty.printMain</span> "state" |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">inline_boardroom_params</span> : <span class="id" title="var">list</span> <span class="id" title="var">kername</span> :=<br/>
+&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% <span class="id" title="var">Params.H</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">Params.generator</span> %%&gt;<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">inline_contract_monad_projection</span> : <span class="id" title="var">list</span> <span class="id" title="var">kername</span> := <br/>
+&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% @<span class="id" title="var">ContractMonads.chain_height</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.current_slot</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.finalized_height</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.caller_addr</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.my_addr</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.my_balance</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.call_amount</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.deployment_setup</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.reject_deployment</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.accept_deployment</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.call_msg</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.my_state</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.queue</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.reject_call</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.accept_call</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractMonads.build_contract</span> %%&gt;<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">to_inline</span> : <span class="id" title="var">list</span> <span class="id" title="var">kername</span> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">inline_contract_monad_projection</span><br/>
+&nbsp;&nbsp;++ <span class="id" title="var">inline_boardroom_params</span><br/>
+&nbsp;&nbsp;++ [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% <span class="id" title="var">Monads.Monad_option</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% <span class="id" title="var">ContractIniterSetupState</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% <span class="id" title="var">ContractReceiverStateMsgState</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">contract_initer_monad</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">run_contract_initer</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">run_contract_receiver</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">contract_receiver_monad</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">contract_reader_to_contract_initer</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">option_to_contract_initer</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">contract_reader_to_receiver</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">option_to_contract_receiver</span> %%&gt;<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractReceiver</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">ContractIniter</span> %%&gt;<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.bind</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.ret</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.lift</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% <span class="id" title="var">bool_rect</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% <span class="id" title="var">bool_rec</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% <span class="id" title="var">option_map</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Extras.with_default</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.setter_from_getter_State_owner</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.setter_from_getter_State_registered_voters</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.setter_from_getter_State_public_keys</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.setter_from_getter_State_setup</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.setter_from_getter_State_tally</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.setter_from_getter_VoterInfo_voter_index</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.setter_from_getter_VoterInfo_vote_hash</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.setter_from_getter_VoterInfo_public_vote</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.set_State_owner</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.set_State_registered_voters</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.set_State_public_keys</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.set_State_setup</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.set_State_tally</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.set_VoterInfo_voter_index</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.set_VoterInfo_vote_hash</span> %%&gt;<br/>
+&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">BV.set_VoterInfo_public_vote</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table for definitions we want to remap. The corresponding top-level definitions will be *ignored* 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+&nbsp;&nbsp;[ <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">BV.amount_eqb</span> %%&gt; "eqTez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">positive</span> %%&gt; "nat"<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;By&nbsp;default,&nbsp;<span class="inlinecode"><span class="id" title="var">Z</span></span>&nbsp;is&nbsp;remapped&nbsp;to&nbsp;<span class="inlinecode"><span class="id" title="var">tez</span></span>&nbsp;along&nbsp;with&nbsp;the&nbsp;operations.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We&nbsp;override&nbsp;this&nbsp;behavior&nbsp;in&nbsp;the&nbsp;case&nbsp;of&nbsp;Boardroom&nbsp;voting&nbsp;*)</span><br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z</span> %%&gt; "int"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.of_nat</span> %%&gt; "int"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.add</span> %%&gt; "addInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.sub</span> %%&gt; "subInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.leb</span> %%&gt; "leInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.ltb</span> %%&gt; "ltInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.add</span> %%&gt; "addInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.eqb</span> %%&gt; "eqInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.gtb</span> %%&gt; "gtbInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Nat.ltb</span> %%&gt; "ltbN"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.modulo</span> %%&gt; "modInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.mul</span> %%&gt; "multInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.lxor</span> %%&gt; "Bitwise.xor"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.succ_pos</span> %%&gt; "addN 1n"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">mod_pow</span> %%&gt; "mod_pow"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">hash_func</span> %%&gt; "hash_func"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Egcd.egcd</span> %%&gt; "egcd"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">bruteforce_tally</span> %%&gt; <span class="id" title="var">bruteforce_tally_def</span> <span class="comment">(*&nbsp;inlined&nbsp;definition&nbsp;*)</span><br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.existsb</span> %%&gt; <span class="id" title="var">existsb_def</span> <span class="comment">(*&nbsp;inlined&nbsp;definition&nbsp;*)</span><br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.nth</span> %%&gt; "nth"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.firstn</span> %%&gt; "firstn"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.skipn</span> %%&gt; "skipn"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Euler.prod</span> %%&gt; "prod"<br/>
+<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ActionBody</span> %%&gt; "operation"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">AddressMap.add</span> %%&gt; "Map.add"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">AddressMap.find</span> %%&gt; "Map.find_opt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">AddressMap.of_list</span> %%&gt; "Map.of_list"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">AddressMap.values</span> %%&gt; <span class="comment">(*&nbsp;only&nbsp;way&nbsp;to&nbsp;obtain&nbsp;values&nbsp;is&nbsp;via&nbsp;fold&nbsp;-&nbsp;specialized&nbsp;to&nbsp;voterInfo*)</span><br/>
+&nbsp;&nbsp;"(fun (v:(address, voterInfo) map) -&gt;
+    Map.fold (fun (acc, (_,info) : voterInfo list * (address * voterInfo)) -&gt; info :: acc)
+    v ([]: voterInfo list))"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">AddressMap.keys</span> %%&gt; "Map.keys"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">AddressMap.empty</span> %%&gt; "Map.empty"<br/>
+<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">modulus</span> %%&gt; <span class="id" title="var">modulus_</span><br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">BV.encodeA</span> %%&gt; "unsafe_int_to_nat"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">BV.encodeNat</span> %%&gt; ""<br/>
+<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.fold_left</span> %%&gt; "List.fold_left"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.map</span> %%&gt; "List.map"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.find</span> %%&gt; "List.find"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.length</span> %%&gt; "List.length"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.app</span> %%&gt; "List.fold_left (fun (acc, e : (int list) * int) -&gt; e :: acc)" <span class="comment">(*&nbsp;small&nbsp;hack&nbsp;since&nbsp;ligo&nbsp;doesn't&nbsp;have&nbsp;append&nbsp;on&nbsp;lists&nbsp;*)</span><br/>
+&nbsp;&nbsp;].<br/>
+</div>
+
+<div class="doc">
+A translation table of constructors and some constants. The corresponding definitions will be extracted and renamed. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_rename</span> : <span class="id" title="var">list</span> (<span class="id" title="var">string</span> * <span class="id" title="var">string</span>):=<br/>
+&nbsp;&nbsp;[ ("Some", "Some")<br/>
+&nbsp;&nbsp;; ("None", "None")<br/>
+&nbsp;&nbsp;; ("Zpos" ,"int") <span class="comment">(*&nbsp;<span class="inlinecode"><span class="id" title="var">int</span></span>&nbsp;is&nbsp;an&nbsp;embedding&nbsp;of&nbsp;natutal&nbsp;numbers&nbsp;to&nbsp;integers&nbsp;in&nbsp;CameLIGO&nbsp;*)</span><br/>
+&nbsp;&nbsp;; ("S" ,"1n +")<br/>
+&nbsp;&nbsp;; ("true", "true")<br/>
+&nbsp;&nbsp;; ("false", "false")<br/>
+&nbsp;&nbsp;; ("hash", "hash_")<br/>
+&nbsp;&nbsp;; (<span class="id" title="var">string_of_kername</span> &lt;%% <span class="id" title="var">BV.State</span> %%&gt;, "state")  <span class="comment">(*&nbsp;we&nbsp;add&nbsp;<span class="inlinecode"><span class="id" title="var">storage</span></span>&nbsp;so&nbsp;it&nbsp;is&nbsp;printed&nbsp;without&nbsp;the&nbsp;prefix&nbsp;*)</span><br/>
+&nbsp;&nbsp;; ("tt", "()")<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+<span class="comment">(*&nbsp;NOTE:&nbsp;the&nbsp;extraction&nbsp;process&nbsp;takes&nbsp;~15&nbsp;min.&nbsp;We&nbsp;comment&nbsp;out&nbsp;these&nbsp;lines&nbsp;to&nbsp;avoid&nbsp;the&nbsp;recompiling&nbsp;it&nbsp;for&nbsp;each&nbsp;build&nbsp;*)</span><br/>
+
+<br/>
+<span class="comment">(*&nbsp;Time&nbsp;MetaCoq&nbsp;Run&nbsp;(CameLIGO_prepare_extraction&nbsp;PREFIX&nbsp;to_inline&nbsp;TT_remap&nbsp;TT_rename&nbsp;<span class="inlinecode"></span>&nbsp;"cctx_instance"&nbsp;BV_MODULE).<br/>
+<br/>
+Time&nbsp;Definition&nbsp;cameLIGO_boardroomvoting&nbsp;:=&nbsp;Eval&nbsp;vm_compute&nbsp;in&nbsp;cameligo_boardroomvoting_prepared.<br/>
+<br/>
+Redirect&nbsp;"../extraction/tests/extracted-code/cameligo-extract/BoardroomVoting.mligo"<br/>
+MetaCoq&nbsp;Run&nbsp;(tmMsg&nbsp;cameLIGO_boardroomvoting).&nbsp;*)</span><br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

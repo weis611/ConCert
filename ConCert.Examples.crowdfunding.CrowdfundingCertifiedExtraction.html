@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.crowdfunding.CrowdfundingCertifiedExtraction</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab218"></a><h1 class="section">Extraction of a crowdfunding contract</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Notations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">LiquidityExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">LPretty</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Common</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">PreludeExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">SimpleBlockchainExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Crowdfunding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">CrowdfundingDataExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Crowdfunding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">CrowdfundingExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">AcornBlockchain</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">CrowdfundingContract</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Receive</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">PREFIX</span> := "".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table for definitions we want to remap. The corresponding top-level definitions will be *ignored* 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+&nbsp;&nbsp;[  <span class="comment">(*&nbsp;types&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z</span> %%&gt; "tez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">address_coq</span> %%&gt; "address"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">time_coq</span> %%&gt; "timestamp"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">nat</span> %%&gt; "nat"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">bool</span> %%&gt; "bool"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">unit</span> %%&gt; "unit"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">list</span> %%&gt; "list"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">fst</span> %%&gt; "fst"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">snd</span> %%&gt; "snd"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">option</span> %%&gt; "option"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Maps.addr_map_coq</span> %%&gt; "(address,tez) map"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">SimpleActionBody_coq</span> %%&gt; "operation"<br/>
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;operations&nbsp;*)</span><br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.add</span> %%&gt; "addTez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.eqb</span> %%&gt; "eqTez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.leb</span> %%&gt; "leTez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.ltb</span> %%&gt; "ltTez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">ltb_time</span> %%&gt; "ltb_time"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">leb_time</span> %%&gt; "leb_time"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">eqb_addr</span> %%&gt; "eq_addr"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">andb</span> %%&gt; "andb"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">negb</span> %%&gt; "not"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Maps.add_map</span> %%&gt; "Map.add"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">lookup_map'</span> %%&gt; "Map.find" ].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table of constructors and some constants. The corresponding definitions will be extracted and renamed. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_rename</span> :=<br/>
+&nbsp;&nbsp;[ ("Z0" ,"0DUN")<br/>
+&nbsp;&nbsp;; ("nil", "[]")<br/>
+&nbsp;&nbsp;; ("mnil", "Map []")<br/>
+&nbsp;&nbsp;; ("tt", "()")<br/>
+&nbsp;&nbsp;; ("true", "true")<br/>
+&nbsp;&nbsp;; ("false", "false")].<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">printWrapperAndMain</span> :=<br/>
+&nbsp;&nbsp;"let wrapper (msg : msg_coq)(st : ((timestamp * (tez * address)) * ((address,tez) map * bool))) = match receive msg st (Current.time (), (Current.sender (), (Current.amount (), Current.balance ()))) with
+| Some v -&gt; v| None -&gt; failwith ()" ++ <span class="id" title="var">nl</span> ++ <span class="id" title="var">nl</span>++<br/>
+"let%entry main (msg : msg_coq)(st : ((timestamp * (tez * address)) * ((address,tez) map * bool))) = wrapper msg st".<br/>
+
+<br/>
+<span class="id" title="keyword">Notation</span> <span class="id" title="var">storage</span> := ((<span class="id" title="var">time_coq</span> × <span class="id" title="var">Z</span> × <span class="id" title="var">address_coq</span>) × <span class="id" title="var">Maps.addr_map_coq</span> × <span class="id" title="var">bool</span>).<br/>
+<span class="id" title="keyword">Notation</span> <span class="id" title="var">params</span> := ((<span class="id" title="var">time_coq</span> × <span class="id" title="var">address_coq</span> × <span class="id" title="var">Z</span> × <span class="id" title="var">Z</span>) × <span class="id" title="var">msg_coq</span>).<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">crowdfunding_init</span> (<span class="id" title="var">ctx</span> : <span class="id" title="var">SimpleCallCtx</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">setup</span> : (<span class="id" title="var">time_coq</span> × <span class="id" title="var">Z</span> × <span class="id" title="var">address_coq</span>)) : <span class="id" title="var">option</span> <span class="id" title="var">storage</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">ctx</span>.2.2.1 =? 0 <span class="id" title="keyword">then</span> <span class="id" title="var">Some</span> (<span class="id" title="var">setup</span>, (<span class="id" title="var">Maps.mnil</span>, <span class="id" title="var">false</span>)) <span class="id" title="keyword">else</span> <span class="id" title="var">None</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;(unfolded&nbsp;Init.init)&nbsp;setup&nbsp;ctx.&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">crowdfunding_receive</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">params</span> : <span class="id" title="var">params</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">st</span> : <span class="id" title="var">storage</span>) : <span class="id" title="var">option</span> (<span class="id" title="var">list</span> <span class="id" title="var">SimpleActionBody_coq</span> × <span class="id" title="var">storage</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">receive</span> <span class="id" title="var">params</span>.2 <span class="id" title="var">st</span> <span class="id" title="var">params</span>.1.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">COUNTER_MODULE</span> :<br/>
+&nbsp;&nbsp;<span class="id" title="var">LiquidityMod</span> <span class="id" title="var">params</span> <span class="id" title="var">SimpleCallCtx</span> (<span class="id" title="var">time_coq</span> × <span class="id" title="var">Z</span> × <span class="id" title="var">address_coq</span>) <span class="id" title="var">storage</span> <span class="id" title="var">SimpleActionBody_coq</span> :=<br/>
+&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "liquidity_crowdfunding" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;pairs&nbsp;and&nbsp;ints&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">LiquidityPrelude</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "type storage = ((timestamp * (tez * address)) * ((address,tez) map * bool))";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;initial&nbsp;storage&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">crowdfunding_init</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;init&nbsp;requires&nbsp;some&nbsp;extra&nbsp;operations&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"let fst (p : 'a * 'b) : 'a = p.(0) in"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "let snd (p : 'a * 'b) : 'b = p.(1) in"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "let eqTez (a : tez ) (b : tez ) = a = b in" ;<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;main&nbsp;functionality&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">crowdfunding_receive</span>  ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> := <span class="id" title="var">printWrapperAndMain</span> |}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We run the extraction procedure inside the <span class="inlinecode"><span class="id" title="library">TemplateMonad</span></span>.
+    It uses the certified erasure from <span class="inlinecode"><span class="id" title="var">MetaCoq</span></span> and the certified deboxing procedure
+    that removes application of boxes to constants and constructors. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">t</span> &lt;- <span class="id" title="var">liquidity_extraction</span> <span class="id" title="var">PREFIX</span> <span class="id" title="var">TT_remap</span> <span class="id" title="var">TT_rename</span> [] <span class="id" title="var">COUNTER_MODULE</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tmDefinition</span> <span class="id" title="var">COUNTER_MODULE</span>.(<span class="id" title="var">lmd_module_name</span>) <span class="id" title="var">t</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="id" title="keyword">Print</span> <span class="id" title="var">liquidity_crowdfunding</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We redirect the extraction result for later processing and compiling with the Liquidity compiler 
+</div>
+<div class="code">
+<span class="id" title="var">Redirect</span> "../extraction/tests/extracted-code/liquidity-extract/CrowdfundingCertifiedExtraction.liq" <span class="id" title="keyword">Compute</span> <span class="id" title="var">liquidity_crowdfunding</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

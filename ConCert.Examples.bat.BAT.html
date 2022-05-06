@@ -1,0 +1,318 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.bat.BAT</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab134"></a><h1 class="section">Basic Attention Token contract</h1>
+ Implementation of the Basic Attention Token.
+    Ported from https://github.com/brave-intl/basic-attention-token-crowdsale/blob/66c886cc4bfb0493d9e7980f392ca7921ef1e7fc/contracts/BAToken.sol
+
+<div class="paragraph"> </div>
+
+    This file contains contract function definitions.
+    All contract types and utility functions are defined in <span class="inlinecode"><span class="id" title="library">ConCert.Examples.BAT.BATCommon</span></span>.
+    Proofs for this contract can be found in <span class="inlinecode"><span class="id" title="library">ConCert.Examples.BAT.BATCorrect</span></span>.
+
+<div class="paragraph"> </div>
+
+    The BAT contract is a combination of a EIP20 token contract and a crowdsale contract.
+    This implementation extends the EIP20 contract implemented in <span class="inlinecode"><span class="id" title="var">ConCert.Execution.Examples.EIP20Token</span></span>.
+
+</div>
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>. <span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith_base</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Extras</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">RecordUpdate</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Monads</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ContractCommon</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.BAT</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">BATCommon</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.EIP20</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">EIP20Token</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab135"></a><h1 class="section">Contract functions</h1>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Section</span> <span class="id" title="var">BAT</span>.<br/>
+<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <span class="id" title="var">ChainBase</span>}.<br/>
+
+<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">N_scope</span>.<br/>
+</div>
+
+<div class="doc">
+<a name="lab136"></a><h2 class="section">Init</h2>
+ This function only gets called once when contract is deployed.
+    Will set up the initial storage state of the contract.
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">init</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">setup</span> : <span class="id" title="var">Setup</span>) : <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">token_state</span> := {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">EIP20Token.balances</span> := <span class="id" title="var">FMap.add</span> <span class="id" title="var">setup</span>.(<span class="id" title="var">_batFundDeposit</span>) <span class="id" title="var">setup</span>.(<span class="id" title="var">_batFund</span>) <span class="id" title="var">FMap.empty</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">EIP20Token.total_supply</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">_batFund</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">EIP20Token.allowances</span> := <span class="id" title="var">FMap.empty</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+EIP20Token initialisation: 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_state</span> := <span class="id" title="var">token_state</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+BAT initialisation: 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">initSupply</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">_batFund</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">isFinalized</span> := <span class="id" title="var">false</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fundDeposit</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">_fundDeposit</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">batFundDeposit</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">_batFundDeposit</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fundingStart</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">_fundingStart</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fundingEnd</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">_fundingEnd</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenExchangeRate</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">_tokenExchangeRate</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenCreationCap</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">_tokenCreationCap</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tokenCreationMin</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">_tokenCreationMin</span>);<br/>
+&nbsp;&nbsp;|}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab137"></a><h2 class="section">Create Tokens</h2>
+ This entrypoint allows users to fund the crowdsale in return for tokens 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">try_create_tokens</span> <span class="id" title="var">sender</span> (<span class="id" title="var">sender_payload</span> : <span class="id" title="var">Amount</span>) <span class="id" title="var">current_slot</span> <span class="id" title="var">state</span> :=<br/>
+&nbsp;<span class="comment">(*&nbsp;early&nbsp;return&nbsp;if&nbsp;funding&nbsp;is&nbsp;finalized,&nbsp;funding&nbsp;period&nbsp;hasn't&nbsp;started&nbsp;yet,&nbsp;or&nbsp;funding&nbsp;period&nbsp;is&nbsp;over&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">state</span>.(<span class="id" title="var">isFinalized</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| (<span class="id" title="var">Nat.ltb</span> <span class="id" title="var">current_slot</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fundingStart</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| (<span class="id" title="var">Nat.ltb</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fundingEnd</span>) <span class="id" title="var">current_slot</span>)) ;<br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+Here we deviate slightly from the reference implementation. They only check for = 0,
+      but since ConCert's payloads may be negative numbers, we must extend this check to &lt;= 0 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">Z.leb</span> <span class="id" title="var">sender_payload</span> 0) ;<br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+Note: this conversion from Z to N is safe because by assumption sender_payload &gt; 0 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">tokens</span> := (<span class="id" title="var">Z.to_N</span> <span class="id" title="var">sender_payload</span>) * <span class="id" title="var">state</span>.(<span class="id" title="var">tokenExchangeRate</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">checkedSupply</span> := (<span class="id" title="var">total_supply</span> <span class="id" title="var">state</span>) + <span class="id" title="var">tokens</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">state</span>.(<span class="id" title="var">tokenCreationCap</span>) &lt;? <span class="id" title="var">checkedSupply</span>) ;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_token_state</span> : <span class="id" title="var">EIP20Token.State</span> := {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">EIP20Token.total_supply</span> := <span class="id" title="var">checkedSupply</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">EIP20Token.balances</span> := <span class="id" title="var">FMap.partial_alter</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">balance</span> =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">with_default</span> 0 <span class="id" title="var">balance</span> + <span class="id" title="var">tokens</span>)) <span class="id" title="var">sender</span> (<span class="id" title="var">balances</span> <span class="id" title="var">state</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">EIP20Token.allowances</span> := <span class="id" title="var">allowances</span> <span class="id" title="var">state</span>;<br/>
+&nbsp;&nbsp;|} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">state</span>&lt;|<span class="id" title="var">token_state</span> := <span class="id" title="var">new_token_state</span>|&gt;).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab138"></a><h2 class="section">Refund</h2>
+ This entrypoint can be called if crowdsale is not successfully funded.
+    Users calling this entrypoint will have their tokens removed and get their money refunded.
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">try_refund</span> <span class="id" title="var">sender</span> <span class="id" title="var">current_slot</span> <span class="id" title="var">state</span> :=<br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+Early return if funding is finalized, or funding period is NOT over, or if total supply exceeds or is equal to the minimum fund tokens. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">state</span>.(<span class="id" title="var">isFinalized</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| (<span class="id" title="var">Nat.leb</span> <span class="id" title="var">current_slot</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fundingEnd</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| (<span class="id" title="var">state</span>.(<span class="id" title="var">tokenCreationMin</span>) &lt;=? (<span class="id" title="var">total_supply</span> <span class="id" title="var">state</span>))) ;<br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+Don't allow the the batFundDeposit account to refund 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">sender</span> <span class="id" title="var">state</span>.(<span class="id" title="var">batFundDeposit</span>)) ;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">sender_bats</span> &lt;- <span class="id" title="var">FMap.find</span> <span class="id" title="var">sender</span> (<span class="id" title="var">balances</span> <span class="id" title="var">state</span>) ;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">sender_bats</span> =? 0) ;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_total_supply</span> := (<span class="id" title="var">total_supply</span>) <span class="id" title="var">state</span> - <span class="id" title="var">sender_bats</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+Convert tokens back to the currency of the blockchain, to be sent back to the sender address 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">amount_to_send</span> := <span class="id" title="var">Z.of_N</span> (<span class="id" title="var">sender_bats</span> / <span class="id" title="var">state</span>.(<span class="id" title="var">tokenExchangeRate</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_token_state</span> : <span class="id" title="var">EIP20Token.State</span> := {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">EIP20Token.total_supply</span> := <span class="id" title="var">new_total_supply</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">EIP20Token.balances</span> := <span class="id" title="var">FMap.add</span> <span class="id" title="var">sender</span> 0 (<span class="id" title="var">balances</span> <span class="id" title="var">state</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">EIP20Token.allowances</span> := <span class="id" title="var">allowances</span> <span class="id" title="var">state</span>;<br/>
+&nbsp;&nbsp;|} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_state</span> := <span class="id" title="var">state</span>&lt;|<span class="id" title="var">token_state</span> := <span class="id" title="var">new_token_state</span>|&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">send_act</span> := <span class="id" title="var">act_transfer</span> <span class="id" title="var">sender</span> <span class="id" title="var">amount_to_send</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">new_state</span>, [<span class="id" title="var">send_act</span>]).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab139"></a><h2 class="section">Finalize</h2>
+ This entrypoint will end the crowdsale and pay out the money to the owner.
+    Can only be called if funding was successful.
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">try_finalize</span> <span class="id" title="var">sender</span> <span class="id" title="var">current_slot</span> <span class="id" title="var">contract_balance</span> <span class="id" title="var">state</span> :=<br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+Early return if funding is finalized, or if sender is NOT the fund deposit address,
+      or if the total token supply is less than the minimum required amount,
+      or if it is too early to end funding and the total token supply has not reached the cap.
+      Note: the last requirement makes it possible to end a funding early if the cap has been reached.
+  
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">state</span>.(<span class="id" title="var">isFinalized</span>) ||<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">negb</span> (<span class="id" title="var">address_eqb</span> <span class="id" title="var">sender</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fundDeposit</span>))) ||<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((<span class="id" title="var">total_supply</span> <span class="id" title="var">state</span>) &lt;? <span class="id" title="var">state</span>.(<span class="id" title="var">tokenCreationMin</span>))) ;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> ((<span class="id" title="var">Nat.leb</span> <span class="id" title="var">current_slot</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fundingEnd</span>)) &amp;&amp; <span class="id" title="var">negb</span> ((<span class="id" title="var">total_supply</span> <span class="id" title="var">state</span>) =? <span class="id" title="var">state</span>.(<span class="id" title="var">tokenCreationCap</span>))) ;<br/>
+&nbsp;&nbsp;</div>
+
+<div class="doc">
+Send the currency of the contract back to the fund 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">send_act</span> := <span class="id" title="var">act_transfer</span> <span class="id" title="var">state</span>.(<span class="id" title="var">fundDeposit</span>) <span class="id" title="var">contract_balance</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_state</span> := <span class="id" title="var">state</span>&lt;|<span class="id" title="var">isFinalized</span> := <span class="id" title="var">true</span>|&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">new_state</span>, [<span class="id" title="var">send_act</span>]).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab140"></a><h2 class="section">Receive</h2>
+ This is the main entrypoint function.
+    All contract calls will be handled by this function
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive_bat</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">maybe_msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">Msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">State</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">sender</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">sender_payload</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_amount</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">slot</span> := <span class="id" title="var">chain</span>.(<span class="id" title="var">current_slot</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">contract_balance</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_contract_balance</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">without_actions</span> := <span class="id" title="var">option_map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">new_state</span> =&gt; (<span class="id" title="var">new_state</span>, [])) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">not_payable</span> <span class="id" title="var">x</span> := <span class="id" title="tactic">do</span> <span class="id" title="var">_</span> &lt;- <span class="id" title="var">throwIf</span> (<span class="id" title="var">sender_payload</span> &gt;? 0) ; <span class="id" title="var">x</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">maybe_msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">create_tokens</span> =&gt; <span class="id" title="var">without_actions</span> (<span class="id" title="var">try_create_tokens</span> <span class="id" title="var">sender</span> <span class="id" title="var">sender_payload</span> <span class="id" title="var">slot</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">refund</span> =&gt; <span class="id" title="var">not_payable</span> (<span class="id" title="var">try_refund</span> <span class="id" title="var">sender</span> <span class="id" title="var">slot</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">finalize</span> =&gt; <span class="id" title="var">not_payable</span> (<span class="id" title="var">try_finalize</span> <span class="id" title="var">sender</span> <span class="id" title="var">slot</span> <span class="id" title="var">contract_balance</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+<span class="id" title="keyword">Close</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Composes EIP20Token.receive and receive_bat by first executing EIP20Token.receive (if the message is an EIP20 message),
+   and otherwise executes receive_bat 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">maybe_msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">Msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">State</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">maybe_msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">tokenMsg</span> <span class="id" title="var">msg</span>) =&gt; <span class="id" title="tactic">do</span> <span class="id" title="var">res</span> &lt;- <span class="id" title="var">EIP20Token.receive</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span>.(<span class="id" title="var">token_state</span>) (<span class="id" title="var">Some</span> <span class="id" title="var">msg</span>) ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_state</span> := <span class="id" title="var">state</span>&lt;|<span class="id" title="var">token_state</span> := <span class="id" title="var">fst</span> <span class="id" title="var">res</span>|&gt; <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">new_state</span>, <span class="id" title="var">snd</span> <span class="id" title="var">res</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">receive_bat</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">state</span> <span class="id" title="var">maybe_msg</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">contract</span> : <span class="id" title="var">Contract</span> <span class="id" title="var">Setup</span> <span class="id" title="var">Msg</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">build_contract</span> <span class="id" title="var">init</span> <span class="id" title="var">receive</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">BAT</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

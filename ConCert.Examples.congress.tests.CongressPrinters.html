@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.congress.tests.CongressPrinters</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">QCTest</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Congress</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Congress</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+
+<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">SerializedValue</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">deserialize</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+<span class="id" title="var">Arguments</span> <span class="id" title="var">serialize</span> : <span class="id" title="tactic">clear</span> <span class="id" title="var">implicits</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showRules</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">Rules</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">r</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"Rules{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;++ "min_vote_count_permille: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">min_vote_count_permille</span> <span class="id" title="var">r</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;++ "margin_needed_permille: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">margin_needed_permille</span> <span class="id" title="var">r</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;++ "debating_period_in_blocks: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">debating_period_in_blocks</span> <span class="id" title="var">r</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">string_of_ca</span> (<span class="id" title="var">str_of_msg</span> : <span class="id" title="var">Msg</span> -&gt; <span class="id" title="var">string</span>) <span class="id" title="var">ca</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">ca</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">cact_transfer</span> <span class="id" title="var">to</span> <span class="id" title="var">amount</span> =&gt; "(transfer: " ++ <span class="id" title="var">show</span> <span class="id" title="var">to</span> ++ <span class="id" title="var">sep</span> ++ <span class="id" title="var">show</span> <span class="id" title="var">amount</span> ++ ")"<br/>
+&nbsp;&nbsp;| <span class="id" title="var">cact_call</span> <span class="id" title="var">to</span> <span class="id" title="var">amount</span> <span class="id" title="var">msg</span> =&gt; "(call: " ++ <span class="id" title="var">show</span> <span class="id" title="var">to</span> ++ <span class="id" title="var">sep</span> ++ <span class="id" title="var">show</span> <span class="id" title="var">amount</span> ++ <span class="id" title="var">sep</span> ++<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> @<span class="id" title="var">deserialize</span> <span class="id" title="var">Msg</span> <span class="id" title="var">_</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">msg</span> =&gt; <span class="id" title="var">str_of_msg</span> <span class="id" title="var">msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt;  "&lt;FAILED DESERIALIZATION&gt;"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> ++ ")"<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showSetup</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">Setup</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">v</span> := <span class="id" title="var">show</span> (<span class="id" title="var">setup_rules</span> <span class="id" title="var">v</span>)<br/>
+|}.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Ugly&nbsp;fuel&nbsp;hack&nbsp;:/&nbsp;*)</span><br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">string_of_Msg</span> (<span class="id" title="var">fuel</span> : <span class="id" title="var">nat</span>) (<span class="id" title="var">m</span> : <span class="id" title="var">Msg</span>) : <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">show_acts</span> <span class="id" title="var">actions</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">fuel</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 0 =&gt; <span class="id" title="var">String.concat</span> "; " (<span class="id" title="var">map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; "Msg{...}") <span class="id" title="var">actions</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">S</span> <span class="id" title="var">fuel</span> =&gt; <span class="id" title="var">String.concat</span> "; " (<span class="id" title="var">map</span> (<span class="id" title="var">string_of_ca</span> (<span class="id" title="var">string_of_Msg</span> <span class="id" title="var">fuel</span>)) <span class="id" title="var">actions</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">transfer_ownership</span> <span class="id" title="var">addr</span> =&gt; "transfer_ownership " ++ <span class="id" title="var">show</span> <span class="id" title="var">addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">change_rules</span> <span class="id" title="var">rules</span> =&gt; "change_rules " ++ <span class="id" title="var">show</span> <span class="id" title="var">rules</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">add_member</span> <span class="id" title="var">addr</span> =&gt; "add_member " ++ <span class="id" title="var">show</span> <span class="id" title="var">addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">remove_member</span> <span class="id" title="var">addr</span> =&gt; "remove_member " ++ <span class="id" title="var">show</span> <span class="id" title="var">addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">create_proposal</span> <span class="id" title="var">actions</span> =&gt; "create_proposal " ++ <span class="id" title="var">show_acts</span> <span class="id" title="var">actions</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">vote_for_proposal</span> <span class="id" title="var">proposalId</span> =&gt; "vote_for_proposal " ++  <span class="id" title="var">show</span> <span class="id" title="var">proposalId</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">vote_against_proposal</span> <span class="id" title="var">proposalId</span> =&gt; "vote_against_proposal " ++ <span class="id" title="var">show</span> <span class="id" title="var">proposalId</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">retract_vote</span> <span class="id" title="var">proposalId</span> =&gt; "retract_vote " ++ <span class="id" title="var">show</span> <span class="id" title="var">proposalId</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">finish_proposal</span> <span class="id" title="var">proposalId</span> =&gt; "finish_proposal " ++ <span class="id" title="var">show</span> <span class="id" title="var">proposalId</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showMsg</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">Msg</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span>:= <span class="id" title="var">string_of_Msg</span> 20<br/>
+|}.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;TODO:&nbsp;fix&nbsp;printing&nbsp;for&nbsp;msg&nbsp;of&nbsp;type&nbsp;SerializedValue&nbsp;such&nbsp;that&nbsp;it&nbsp;works&nbsp;whenever&nbsp;it&nbsp;is&nbsp;serialized&nbsp;from&nbsp;type&nbsp;Msg&nbsp;*)</span><br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showCongressAction</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">CongressAction</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> := <span class="id" title="var">string_of_ca</span> (<span class="id" title="var">string_of_Msg</span> 20)<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showProposal</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">Proposal</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">p</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;"Proposal{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;++ "actions: " ++  <span class="id" title="var">show</span> (<span class="id" title="var">actions</span> <span class="id" title="var">p</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;++ "votes: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">votes</span> <span class="id" title="var">p</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;++ "vote_result: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">vote_result</span> <span class="id" title="var">p</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;++ "proposed_in: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">proposed_in</span> <span class="id" title="var">p</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;++ "}" ++ <span class="id" title="var">newline</span><br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showState</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">Congress.State</span> :=<br/>
+{|<br/>
+&nbsp;&nbsp;<span class="id" title="var">show</span> <span class="id" title="var">s</span> := "State{"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "owner: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">owner</span> <span class="id" title="var">s</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "rules: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">state_rules</span> <span class="id" title="var">s</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "proposals: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">proposals</span> <span class="id" title="var">s</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "next_proposal_id: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">next_proposal_id</span> <span class="id" title="var">s</span>) ++ <span class="id" title="var">sep</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "members: " ++ <span class="id" title="var">show</span> (<span class="id" title="var">members</span> <span class="id" title="var">s</span>) ++ "}"<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <span class="id" title="var">showSerializedMsg</span> : <span class="id" title="keyword">Show</span> <span class="id" title="var">SerializedValue</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">Derive</span> <span class="id" title="keyword">Show</span> <span class="id" title="var">Msg</span> &lt; <span class="id" title="var">Msg</span>, <span class="id" title="var">Setup</span> &gt;.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

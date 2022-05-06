@@ -1,0 +1,259 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.eip20.EIP20LiquidityExtraction</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab298"></a><h1 class="section">Extraction of a simple counter contract</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Notations</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">PreludeExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">LPretty</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">LiquidityExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Common</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.EIP20</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">EIP20Token</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ContractCommon</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">PREFIX</span> := "".<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap_default</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;types&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z</span> %%&gt; "tez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N</span> %%&gt; "int"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">nat</span> %%&gt; "nat"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">bool</span> %%&gt; "bool"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">unit</span> %%&gt; "unit"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">list</span> %%&gt; "list"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">fst</span> %%&gt; "fst"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">snd</span> %%&gt; "snd"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">option</span> %%&gt; "option"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">positive</span> %%&gt; "nat"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Amount</span> %%&gt; "tez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">Address</span> %%&gt; "address"<br/>
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;operations&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Note:&nbsp;N&nbsp;is&nbsp;mapped&nbsp;to&nbsp;Int&nbsp;instead&nbsp;of&nbsp;nat&nbsp;because&nbsp;Liquidity's&nbsp;minus&nbsp;operator&nbsp;on&nbsp;nats&nbsp;returns&nbsp;an&nbsp;int,&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;which&nbsp;is&nbsp;not&nbsp;compatible&nbsp;with&nbsp;N.sub&nbsp;since&nbsp;it&nbsp;returns&nbsp;an&nbsp;N&nbsp;*)</span><br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">List.fold_left</span> %%&gt; "List.fold"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Pos.add</span> %%&gt; "addNat"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Pos.sub</span> %%&gt; "subNat"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Pos.leb</span> %%&gt; "leNat"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Pos.eqb</span> %%&gt; "eqNat"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.add</span> %%&gt; "addTez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.sub</span> %%&gt; "subTez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.leb</span> %%&gt; "leTez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.ltb</span> %%&gt; "ltTez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.eqb</span> %%&gt; "eqTez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.gtb</span> %%&gt; "gtbTez"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.add</span> %%&gt; "addInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.sub</span> %%&gt; "subInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.leb</span> %%&gt; "leInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.ltb</span> %%&gt; "ltInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">N.eqb</span> %%&gt; "eqInt"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">andb</span> %%&gt; "andb"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">negb</span> %%&gt; "not"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">orb</span> %%&gt; "orb"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">eqb_addr</span> %%&gt; "eq_addr"<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">EIP20TokenExtraction</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">EIP20Token</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> <span class="id" title="var">params</span> := (<span class="id" title="var">ContractCallContext</span> × <span class="id" title="var">option</span> <span class="id" title="var">EIP20Token.Msg</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">N_scope</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">bool</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;We&nbsp;define&nbsp;a&nbsp;version&nbsp;of&nbsp;<span class="inlinecode"><span class="id" title="var">receive</span></span>&nbsp;that&nbsp;has&nbsp;the&nbsp;right&nbsp;signature.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;TODO:&nbsp;remove,&nbsp;once&nbsp;the&nbsp;<span class="inlinecode"><span class="id" title="var">LiquidityMod</span></span>&nbsp;is&nbsp;fixed.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">test_receive</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <span class="id" title="var">EIP20Token.State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">maybe_msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">EIP20Token.Msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">option</span> (<span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span> * <span class="id" title="var">EIP20Token.State</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">sender</span> := <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">without_actions</span> := <span class="id" title="var">option_map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">new_state</span> =&gt; ([], <span class="id" title="var">new_state</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">maybe_msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">transfer</span> <span class="id" title="var">to_addr</span> <span class="id" title="var">amountt</span>) =&gt; <span class="id" title="var">without_actions</span> (<span class="id" title="var">try_transfer</span> <span class="id" title="var">sender</span> <span class="id" title="var">to_addr</span> <span class="id" title="var">amountt</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">transfer_from</span> <span class="id" title="var">from</span> <span class="id" title="var">to_addr</span> <span class="id" title="var">amountt</span>) =&gt; <span class="id" title="var">without_actions</span> (<span class="id" title="var">try_transfer_from</span> <span class="id" title="var">sender</span> <span class="id" title="var">from</span> <span class="id" title="var">to_addr</span> <span class="id" title="var">amountt</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">approve</span> <span class="id" title="var">delegate</span> <span class="id" title="var">amount</span>) =&gt; <span class="id" title="var">without_actions</span> (<span class="id" title="var">try_approve</span> <span class="id" title="var">sender</span> <span class="id" title="var">delegate</span> <span class="id" title="var">amount</span> <span class="id" title="var">state</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive_wrapper</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">params</span> : <span class="id" title="var">params</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">st</span> : <span class="id" title="var">State</span>) : <span class="id" title="var">option</span> (<span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span> × <span class="id" title="var">State</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">test_receive</span> <span class="id" title="var">params</span>.1 <span class="id" title="var">st</span> <span class="id" title="var">params</span>.2.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;The&nbsp;same&nbsp;as&nbsp;for&nbsp;<span class="inlinecode"><span class="id" title="var">test_receive</span></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TODO:&nbsp;remove,&nbsp;once&nbsp;the&nbsp;<span class="inlinecode"><span class="id" title="var">LiquidityMod</span></span>&nbsp;is&nbsp;fixed.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">init</span> (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">setup</span> : <span class="id" title="var">EIP20Token.Setup</span>) : <span class="id" title="var">option</span> <span class="id" title="var">EIP20Token.State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;ensure&nbsp;extraction&nbsp;does&nbsp;not&nbsp;optimize&nbsp;unused&nbsp;ctx&nbsp;away<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOTE:&nbsp;can&nbsp;be&nbsp;dealt&nbsp;with&nbsp;in&nbsp;a&nbsp;better&nbsp;way&nbsp;using&nbsp;the&nbsp;mask-override&nbsp;mechanism&nbsp;of&nbsp;dearging&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ctx_</span> := <span class="id" title="var">ctx</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> {| <span class="id" title="var">total_supply</span> := <span class="id" title="var">setup</span>.(<span class="id" title="var">init_amount</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">balances</span> := <span class="id" title="var">AddressMap.add</span> (<span class="id" title="var">EIP20Token.owner</span> <span class="id" title="var">setup</span>) (<span class="id" title="var">init_amount</span> <span class="id" title="var">setup</span>) <span class="id" title="var">AddressMap.empty</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">allowances</span> := <span class="id" title="var">AddressMap.empty</span> |}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">printERC20Wrapper</span> (<span class="id" title="var">contract</span> : <span class="id" title="var">string</span>): <span class="id" title="var">string</span> :=<br/>
+&nbsp;&nbsp;"let wrapper param (st : storage)"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ " = "<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "match " ++ <span class="id" title="var">contract</span> ++ " (" ++ <span class="id" title="var">liquidity_call_ctx</span> ++ ", param) st" ++ " with"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "| Some v -&gt; v"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ "| None -&gt; failwith ()".<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">EIP20Token_MODULE</span> : <span class="id" title="var">LiquidityMod</span> <span class="id" title="var">params</span> <span class="id" title="var">ContractCallContext</span> <span class="id" title="var">EIP20Token.Setup</span> <span class="id" title="var">EIP20Token.State</span> <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "liquidity_eip20token" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;pairs&nbsp;and&nbsp;ints&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> := <span class="id" title="var">LPretty.LiquidityPrelude</span>;<br/>
+<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;initial&nbsp;storage&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">init</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> := "";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;main&nbsp;functionality&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">receive_wrapper</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> := "type storage = state" ++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">printERC20Wrapper</span> (<span class="id" title="var">PREFIX</span> ++ "receive_wrapper") ++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">LPretty.printMain</span> |}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap_eip20token</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">TT_remap_default</span> ++ [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ContractCallContext</span> %%&gt; "(timestamp * (address * (tez * tez)))"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ctx_from</span> %%&gt; "(fun x -&gt; x.(1).(0))" <span class="comment">(*&nbsp;small&nbsp;hack,&nbsp;but&nbsp;valid&nbsp;since&nbsp;ContractCallContext&nbsp;is&nbsp;mapped&nbsp;to&nbsp;a&nbsp;tuple&nbsp;*)</span><br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">gmap.gmap</span> %%&gt; "map"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">AddressMap.add</span> %%&gt; "Map.add"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">AddressMap.find</span> %%&gt; "Map.find"<br/>
+&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">AddressMap.empty</span> %%&gt; "(Map [])"<br/>
+&nbsp;&nbsp;].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_rename_eip20token</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[ ("Z0" ,"0tez")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("N0", "0")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("N1", "1")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("nil", "[]")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("tt", "()") ].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_inlines_eip20token</span> : <span class="id" title="var">list</span> <span class="id" title="var">kername</span> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% <span class="id" title="var">Monads.Monad_option</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.bind</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.ret</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">bool_rect</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">bool_rec</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">option_map</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Extras.with_default</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_balances</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_total_supply</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_allowances</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">set_State_balances</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">set_State_allowances</span>%%&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">t</span> &lt;- <span class="id" title="var">liquidity_extraction_specialize</span> <span class="id" title="var">PREFIX</span> <span class="id" title="var">TT_remap_eip20token</span> <span class="id" title="var">TT_rename_eip20token</span> <span class="id" title="var">TT_inlines_eip20token</span> <span class="id" title="var">EIP20Token_MODULE</span> ;;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">tmDefinition</span> <span class="id" title="var">EIP20Token_MODULE</span>.(<span class="id" title="var">lmd_module_name</span>) <span class="id" title="var">t</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We redirect the extraction result for later processing and compiling with the Liquidity compiler 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="var">Redirect</span> "../extraction/tests/extracted-code/liquidity-extract/liquidity_eip20token.liq"<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> <span class="id" title="var">liquidity_eip20token</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">EIP20TokenExtraction</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

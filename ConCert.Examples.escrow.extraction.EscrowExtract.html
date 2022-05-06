@@ -1,0 +1,337 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.escrow.extraction.EscrowExtract</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab271"></a><h1 class="section">Extraction of Escrow to CameLIGO and liquidity</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">All</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">SimpleBlockchainExt</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Escrow</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Escrow</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Common</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">CameLIGOPretty</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">CameLIGOExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">LPretty</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="var">LiquidityExtract</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">String</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">escrow_init_wrapper</span> (<span class="id" title="var">cctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">Setup</span> * <span class="id" title="var">Chain</span>) : <span class="id" title="var">option</span> <span class="id" title="var">State</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Escrow.init</span> (<span class="id" title="var">snd</span> <span class="id" title="var">s</span>) <span class="id" title="var">cctx</span> (<span class="id" title="var">fst</span> <span class="id" title="var">s</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">escrow_receive</span> (<span class="id" title="var">c</span> : <span class="id" title="var">Chain</span>) (<span class="id" title="var">cctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) (<span class="id" title="var">msg</span> : <span class="id" title="var">option</span> <span class="id" title="var">Msg</span>) : <span class="id" title="var">option</span> (<span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span> * <span class="id" title="var">State</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">Escrow.receive</span> <span class="id" title="var">c</span> <span class="id" title="var">cctx</span> <span class="id" title="var">s</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">s</span>, <span class="id" title="var">acts</span>) =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">acts</span>, <span class="id" title="var">s</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">EscrowCameLIGOExtraction</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">CameLIGOExtract</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">CameLIGOPretty</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">PrintConfShortNames.PrintWithShortNames</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table of constructors and some constants. The corresponding definitions will be extracted and renamed. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_rename_ligo</span> : <span class="id" title="var">list</span> (<span class="id" title="var">string</span> * <span class="id" title="var">string</span>):=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[ ("true", "true")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("false", "false")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("tt", "()")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap_ligo</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) := [ <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">subAmountOption</span> %%&gt; "subTez" ].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">ESCROW_MODULE_LIGO</span> : <span class="id" title="var">CameLIGOMod</span> <span class="id" title="var">Msg</span> <span class="id" title="var">ContractCallContext</span> (<span class="id" title="var">Setup</span> * <span class="id" title="var">Chain</span>) <span class="id" title="var">State</span> <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "cameligo_escrow" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;numbers,&nbsp;call&nbsp;context,&nbsp;etc.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> := <span class="id" title="var">CameLIGOPrelude</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;initial&nbsp;storage&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">escrow_init_wrapper</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;no&nbsp;extra&nbsp;operations&nbsp;in&nbsp;<span class="inlinecode"><span class="id" title="var">init</span></span>&nbsp;are&nbsp;required&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> := "";<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;main&nbsp;functionality&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">escrow_receive</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive_prelude</span> := "";<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">printWrapper</span> "escrow_receive" "msg" "state" <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">CameLIGOPretty.printMain</span> "state" |}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">to_inline</span> : <span class="id" title="var">list</span> <span class="id" title="var">kername</span> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[ &lt;%% <span class="id" title="var">Monads.Monad_option</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.bind</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.ret</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.lift</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">bool_rect</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">bool_rec</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">option_map</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Extras.with_default</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_last_action</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_next_step</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_seller</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_buyer</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_seller_withdrawable</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_buyer_withdrawable</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span><br/>
+&nbsp;&nbsp;(<span class="id" title="var">CameLIGO_prepare_extraction</span> <span class="id" title="var">to_inline</span> <span class="id" title="var">TT_remap_ligo</span> <span class="id" title="var">TT_rename_ligo</span> [] "cctx_instance" <span class="id" title="var">ESCROW_MODULE_LIGO</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Time</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">cameLIGO_escrow</span> := <span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <span class="id" title="var">cameligo_escrow_prepared</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Redirect&nbsp;"../extraction/tests/extracted-code/cameligo-extract/EscrowExtract.mligo"&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">tmMsg</span> <span class="id" title="var">cameLIGO_escrow</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">EscrowCameLIGOExtraction</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">EscrowLiquidityExtraction</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">PREFIX</span> := "".<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">LPretty</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">LiquidityExtract</span>.<br/>
+</div>
+
+<div class="doc">
+A translation table for definitions we want to remap. The corresponding top-level definitions will be *ignored* 
+</div>
+<div class="code">
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">chainDef</span> := "type chain = (nat * (nat * nat))".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">storageDef</span> := "type storage = state".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">contractcallcontextDef</span> := "type cctx = (timestamp * (address * (tez * tez)))".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;'msg'" := ((<span class="id" title="var">Msg</span> * <span class="id" title="var">ContractCallContext</span>) * <span class="id" title="var">Chain</span>)%<span class="id" title="keyword">type</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">liquidity_escrow_receive</span> (<span class="id" title="var">m</span> : <span class="id" title="var">msg</span>) (<span class="id" title="var">s</span> : <span class="id" title="var">State</span>) := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">receive</span> <span class="id" title="var">m</span>.2 <span class="id" title="var">m</span>.1.2 <span class="id" title="var">s</span> (<span class="id" title="var">Some</span> <span class="id" title="var">m</span>.1.1) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">s</span>, <span class="id" title="var">acts</span>) =&gt; <span class="id" title="var">Some</span> (<span class="id" title="var">acts</span>, <span class="id" title="var">s</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">ESCROW_MODULE_LIQUIDITY</span> : <span class="id" title="var">LiquidityMod</span> <span class="id" title="var">msg</span> <span class="id" title="var">ContractCallContext</span> (<span class="id" title="var">Setup</span> * <span class="id" title="var">Chain</span>) <span class="id" title="var">State</span> <span class="id" title="var">ActionBody</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="comment">(*&nbsp;a&nbsp;name&nbsp;for&nbsp;the&nbsp;definition&nbsp;with&nbsp;the&nbsp;extracted&nbsp;code&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_module_name</span> := "liquidity_escrow" ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;definitions&nbsp;of&nbsp;operations&nbsp;on&nbsp;pairs&nbsp;and&nbsp;ints&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_prelude</span> := <span class="id" title="var">String.concat</span> <span class="id" title="var">nl</span> ([<span class="id" title="var">LiquidityPrelude</span>; <span class="id" title="var">contractcallcontextDef</span>; <span class="id" title="var">chainDef</span>]);<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;initial&nbsp;storage&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init</span> := <span class="id" title="var">escrow_init_wrapper</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_init_prelude</span> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">nl</span> ++ "let evenTez (i : tez) = match i/2tz with | Some (_, r) -&gt; r=0tz | None -&gt; false in"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span> ++ "let eqTez (a : tez ) (b : tez ) = a = b in"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span> ++ "let eq_addr (a1 : address) (a2 : address) = a1 = a2 in"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span> ++ "let andb (a : bool ) (b : bool ) = a &amp; b in"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">nl</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;the&nbsp;main&nbsp;functionality&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_receive</span> := <span class="id" title="var">liquidity_escrow_receive</span> ;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;code&nbsp;for&nbsp;the&nbsp;entry&nbsp;point&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lmd_entry_point</span> :=   <span class="id" title="var">storageDef</span> ++ <span class="id" title="var">nl</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">printWrapper</span> (<span class="id" title="var">PREFIX</span> ++ "liquidity_escrow_receive") ++ <span class="id" title="var">nl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++ <span class="id" title="var">printMain</span> |}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A translation table for definitions we want to remap. The corresponding top-level definitions will be *ignored* 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_remap_liquidity</span> : <span class="id" title="var">list</span> (<span class="id" title="var">kername</span> * <span class="id" title="var">string</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Amount</span> %%&gt; "tez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Nat.add</span> %%&gt; "addNat"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Nat.ltb</span> %%&gt; "ltNat"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Nat.mul</span> %%&gt; "multNat"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.add</span> %%&gt; "addTez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.mul</span> %%&gt; "multTez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.sub</span> %%&gt; "subTez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.leb</span> %%&gt; "leTez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.ltb</span> %%&gt; "ltTez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.gtb</span> %%&gt; "gtTez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.div</span> %%&gt; "divTez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.even</span> %%&gt; "evenTez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z.eqb</span> %%&gt; "eqTez"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% <span class="id" title="var">Z</span> %%&gt; "tez"<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ActionBody</span> %%&gt; "operation"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ContractCallContext</span> %%&gt; "cctx"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">chain_height</span> %%&gt; "(fun (c : chain) -&gt; c.(0))"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">current_slot</span> %%&gt; "(fun (c : chain) -&gt; c.(1).(0))"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">finalized_height</span> %%&gt; "(fun (c : chain) -&gt; c.(1).(1))"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ctx_from</span> %%&gt; "(fun (c : cctx) -&gt; c.(1).(0))"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ctx_contract_address</span> %%&gt; "(fun (c : cctx) -&gt; c.(0))"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ctx_contract_balance</span> %%&gt; "(fun (c : cctx) -&gt; c.(1).(1).(0))"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">ctx_amount</span> %%&gt; "(fun (c : cctx) -&gt; c.(1).(1).(1))"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">address_eqb</span> %%&gt; "eq_addr"<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.fold_left</span> %%&gt; "List.fold"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.map</span> %%&gt; "List.map"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.find</span> %%&gt; "List.find"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.length</span> %%&gt; "List.length"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; <span class="id" title="var">remap</span> &lt;%% @<span class="id" title="var">List.app</span> %%&gt; "List.append"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;].<br/>
+</div>
+
+<div class="doc">
+A translation table of constructors and some constants. The corresponding definitions will be extracted and renamed. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">TT_rename_liquidity</span> : <span class="id" title="var">list</span> (<span class="id" title="var">string</span> * <span class="id" title="var">string</span>):=<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[ ("Some", "Some")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("None", "None")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("Zpos" ,"int")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("Npos" ,"(fun (n:nat) -&gt; n)")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("Zneg" ,"-")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("Z0" ,"0tz")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("N0" ,"0")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("xH" ,"0")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("1" ,"1")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("nil", "[]")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("true", "true")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; ("tt", "()")<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">to_inline</span> : <span class="id" title="var">list</span> <span class="id" title="var">kername</span> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;%% <span class="id" title="var">Monads.Monad_option</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.bind</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.ret</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Monads.lift</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">bool_rect</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">bool_rec</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% <span class="id" title="var">option_map</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">Extras.with_default</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;necessary&nbsp;because&nbsp;liquidity&nbsp;doesn't&nbsp;allow&nbsp;calls&nbsp;to&nbsp;other&nbsp;functions&nbsp;in&nbsp;init&nbsp;for&nbsp;some&nbsp;reason&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">init</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_last_action</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_next_step</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_seller</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_buyer</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_seller_withdrawable</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">setter_from_getter_State_buyer_withdrawable</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">set_State_last_action</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">set_State_next_step</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">set_State_seller</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">set_State_buyer</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">set_State_seller_withdrawable</span> %%&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;; &lt;%% @<span class="id" title="var">set_State_buyer_withdrawable</span> %%&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">MonadNotation</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Time&nbsp;MetaCoq&nbsp;Run&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(t&nbsp;&lt;-&nbsp;liquidity_extraction_specialize&nbsp;PREFIX&nbsp;TT_remap_liquidity&nbsp;TT_rename_liquidity&nbsp;to_inline&nbsp;ESCROW_MODULE_LIQUIDITY&nbsp;;;&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tmDefinition&nbsp;ESCROW_MODULE_LIQUIDITY.(lmd_module_name)&nbsp;t&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;).&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;<span class="comment">(**&nbsp;We&nbsp;redirect&nbsp;the&nbsp;extraction&nbsp;result&nbsp;for&nbsp;later&nbsp;processing&nbsp;and&nbsp;compiling&nbsp;with&nbsp;the&nbsp;Liquidity&nbsp;compiler&nbsp;*)</span>&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Redirect&nbsp;"../extraction/tests/extracted-code/liquidity-extract/escrow.liq"&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;MetaCoq&nbsp;Run&nbsp;(tmMsg&nbsp;liquidity_escrow).&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">EscrowLiquidityExtraction</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

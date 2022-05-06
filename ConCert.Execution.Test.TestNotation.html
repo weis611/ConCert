@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Execution.Test.TestNotation</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Execution.Blockchain.html#"><span class="id" title="library">Blockchain</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Execution.Test.TraceGens.html#"><span class="id" title="library">TraceGens</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Execution.Test.TestUtils.html#"><span class="id" title="library">TestUtils</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">QuickChick</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">QuickChick</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#"><span class="id" title="library">List</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.ZArith.html#"><span class="id" title="library">ZArith</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Bool.Bool.html#"><span class="id" title="library">Bool</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab335"></a><h1 class="section">Test parameters</h1>
+ These determine the behaviour of the chain trace generators.
+    The following parameters are available.
+<ul class="doclist">
+<li> max_trace_length: This determines the maximum number of blocks that will be added to the trace by the generator. Default value is 7.
+
+</li>
+<li> max_acts_per_block: Defines the maximum number of actions that the generator will add per block. Default value is 2.
+
+</li>
+<li> act_depth
+
+</li>
+<li> DepthFirst: A boolean value denoting whether actions are executed in a depth first order (true) or breadth first order (false). Default value is true.
+
+</li>
+<li> AddrSize: The total number of valid addresses in the blockchain. The first half of the address space is reserved
+      for user accounts while the secound half is reserved for smart contracts. Default value is 256 (overwriting this value is not recommended).
+
+</li>
+<li> BlockReward: The reward given to the address adding a block to the chain. Default value is 50.
+
+</li>
+<li> BlockCreator: The address used when adding new blocks to the chain. Default value is "creator" (address 10).
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    These values can be overwritten between tests by: <tt>Extract Constant max_trace_length =&gt; "3" </tt>
+<div class="paragraph"> </div>
+
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="max_trace_length"><span class="id" title="definition">max_trace_length</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> := 7.<br/>
+<span class="id" title="keyword">Definition</span> <a name="max_acts_per_block"><span class="id" title="definition">max_acts_per_block</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> := 2.<br/>
+<span class="id" title="keyword">Definition</span> <a name="act_depth"><span class="id" title="definition">act_depth</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> := 3.<br/>
+
+<br/>
+<span class="id" title="var">Declare</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">qc_test_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Type</span> <a name="TestNotationParameters"><span class="id" title="module">TestNotationParameters</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <a name="TestNotationParameters.gAction"><span class="id" title="axiom">gAction</span></a> : (<a class="idref" href="ConCert.Execution.Blockchain.html#Environment"><span class="id" title="record">Environment</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <span class="id" title="definition">GOpt</span> <a class="idref" href="ConCert.Execution.Blockchain.html#Action"><span class="id" title="record">Action</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <a name="TestNotationParameters.init_cb"><span class="id" title="axiom">init_cb</span></a> : <a class="idref" href="ConCert.Execution.Test.TestUtils.html#ChainBuilder"><span class="id" title="instance">ChainBuilder</span></a>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotationParameters"><span class="id" title="module">TestNotationParameters</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="TestNotations"><span class="id" title="module">TestNotations</span></a> (<span class="id" title="var">p</span> : <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotationParameters"><span class="id" title="module">TestNotationParameters</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">p</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="TestNotations.gChain_"><span class="id" title="definition">gChain_</span></a> <span class="id" title="var">init_cb</span> <span class="id" title="var">max_trace_length</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Test.TraceGens.html#gChain"><span class="id" title="definition">gChain</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#init_cb"><span class="id" title="variable">init_cb</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">env</span> <span class="id" title="var">act_depth</span> =&gt; <a class="idref" href="ConCert.Execution.Test.TestNotation.html#p.gAction"><span class="id" title="axiom">gAction</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#env"><span class="id" title="variable">env</span></a>) <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_trace_length"><span class="id" title="variable">max_trace_length</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#act_depth"><span class="id" title="definition">act_depth</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_acts_per_block"><span class="id" title="definition">max_acts_per_block</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="TestNotations.gChain"><span class="id" title="definition">gChain</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Test.TraceGens.html#gChain"><span class="id" title="definition">gChain</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#p.init_cb"><span class="id" title="axiom">init_cb</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">env</span> <span class="id" title="var">act_depth</span> =&gt; <a class="idref" href="ConCert.Execution.Test.TestNotation.html#p.gAction"><span class="id" title="axiom">gAction</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#env"><span class="id" title="variable">env</span></a>) <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_trace_length"><span class="id" title="definition">max_trace_length</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#act_depth"><span class="id" title="definition">act_depth</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_acts_per_block"><span class="id" title="definition">max_acts_per_block</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="TestNotations.gInvalidActions"><span class="id" title="definition">gInvalidActions</span></a> <span class="id" title="var">g</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Test.TraceGens.html#gInvalidAction"><span class="id" title="definition">gInvalidAction</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#p.init_cb"><span class="id" title="axiom">init_cb</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">env</span> <span class="id" title="var">act_depth</span> =&gt; <a class="idref" href="ConCert.Execution.Test.TestNotation.html#g"><span class="id" title="variable">g</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#env"><span class="id" title="variable">env</span></a>) <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_trace_length"><span class="id" title="definition">max_trace_length</span></a> 1 1.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="TestNotations.forAllInvalidActions"><span class="id" title="definition">forAllInvalidActions</span></a> `{<span class="id" title="class">Show</span> <a class="idref" href="ConCert.Execution.Test.TestUtils.html#ChainBuilder"><span class="id" title="instance">ChainBuilder</span></a>} `{<span class="id" title="class">Show</span> <a class="idref" href="ConCert.Execution.Blockchain.html#Action"><span class="id" title="record">Action</span></a>} <span class="id" title="var">g</span> <span class="id" title="var">P</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">forAll</span> (<a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotations.gInvalidActions"><span class="id" title="definition">gInvalidActions</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#g"><span class="id" title="variable">g</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> '<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">cb</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="var">acts</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> =&gt; <span class="id" title="keyword">if</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#length"><span class="id" title="abbreviation">length</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#acts"><span class="id" title="variable">acts</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Arith.PeanoNat.html#ad2ec4e405f68c46c0a176e3e94ae2e3"><span class="id" title="notation">=?</span></a> 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="method">checker</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="definition">disjoin</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> (<span class="id" title="keyword">fun</span> <span class="id" title="var">act</span> =&gt; <a class="idref" href="ConCert.Execution.Test.TestNotation.html#P"><span class="id" title="variable">P</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#cb"><span class="id" title="variable">cb</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#act"><span class="id" title="variable">act</span></a>) <a class="idref" href="ConCert.Execution.Test.TestNotation.html#acts"><span class="id" title="variable">acts</span></a>)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="TestNotations.forAllChainBuilders"><span class="id" title="definition">forAllChainBuilders</span></a> `{<span class="id" title="class">Show</span> <a class="idref" href="ConCert.Execution.Test.TestUtils.html#ChainBuilder"><span class="id" title="instance">ChainBuilder</span></a>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Test.TraceGens.html#forAllChainBuilder"><span class="id" title="definition">forAllChainBuilder</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_trace_length"><span class="id" title="definition">max_trace_length</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#p.init_cb"><span class="id" title="axiom">init_cb</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotations.gChain_"><span class="id" title="definition">gChain_</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="TestNotations.forAllBlocks"><span class="id" title="definition">forAllBlocks</span></a> `{<span class="id" title="class">Show</span> <a class="idref" href="ConCert.Execution.Blockchain.html#ChainState"><span class="id" title="record">ChainState</span></a>} `{<span class="id" title="class">Show</span> <a class="idref" href="ConCert.Execution.Test.TestUtils.html#ChainBuilder"><span class="id" title="instance">ChainBuilder</span></a>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Test.TraceGens.html#forAllBlocks"><span class="id" title="definition">forAllBlocks</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_trace_length"><span class="id" title="definition">max_trace_length</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#p.init_cb"><span class="id" title="axiom">init_cb</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotations.gChain_"><span class="id" title="definition">gChain_</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="TestNotations.forAllChainStatePairs"><span class="id" title="definition">forAllChainStatePairs</span></a> `{<span class="id" title="class">Show</span> <a class="idref" href="ConCert.Execution.Test.TestUtils.html#ChainBuilder"><span class="id" title="instance">ChainBuilder</span></a>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Test.TraceGens.html#forAllChainStatePairs"><span class="id" title="definition">forAllChainStatePairs</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_trace_length"><span class="id" title="definition">max_trace_length</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#p.init_cb"><span class="id" title="axiom">init_cb</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotations.gChain_"><span class="id" title="definition">gChain_</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="TestNotations.bool_to_option"><span class="id" title="definition">bool_to_option</span></a> {<span class="id" title="var">A</span>} (<span class="id" title="var">P</span> : <a class="idref" href="ConCert.Execution.Test.TestNotation.html#A"><span class="id" title="variable">A</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bool"><span class="id" title="inductive">bool</span></a>) : (<a class="idref" href="ConCert.Execution.Test.TestNotation.html#A"><span class="id" title="variable">A</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#unit"><span class="id" title="inductive">unit</span></a>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <span class="id" title="var">cs</span> =&gt; <span class="id" title="keyword">if</span> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#P"><span class="id" title="variable">P</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#cs"><span class="id" title="variable">cs</span></a> <span class="id" title="keyword">then</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#tt"><span class="id" title="constructor">tt</span></a> <span class="id" title="keyword">else</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="TestNotations.checkForAllStatesInTrace"><span class="id" title="definition">checkForAllStatesInTrace</span></a> {<span class="id" title="var">A</span>} <span class="id" title="var">Q</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fun</span> (<span class="id" title="var">_</span> : <a class="idref" href="ConCert.Execution.Test.TestNotation.html#A"><span class="id" title="variable">A</span></a>) (<span class="id" title="var">pre_trace</span> <span class="id" title="var">post_trace</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="ConCert.Execution.Blockchain.html#ChainState"><span class="id" title="record">ChainState</span></a>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="method">checker</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#fold_left"><span class="id" title="definition">fold_left</span></a> (<span class="id" title="keyword">fun</span> <span class="id" title="var">a</span> (<span class="id" title="var">cs</span> : <a class="idref" href="ConCert.Execution.Blockchain.html#ChainState"><span class="id" title="record">ChainState</span></a>) =&gt; <a class="idref" href="ConCert.Execution.Test.TestNotation.html#a"><span class="id" title="variable">a</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#9ddeac0ab66152bd1d64bedb507a795e"><span class="id" title="notation">&amp;&amp;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#9ddeac0ab66152bd1d64bedb507a795e"><span class="id" title="notation">(</span></a><a class="idref" href="ConCert.Execution.Test.TestNotation.html#Q"><span class="id" title="variable">Q</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#pre_trace"><span class="id" title="variable">pre_trace</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#cs"><span class="id" title="variable">cs</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#9ddeac0ab66152bd1d64bedb507a795e"><span class="id" title="notation">)</span></a> ) <a class="idref" href="ConCert.Execution.Test.TestNotation.html#post_trace"><span class="id" title="variable">post_trace</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> <a name="3df738f1514836631643bc237bca754b"><span class="id" title="notation">&quot;</span></a>cb '~~&gt;' pf" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Execution.Test.TraceGens.html#reachableFrom_chaintrace"><span class="id" title="definition">reachableFrom_chaintrace</span></a> <span class="id" title="var">cb</span> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotations.gChain_"><span class="id" title="definition">gChain_</span></a> <span class="id" title="var">pf</span>) (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 45, <span class="id" title="tactic">left</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">qc_test_scope</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> <a name="d9e948076510bc52a4e5a2b1f6a3f08e"><span class="id" title="notation">&quot;</span></a>lc '~~~&gt;' pf1 '===&gt;' pf2" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Execution.Test.TraceGens.html#reachableFrom_implies_chaintracePropSized"><span class="id" title="definition">reachableFrom_implies_chaintracePropSized</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_trace_length"><span class="id" title="definition">max_trace_length</span></a> <span class="id" title="var">lc</span> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotations.gChain_"><span class="id" title="definition">gChain_</span></a> <span class="id" title="var">pf1</span> <span class="id" title="var">pf2</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 45, <span class="id" title="var">pf1</span> <span class="id" title="tactic">at</span> <span class="id" title="var">next</span> <span class="id" title="keyword">level</span>, <span class="id" title="tactic">left</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">qc_test_scope</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> <a name="1bb6ca55958cf217b4358ccf88648fbe"><span class="id" title="notation">&quot;</span></a>'{{' P '}}'" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Execution.Test.TraceGens.html#forAllChainState"><span class="id" title="definition">forAllChainState</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_trace_length"><span class="id" title="definition">max_trace_length</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#p.init_cb"><span class="id" title="axiom">init_cb</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotations.gChain_"><span class="id" title="definition">gChain_</span></a> <span class="id" title="var">P</span>) (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 60, <span class="id" title="keyword">no</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">qc_test_scope</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> <a name="ab947feb87373d2595d256849ebfad97"><span class="id" title="notation">&quot;</span></a>'{{' P '}}' '==&gt;' '{{' Q '}}'" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Execution.Test.TraceGens.html#forAllChainState_implication"><span class="id" title="definition">forAllChainState_implication</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_trace_length"><span class="id" title="definition">max_trace_length</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#p.init_cb"><span class="id" title="axiom">init_cb</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotations.gChain_"><span class="id" title="definition">gChain_</span></a> <span class="id" title="var">P</span> <span class="id" title="var">Q</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 60, <span class="id" title="tactic">left</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">qc_test_scope</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> <a name="8ca7f34d2c775fd1594bd6f93dd964e6"><span class="id" title="notation">&quot;</span></a>'{{' P '}}' c '{{' Q '}}'" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Execution.Test.TraceGens.html#pre_post_assertion"><span class="id" title="definition">pre_post_assertion</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_trace_length"><span class="id" title="definition">max_trace_length</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#p.init_cb"><span class="id" title="axiom">init_cb</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotations.gChain_"><span class="id" title="definition">gChain_</span></a> <span class="id" title="var">c</span> <span class="id" title="var">P</span> <span class="id" title="var">Q</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 60, <span class="id" title="var">c</span> <span class="id" title="tactic">at</span> <span class="id" title="var">next</span> <span class="id" title="keyword">level</span>, <span class="id" title="keyword">no</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">qc_test_scope</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> <a name="e47e752fba1747f210ec5c170cb0ceef"><span class="id" title="notation">&quot;</span></a>'{{' P '}}' c '{{' Q '}}' chain" :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Execution.Test.TraceGens.html#pre_post_assertion"><span class="id" title="definition">pre_post_assertion</span></a> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#max_trace_length"><span class="id" title="definition">max_trace_length</span></a> <span class="id" title="var">chain</span> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotations.gChain_"><span class="id" title="definition">gChain_</span></a> <span class="id" title="var">c</span> <span class="id" title="var">P</span> <span class="id" title="var">Q</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 60, <span class="id" title="var">c</span> <span class="id" title="tactic">at</span> <span class="id" title="var">next</span> <span class="id" title="keyword">level</span>, <span class="id" title="var">chain</span> <span class="id" title="tactic">at</span> <span class="id" title="var">next</span> <span class="id" title="keyword">level</span>, <span class="id" title="keyword">no</span> <span class="id" title="keyword">associativity</span>) : <span class="id" title="var">qc_test_scope</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Execution.Test.TestNotation.html#TestNotations"><span class="id" title="module">TestNotations</span></a>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">qc_test_scope</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

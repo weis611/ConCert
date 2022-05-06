@@ -1,0 +1,344 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.escrow.tests.EscrowTests</h1>
+
+<div class="code">
+<span class="comment">(*&nbsp;QuickChick&nbsp;tests&nbsp;of&nbsp;the&nbsp;Escrow&nbsp;contract.&nbsp;The&nbsp;properties&nbsp;tested&nbsp;are:<br/>
+&nbsp;&nbsp;&nbsp;-&nbsp;functional&nbsp;correctness&nbsp;(also&nbsp;proved&nbsp;in&nbsp;Escrow.v)<br/>
+&nbsp;&nbsp;&nbsp;-&nbsp;the&nbsp;next_step&nbsp;field&nbsp;satisfies&nbsp;a&nbsp;certain&nbsp;ordering&nbsp;(e.g.&nbsp;buyer_commit&nbsp;-&gt;&nbsp;buyer_confirm&nbsp;-&gt;&nbsp;withdrawals)<br/>
+*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Automation</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ChainedList</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ResultMonad</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">QCTest</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Escrow</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Escrow</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Escrow</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">EscrowPrinters</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Escrow</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">EscrowGens</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">TestSetup</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Fix&nbsp;seller&nbsp;and&nbsp;buyer&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">seller</span> := <span class="id" title="var">creator</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">buyer</span> := <span class="id" title="var">person_1</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">escrow_setup</span> := {|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">setup_buyer</span> := <span class="id" title="var">buyer</span><br/>
+&nbsp;&nbsp;|}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">deploy_escrow</span> <span class="id" title="var">amount</span> := <span class="id" title="var">create_deployment</span> <span class="id" title="var">amount</span> <span class="id" title="var">Escrow.contract</span> <span class="id" title="var">escrow_setup</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">escrow_contract_addr</span> : <span class="id" title="var">Address</span> := <span class="id" title="var">contract_base_addr</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;The&nbsp;initial&nbsp;blockchain&nbsp;with&nbsp;the&nbsp;escrow&nbsp;contract&nbsp;deployed,&nbsp;and&nbsp;with&nbsp;buyer&nbsp;balance&nbsp;=&nbsp;10&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">escrow_chain</span> : <span class="id" title="var">ChainBuilder</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unpack_result</span> (<span class="id" title="var">TraceGens.add_block</span> <span class="id" title="var">empty_chain</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">seller</span> <span class="id" title="var">seller</span> (<span class="id" title="var">act_transfer</span> <span class="id" title="var">buyer</span> 10);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">build_act</span> <span class="id" title="var">seller</span> <span class="id" title="var">seller</span> (<span class="id" title="var">deploy_escrow</span> 2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;]).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">TestSetup</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;To&nbsp;instantiate&nbsp;the&nbsp;EscrowGen&nbsp;module&nbsp;functor,&nbsp;we&nbsp;need&nbsp;to&nbsp;supply<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;an&nbsp;EscrowGensInfo&nbsp;module.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">TestInfo</span> &lt;: <span class="id" title="var">EscrowGensInfo</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">contract_addr</span> := <span class="id" title="var">escrow_contract_addr</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">TestInfo</span>.<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">MG</span> := <span class="id" title="var">EscrowGens.EscrowGens</span> <span class="id" title="var">TestInfo</span>. <span class="id" title="keyword">Import</span> <span class="id" title="var">MG</span>.<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">TestGenInstances</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;For&nbsp;automation&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">gEscrowChainBuilder</span> : <span class="id" title="var">GenSized</span> <span class="id" title="var">ChainBuilder</span> := <br/>
+&nbsp;&nbsp;{|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">arbitrarySized</span> := <span class="id" title="var">gEscrowTraceBetter</span> <span class="id" title="var">escrow_chain</span><br/>
+&nbsp;&nbsp;|}.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">TestGenInstances</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">TestProperties</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;This&nbsp;is&nbsp;the&nbsp;proposition&nbsp;we&nbsp;wish&nbsp;to&nbsp;test,&nbsp;but&nbsp;QuickChick&nbsp;cannot&nbsp;test&nbsp;arbitrary&nbsp;Props&nbsp;since&nbsp;they&nbsp;are&nbsp;not<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;decidable&nbsp;in&nbsp;general.&nbsp;Therefore,&nbsp;we&nbsp;define&nbsp;a&nbsp;boolean&nbsp;version,&nbsp;escrow_correct_bool,&nbsp;below&nbsp;and<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;show&nbsp;that&nbsp;it&nbsp;implies&nbsp;escrow_correct_Prop.&nbsp;We&nbsp;then&nbsp;test&nbsp;on&nbsp;escrow_correct_bool&nbsp;instead.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;alternative&nbsp;approach&nbsp;is&nbsp;to&nbsp;prove&nbsp;that&nbsp;escrow_correct_Prop&nbsp;is&nbsp;decidable,&nbsp;since&nbsp;QuickChick&nbsp;can&nbsp;test&nbsp;any<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;decidable&nbsp;proposition&nbsp;(by&nbsp;coercing&nbsp;it&nbsp;to&nbsp;a&nbsp;bool)&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">escrow_correct_Prop</span> {<span class="id" title="var">from</span> <span class="id" title="var">to</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">caddr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">cstate</span> : <span class="id" title="var">Escrow.State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">trace</span> : <span class="id" title="var">ChainTrace</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">depinfo</span> : <span class="id" title="var">DeploymentInfo</span> <span class="id" title="var">Setup</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">inc_calls</span> : <span class="id" title="var">list</span> (<span class="id" title="var">ContractCallInfo</span> <span class="id" title="var">Msg</span>)) : <span class="id" title="keyword">Prop</span> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">item_worth</span> := <span class="id" title="var">deployment_amount</span> <span class="id" title="var">depinfo</span> / 2 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">seller</span> := <span class="id" title="var">deployment_from</span> <span class="id" title="var">depinfo</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">buyer</span> := <span class="id" title="var">setup_buyer</span> (<span class="id" title="var">deployment_setup</span> <span class="id" title="var">depinfo</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">is_escrow_finished</span> <span class="id" title="var">cstate</span> = <span class="id" title="var">true</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">buyer_confirmed</span> <span class="id" title="var">inc_calls</span> <span class="id" title="var">buyer</span> = <span class="id" title="var">true</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">net_balance_effect</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> <span class="id" title="var">seller</span> = <span class="id" title="var">item_worth</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">net_balance_effect</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> <span class="id" title="var">buyer</span> = -<span class="id" title="var">item_worth</span> \/<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">buyer_confirmed</span> <span class="id" title="var">inc_calls</span> <span class="id" title="var">buyer</span> = <span class="id" title="var">false</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">net_balance_effect</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> <span class="id" title="var">seller</span> = 0 /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">net_balance_effect</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> <span class="id" title="var">buyer</span> = 0).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;bool&nbsp;version&nbsp;of&nbsp;escrow_correct_Prop&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">escrow_correct_bool</span> {<span class="id" title="var">from</span> <span class="id" title="var">to</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">caddr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">cstate</span> : <span class="id" title="var">Escrow.State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">trace</span> : <span class="id" title="var">ChainTrace</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">depinfo</span> : <span class="id" title="var">DeploymentInfo</span> <span class="id" title="var">Setup</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">inc_calls</span> : <span class="id" title="var">list</span> (<span class="id" title="var">ContractCallInfo</span> <span class="id" title="var">Msg</span>)) := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">item_worth</span> := <span class="id" title="var">deployment_amount</span> <span class="id" title="var">depinfo</span> / 2 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">seller</span> := <span class="id" title="var">deployment_from</span> <span class="id" title="var">depinfo</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">buyer</span> := <span class="id" title="var">setup_buyer</span> (<span class="id" title="var">deployment_setup</span> <span class="id" title="var">depinfo</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">is_escrow_finished</span> <span class="id" title="var">cstate</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> (<span class="id" title="var">buyer_confirmed</span> <span class="id" title="var">inc_calls</span> <span class="id" title="var">buyer</span> &amp;&amp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((<span class="id" title="var">net_balance_effect</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> <span class="id" title="var">seller</span> =? <span class="id" title="var">item_worth</span>) &amp;&amp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">net_balance_effect</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> <span class="id" title="var">buyer</span> =? -<span class="id" title="var">item_worth</span>)) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;||<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">negb</span> (<span class="id" title="var">buyer_confirmed</span> <span class="id" title="var">inc_calls</span> <span class="id" title="var">buyer</span>)) &amp;&amp; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((<span class="id" title="var">net_balance_effect</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> <span class="id" title="var">seller</span> =? 0) &amp;&amp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">net_balance_effect</span> <span class="id" title="var">trace</span> <span class="id" title="var">caddr</span> <span class="id" title="var">buyer</span> =? 0)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">true</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;We&nbsp;show&nbsp;that&nbsp;the&nbsp;bool&nbsp;version&nbsp;implies&nbsp;the&nbsp;propositional&nbsp;version<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;correctness&nbsp;property.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">escrow_correct_bool_refl_prop</span> {<span class="id" title="var">from</span> <span class="id" title="var">to</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">caddr</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">cstate</span> : <span class="id" title="var">Escrow.State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">trace</span> : <span class="id" title="var">ChainTrace</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">depinfo</span> : <span class="id" title="var">DeploymentInfo</span> <span class="id" title="var">Setup</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">inc_calls</span> : <span class="id" title="var">list</span> (<span class="id" title="var">ContractCallInfo</span> <span class="id" title="var">Msg</span>)) : <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">escrow_correct_bool</span> <span class="id" title="var">caddr</span> <span class="id" title="var">cstate</span> <span class="id" title="var">trace</span> <span class="id" title="var">depinfo</span> <span class="id" title="var">inc_calls</span> = <span class="id" title="var">true</span> &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">escrow_correct_Prop</span> <span class="id" title="var">caddr</span> <span class="id" title="var">cstate</span> <span class="id" title="var">trace</span> <span class="id" title="var">depinfo</span> <span class="id" title="var">inc_calls</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">escrow_correct_bool</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">is_escrow_finished</span> <span class="id" title="var">cstate</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">H1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">unfold</span> <span class="id" title="var">escrow_correct_Prop</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">propify</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">escrow_correct_Prop</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">left</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">H1</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> (<span class="id" title="var">is_escrow_finished</span> <span class="id" title="var">cstate</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">H1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">unfold</span> <span class="id" title="var">escrow_correct_Prop</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">propify</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Z.eqb_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">H1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Finally,&nbsp;we&nbsp;can&nbsp;show&nbsp;that&nbsp;escrow_correct_Prop&nbsp;is&nbsp;decidable&nbsp;(using&nbsp;escrow_correct_bool&nbsp;as&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;decision&nbsp;procedure).&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">escrow_correct_P_dec</span> {<span class="id" title="var">from</span> <span class="id" title="var">to</span> <span class="id" title="var">caddr</span> <span class="id" title="var">cstate</span> <span class="id" title="var">trace</span> <span class="id" title="var">depinfo</span> <span class="id" title="var">inc_calls</span>} <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">Dec</span> (@<span class="id" title="var">escrow_correct_Prop</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span> <span class="id" title="var">caddr</span> <span class="id" title="var">cstate</span> <span class="id" title="var">trace</span> <span class="id" title="var">depinfo</span> <span class="id" title="var">inc_calls</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">ssrbool.decidable</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">escrow_correct_bool</span> <span class="id" title="var">caddr</span> <span class="id" title="var">cstate</span> <span class="id" title="var">trace</span> <span class="id" title="var">depinfo</span> <span class="id" title="var">inc_calls</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">left</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">escrow_correct_bool_refl_prop</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">right</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">not</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">escrow_correct_bool_refl_prop</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">escrow_correct_P_checkable</span> {<span class="id" title="var">from</span> <span class="id" title="var">to</span> <span class="id" title="var">caddr</span> <span class="id" title="var">cstate</span> <span class="id" title="var">trace</span> <span class="id" title="var">depinfo</span> <span class="id" title="var">inc_calls</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="var">Checkable</span> (@<span class="id" title="var">escrow_correct_Prop</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span> <span class="id" title="var">caddr</span> <span class="id" title="var">cstate</span> <span class="id" title="var">trace</span> <span class="id" title="var">depinfo</span> <span class="id" title="var">inc_calls</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">testDec</span>. <span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Notation</span> &quot;a ===&gt; f" := (<span class="id" title="var">isSomeCheck</span> <span class="id" title="var">a</span> <span class="id" title="var">f</span>) (<span class="id" title="tactic">at</span> <span class="id" title="keyword">level</span> 44).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Wrapper&nbsp;for&nbsp;escrow_correct_bool.&nbsp;This&nbsp;is&nbsp;the&nbsp;Checker&nbsp;we&nbsp;will&nbsp;run&nbsp;QC&nbsp;on.&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">escrow_correct_P</span> (<span class="id" title="var">cb</span> : <span class="id" title="var">ChainBuilder</span>) := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">trace</span> := <span class="id" title="var">builder_trace</span> <span class="id" title="var">cb</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">depinfo'</span> := <span class="id" title="var">deployment_info</span> <span class="id" title="var">Escrow.Setup</span> <span class="id" title="var">trace</span> <span class="id" title="var">escrow_contract_addr</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">inc_calls'</span> := <span class="id" title="var">incoming_calls</span> <span class="id" title="var">Escrow.Msg</span> <span class="id" title="var">trace</span> <span class="id" title="var">escrow_contract_addr</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">depinfo'</span>  ===&gt;  (<span class="id" title="keyword">fun</span> <span class="id" title="var">depinfo</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">inc_calls'</span> ===&gt;  (<span class="id" title="keyword">fun</span> <span class="id" title="var">inc_calls</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">get_contract_state</span> <span class="id" title="var">Escrow.State</span> <span class="id" title="var">cb</span> <span class="id" title="var">escrow_contract_addr</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;main&nbsp;part&nbsp;of&nbsp;the&nbsp;property:&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">cstate</span> =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">is_escrow_finished</span> <span class="id" title="var">cstate</span> ==&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((<span class="id" title="var">escrow_correct_Prop</span> <span class="id" title="var">escrow_contract_addr</span> <span class="id" title="var">cstate</span> <span class="id" title="var">trace</span> <span class="id" title="var">depinfo</span> <span class="id" title="var">inc_calls</span>)?)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">checker</span> <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;we&nbsp;derive&nbsp;decidable&nbsp;equality&nbsp;on&nbsp;NextStep&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Scheme</span> <span class="id" title="var">Equality</span> <span class="id" title="keyword">for</span> <span class="id" title="var">NextStep</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Instance</span> <span class="id" title="var">nextstep_dec_eq</span> : <span class="id" title="var">Dec_Eq</span> <span class="id" title="var">NextStep</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">NextStep_eq_dec</span>. <span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">escrow_next_states</span> {<span class="id" title="var">from</span> <span class="id" title="var">to</span>} <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">escrow_caddr</span> : <span class="id" title="var">Address</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">trace</span> : <span class="id" title="var">ChainTrace</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span>) : <span class="id" title="var">list</span> <span class="id" title="var">NextStep</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="keyword">fix</span> <span class="id" title="keyword">rec</span> {<span class="id" title="var">from</span> <span class="id" title="var">to</span>} (<span class="id" title="var">trace</span> : <span class="id" title="var">ChainTrace</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span>) <span class="id" title="var">acc</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">trace</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">snoc</span> <span class="id" title="var">trace'</span> <span class="id" title="var">step</span> =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">acc</span>, <span class="id" title="var">get_contract_state</span> <span class="id" title="var">Escrow.State</span> <span class="id" title="var">to</span> <span class="id" title="var">escrow_caddr</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">nextstep</span>::<span class="id" title="var">_</span>, <span class="id" title="var">Some</span> <span class="id" title="var">state</span> =&gt; <span class="id" title="keyword">if</span> (<span class="id" title="var">nextstep</span> = <span class="id" title="var">state</span>.(<span class="id" title="var">next_step</span>))?<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="keyword">rec</span> <span class="id" title="var">trace'</span> <span class="id" title="var">acc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">rec</span> <span class="id" title="var">trace'</span> (<span class="id" title="var">state</span>.(<span class="id" title="var">next_step</span>) :: <span class="id" title="var">acc</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [], <span class="id" title="var">Some</span> <span class="id" title="var">state</span> =&gt; <span class="id" title="keyword">rec</span> <span class="id" title="var">trace'</span> (<span class="id" title="var">state</span>.(<span class="id" title="var">next_step</span>) :: <span class="id" title="var">acc</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span>, <span class="id" title="var">_</span> =&gt; <span class="id" title="keyword">rec</span> <span class="id" title="var">trace'</span> <span class="id" title="var">acc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">clnil</span> =&gt; <span class="id" title="var">acc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="tactic">in</span> <br/>
+&nbsp;&nbsp;<span class="id" title="keyword">rec</span> <span class="id" title="var">trace</span> [].<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;We&nbsp;want&nbsp;to&nbsp;see&nbsp;what&nbsp;the&nbsp;length&nbsp;of&nbsp;the&nbsp;generated&nbsp;sequences&nbsp;of&nbsp;next_step&nbsp;are,<br/>
+&nbsp;&nbsp;so&nbsp;we&nbsp;use&nbsp;QuickChick's&nbsp;'collect'&nbsp;to&nbsp;collect&nbsp;length&nbsp;distribution&nbsp;statistics&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">collect_steps_length_distribution</span> <span class="id" title="var">g</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">forAll</span> (<span class="id" title="var">g</span> <span class="id" title="var">escrow_chain</span> 10%<span class="id" title="var">nat</span>) (<span class="id" title="keyword">fun</span> <span class="id" title="var">cb</span> =&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="var">collect</span> (<span class="id" title="var">length</span> (<span class="id" title="var">escrow_next_states</span> <span class="id" title="var">escrow_contract_addr</span> (<span class="id" title="var">cb</span>.(<span class="id" title="var">builder_trace</span>))))<br/>
+&nbsp;&nbsp;<span class="id" title="var">true</span>).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;QuickChick&nbsp;(collect_steps_length_distribution&nbsp;gEscrowTrace).&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;<br/>
+&nbsp;&nbsp;4812&nbsp;:&nbsp;2<br/>
+&nbsp;&nbsp;2470&nbsp;:&nbsp;1<br/>
+&nbsp;&nbsp;2244&nbsp;:&nbsp;3<br/>
+&nbsp;&nbsp;474&nbsp;:&nbsp;4<br/>
+&nbsp;&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;QuickChick&nbsp;(collect_steps_length_distribution&nbsp;gEscrowTraceBetter).&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;<br/>
+&nbsp;&nbsp;6636&nbsp;:&nbsp;4<br/>
+&nbsp;&nbsp;3364&nbsp;:&nbsp;2<br/>
+&nbsp;&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;We&nbsp;see&nbsp;that&nbsp;the&nbsp;"better"&nbsp;generator&nbsp;more&nbsp;often&nbsp;generates&nbsp;the&nbsp;full&nbsp;sequence&nbsp;of&nbsp;states,&nbsp;namely&nbsp;the&nbsp;sequence:<br/>
+&nbsp;&nbsp;buyer_commit&nbsp;-&gt;&nbsp;buyer_confirm&nbsp;-&gt;&nbsp;withdrawals&nbsp;-&gt;&nbsp;no_next_step<br/>
+&nbsp;&nbsp;The&nbsp;sequence&nbsp;of&nbsp;length&nbsp;2&nbsp;is&nbsp;the&nbsp;sequence:<br/>
+&nbsp;&nbsp;buyer_commit&nbsp;-&gt;&nbsp;no_next_step<br/>
+&nbsp;&nbsp;Corresponding&nbsp;to&nbsp;the&nbsp;case&nbsp;where&nbsp;the&nbsp;seller&nbsp;withdraws&nbsp;their&nbsp;funds&nbsp;before&nbsp;the&nbsp;buyer&nbsp;commits&nbsp;&amp;&nbsp;confirms&nbsp;their&nbsp;purchase.&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">is_valid_step_sequence_fix</span> <span class="id" title="var">steps</span> <span class="id" title="var">prev_step</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">prev_step</span>, <span class="id" title="var">steps</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span>, [] =&gt; <span class="id" title="var">true</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">None</span>, <span class="id" title="var">step</span>::<span class="id" title="var">steps'</span> =&gt; <span class="id" title="var">is_valid_step_sequence_fix</span> <span class="id" title="var">steps'</span> (<span class="id" title="var">Some</span> <span class="id" title="var">step</span>) <br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">prev_step</span>, <span class="id" title="var">step</span>::<span class="id" title="var">steps'</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">prev_step</span>, <span class="id" title="var">step</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">buyer_commit</span>, <span class="id" title="var">buyer_confirm</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">buyer_commit</span>, <span class="id" title="var">no_next_step</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">buyer_confirm</span>, <span class="id" title="var">withdrawals</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">withdrawals</span>, <span class="id" title="var">no_next_step</span> =&gt; <span class="id" title="var">is_valid_step_sequence_fix</span> <span class="id" title="var">steps'</span> (<span class="id" title="var">Some</span> <span class="id" title="var">step</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span>, <span class="id" title="var">_</span> =&gt; <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">is_valid_step_sequence</span> <span class="id" title="var">steps</span> := <br/>
+&nbsp;&nbsp;<span class="id" title="var">is_valid_step_sequence_fix</span> <span class="id" title="var">steps</span> <span class="id" title="var">None</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Test&nbsp;property&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Conjecture</span> <span class="id" title="var">escrow_valid_steps_P</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">trace</span> : {<span class="id" title="var">to</span> : <span class="id" title="var">ChainState</span> &amp; <span class="id" title="var">ChainTrace</span> <span class="id" title="var">empty_state</span> <span class="id" title="var">to</span>},<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">steps</span> := <span class="id" title="var">escrow_next_states</span> <span class="id" title="var">escrow_contract_addr</span> (<span class="id" title="var">projT2</span> <span class="id" title="var">trace</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">is_valid_step_sequence</span> <span class="id" title="var">steps</span> = <span class="id" title="var">true</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">TestProperties</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;----------&nbsp;Test&nbsp;execution&nbsp;----------&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">defNumDiscards</span> =&gt; "(2 * defNumTests)".<br/>
+
+<br/>
+<span class="comment">(*&nbsp;QuickChick&nbsp;(forAllEscrowChainBuilder&nbsp;gEscrowTrace&nbsp;7&nbsp;escrow_chain&nbsp;escrow_correct_P).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;***&nbsp;Gave&nbsp;up!&nbsp;Passed&nbsp;only&nbsp;8598&nbsp;tests<br/>
+Discarded:&nbsp;20000&nbsp;*)</span><br/>
+
+<br/>
+<span class="comment">(*&nbsp;Using&nbsp;the&nbsp;better&nbsp;generator,&nbsp;which&nbsp;avoid&nbsp;the&nbsp;discards:&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;QuickChick&nbsp;(forAllEscrowChainBuilder&nbsp;gEscrowTraceBetter&nbsp;7&nbsp;escrow_chain&nbsp;escrow_correct_P).&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Or&nbsp;alternatively&nbsp;we&nbsp;can&nbsp;just&nbsp;write:&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;QuickChick&nbsp;escrow_correct_P.&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;&nbsp;(40&nbsp;discards)&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Not&nbsp;sure&nbsp;where&nbsp;the&nbsp;40&nbsp;discards&nbsp;come&nbsp;from,&nbsp;but&nbsp;it's&nbsp;an&nbsp;acceptable&nbsp;amount&nbsp;for&nbsp;sure...&nbsp;*)</span><br/>
+
+<br/>
+<span class="comment">(*&nbsp;Note&nbsp;that&nbsp;we&nbsp;are&nbsp;implicitly&nbsp;using&nbsp;the&nbsp;"better"&nbsp;generator&nbsp;here&nbsp;to&nbsp;generate&nbsp;arbitrary&nbsp;ChainTraces&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;QuickChick&nbsp;escrow_valid_steps_P.&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;+++&nbsp;Passed&nbsp;10000&nbsp;tests&nbsp;(0&nbsp;discards)&nbsp;*)</span><br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

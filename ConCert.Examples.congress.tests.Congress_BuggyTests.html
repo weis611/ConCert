@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Examples.congress.tests.Congress_BuggyTests</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Containers</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ResultMonad</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Monads</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Test</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">QCTest</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Congress</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Congress_Buggy</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Congress</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Congress_BuggyGens</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Examples.Congress</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Congress_BuggyPrinters</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Extras</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;--------------------------&nbsp;Tests&nbsp;of&nbsp;the&nbsp;Buggy&nbsp;Congress&nbsp;Implementation&nbsp;--------------------------&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">creator</span> := <span class="id" title="var">addr_of_Z</span> 10.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">rules</span> := {|<br/>
+&nbsp;&nbsp;<span class="id" title="var">min_vote_count_permille</span> := 200;<br/>
+&nbsp;&nbsp;<span class="id" title="var">margin_needed_permille</span> := 501;<br/>
+&nbsp;&nbsp;<span class="id" title="var">debating_period_in_blocks</span> := 0;<br/>
+|}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">exploit_example</span> : <span class="id" title="var">option</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">ChainBuilder</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">chain</span> := <span class="id" title="var">builder_initial</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">add_block</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">ChainBuilder</span>) <span class="id" title="var">act_bodies</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">next_header</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{| <span class="id" title="var">block_height</span> := <span class="id" title="var">S</span> (<span class="id" title="var">chain_height</span> <span class="id" title="var">chain</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">block_slot</span> := <span class="id" title="var">S</span> (<span class="id" title="var">current_slot</span> <span class="id" title="var">chain</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">block_finalized_height</span> := <span class="id" title="var">finalized_height</span> <span class="id" title="var">chain</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">block_creator</span> := <span class="id" title="var">creator</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">block_reward</span> := 50; |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">acts</span> := <span class="id" title="var">map</span> (<span class="id" title="var">build_act</span> <span class="id" title="var">creator</span> <span class="id" title="var">creator</span>) <span class="id" title="var">act_bodies</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">option_of_result</span> (<span class="id" title="var">builder_add_block</span> <span class="id" title="var">chain</span> <span class="id" title="var">next_header</span> <span class="id" title="var">acts</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Get&nbsp;some&nbsp;money&nbsp;on&nbsp;the&nbsp;creator&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Deploy&nbsp;congress&nbsp;and&nbsp;exploit&nbsp;contracts&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">chain</span> &lt;- <span class="id" title="var">add_block</span> <span class="id" title="var">chain</span> [];<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">dep_congress</span> := <span class="id" title="var">create_deployment</span> 50 <span class="id" title="var">contract</span> {| <span class="id" title="var">setup_rules</span> := <span class="id" title="var">rules</span> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">dep_exploit</span> := <span class="id" title="var">create_deployment</span> 0 <span class="id" title="var">exploit_contract</span> <span class="id" title="var">tt</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">chain</span> &lt;- <span class="id" title="var">add_block</span> <span class="id" title="var">chain</span> [<span class="id" title="var">dep_congress</span>; <span class="id" title="var">dep_exploit</span>];<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">contracts</span> := <span class="id" title="var">map</span> <span class="id" title="var">fst</span> (<span class="id" title="var">FMap.elements</span> (<span class="id" title="var">get_contracts</span> <span class="id" title="var">chain</span>)) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">exploit</span> := <span class="id" title="var">nth</span> 0 <span class="id" title="var">contracts</span> <span class="id" title="var">creator</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">congress</span> := <span class="id" title="var">nth</span> 1 <span class="id" title="var">contracts</span> <span class="id" title="var">creator</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Add&nbsp;creator&nbsp;to&nbsp;congress&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">add_creator</span> := <span class="id" title="var">add_member</span> <span class="id" title="var">creator</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">act_bodies</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">m</span> =&gt; <span class="id" title="var">act_call</span> <span class="id" title="var">congress</span> 0 (<span class="id" title="var">serialize</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">m</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<span class="id" title="var">add_creator</span>] <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">chain</span> &lt;- <span class="id" title="var">add_block</span> <span class="id" title="var">chain</span> <span class="id" title="var">act_bodies</span>;<br/>
+&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">congress</span>, <span class="id" title="var">chain</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">unpacked_exploit_example</span> : <span class="id" title="var">Address</span> * <span class="id" title="var">ChainBuilder</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">unpack_option</span> <span class="id" title="var">exploit_example</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">congress_caddr</span> := <span class="id" title="var">addr_of_Z</span> 128%<span class="id" title="var">Z</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">NotationInfo</span> &lt;: <span class="id" title="var">TestNotationParameters</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">gAction</span> := (<span class="id" title="keyword">fun</span> <span class="id" title="var">env</span> =&gt; <span class="id" title="var">GCongressAction</span> <span class="id" title="var">env</span> <span class="id" title="var">act_depth</span> <span class="id" title="var">congress_caddr</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">init_cb</span> := (<span class="id" title="var">snd</span> <span class="id" title="var">unpacked_exploit_example</span>).<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">NotationInfo</span>.<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">TN</span> := <span class="id" title="var">TestNotations</span> <span class="id" title="var">NotationInfo</span>. <span class="id" title="keyword">Import</span> <span class="id" title="var">TN</span>.<br/>
+<span class="comment">(*&nbsp;Sample&nbsp;gChain.&nbsp;*)</span><br/>
+
+<br/>
+<span class="comment">(*&nbsp;Definition&nbsp;gCongressChain&nbsp;max_acts_per_block&nbsp;congress_cb&nbsp;max_length&nbsp;:=&nbsp;<br/>
+&nbsp;&nbsp;let&nbsp;act_depth&nbsp;:=&nbsp;2&nbsp;in&nbsp;<br/>
+&nbsp;&nbsp;gChain&nbsp;congress_cb<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(fun&nbsp;env&nbsp;act_depth&nbsp;=&gt;&nbsp;GCongressAction&nbsp;env&nbsp;act_depth&nbsp;congress_caddr)&nbsp;max_length&nbsp;act_depth&nbsp;max_acts_per_block.<br/>
+<br/>
+Definition&nbsp;forAllCongressChainTraces&nbsp;n&nbsp;:=<br/>
+&nbsp;&nbsp;forAllBlocks&nbsp;n&nbsp;(snd&nbsp;unpacked_exploit_example)&nbsp;(gCongressChain&nbsp;2).<br/>
+<br/>
+Definition&nbsp;pre_post_assertion_congress&nbsp;P&nbsp;c&nbsp;Q&nbsp;:=<br/>
+&nbsp;&nbsp;pre_post_assertion&nbsp;2&nbsp;(snd&nbsp;unpacked_exploit_example)&nbsp;(gCongressChain&nbsp;1)&nbsp;Congress_Buggy.contract&nbsp;c&nbsp;P&nbsp;Q.<br/>
+Notation&nbsp;"{{&nbsp;P&nbsp;}}&nbsp;c&nbsp;{{&nbsp;Q&nbsp;}}"&nbsp;:=&nbsp;(pre_post_assertion_congress&nbsp;P&nbsp;c&nbsp;Q)&nbsp;(&nbsp;at&nbsp;level&nbsp;50).&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Local Close</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">num_cacts_in_state</span> <span class="id" title="var">state</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">sumnat</span> (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">k</span>, <span class="id" title="var">v</span>) =&gt; <span class="id" title="var">length</span> (<span class="id" title="var">actions</span> <span class="id" title="var">v</span>)) (<span class="id" title="var">FMap.elements</span> (<span class="id" title="var">proposals</span> <span class="id" title="var">state</span>)).<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">num_cacts_safe_P</span> (<span class="id" title="var">msg</span> : <span class="id" title="var">Congress_Buggy.Msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">resp_acts</span> : <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">old_state</span> : <span class="id" title="var">Congress_Buggy.State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">new_state</span> : <span class="id" title="var">Congress_Buggy.State</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">nr_cacts</span> := <span class="id" title="keyword">match</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">create_proposal</span> <span class="id" title="var">ls</span> =&gt; <span class="id" title="var">length</span> <span class="id" title="var">ls</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">num_cacts_in_state</span> <span class="id" title="var">new_state</span> + <span class="id" title="var">length</span> <span class="id" title="var">resp_acts</span> &lt;=?<br/>
+&nbsp;&nbsp;<span class="id" title="var">num_cacts_in_state</span> <span class="id" title="var">old_state</span> + <span class="id" title="var">nr_cacts</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive_state_well_behaved_P</span> (<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">cctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">old_state</span> : <span class="id" title="var">Congress_Buggy.State</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">msg</span> : <span class="id" title="var">Congress_Buggy.Msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">result</span> : <span class="id" title="var">option</span> (<span class="id" title="var">Congress_Buggy.State</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>)) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">result</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">Some</span> (<span class="id" title="var">new_state</span>, <span class="id" title="var">resp_acts</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">checker</span> (<span class="id" title="var">num_cacts_safe_P</span> <span class="id" title="var">msg</span> <span class="id" title="var">resp_acts</span> <span class="id" title="var">old_state</span> <span class="id" title="var">new_state</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">checker</span> <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;QuickChick&nbsp;(<br/>
+&nbsp;&nbsp;{{fun&nbsp;_&nbsp;_&nbsp;=&gt;&nbsp;true}}<br/>
+&nbsp;&nbsp;congress_caddr<br/>
+&nbsp;&nbsp;{{receive_state_well_behaved_P}}<br/>
+).&nbsp;*)</span><br/>
+
+<br/>
+<span class="comment">(*&nbsp;<br/>
+Chain{|&nbsp;<br/>
+Block&nbsp;1&nbsp;<span class="inlinecode"></span>;<br/>
+Block&nbsp;2&nbsp;<span class="inlinecode"></span>
+<span class="inlinecode"><span class="id" title="var">Action</span>{<span class="id" title="var">act_from</span>:</span> <span class="inlinecode">10%256,</span> <span class="inlinecode"><span class="id" title="var">act_body</span>:</span> <span class="inlinecode">(<span class="id" title="var">act_deploy</span></span> <span class="inlinecode">50,</span> <span class="inlinecode">&lt;<span class="id" title="var">FAILED</span></span> <span class="inlinecode"><span class="id" title="var">DESERIALIZATION</span>&gt;)};</span>
+<span class="inlinecode"><span class="id" title="var">Action</span>{<span class="id" title="var">act_from</span>:</span> <span class="inlinecode">10%256,</span> <span class="inlinecode"><span class="id" title="var">act_body</span>:</span> <span class="inlinecode">(<span class="id" title="var">act_deploy</span></span> <span class="inlinecode">0,</span> <span class="inlinecode">&lt;<span class="id" title="var">FAILED</span></span> <span class="inlinecode"><span class="id" title="var">DESERIALIZATION</span>&gt;)}</span>;<br/>
+Block&nbsp;3&nbsp;<span class="inlinecode"></span>
+<span class="inlinecode"><span class="id" title="var">Action</span>{<span class="id" title="var">act_from</span>:</span> <span class="inlinecode">10%256,</span> <span class="inlinecode"><span class="id" title="var">act_body</span>:</span> <span class="inlinecode">(<span class="id" title="var">act_call</span></span> <span class="inlinecode">128%256,</span> <span class="inlinecode">0,</span> <span class="inlinecode"><span class="id" title="var">add_member</span></span> <span class="inlinecode">10%256)}</span>;<br/>
+Block&nbsp;4&nbsp;<span class="inlinecode"></span>
+<span class="inlinecode"><span class="id" title="var">Action</span>{<span class="id" title="var">act_from</span>:</span> <span class="inlinecode">10%256,</span> <span class="inlinecode"><span class="id" title="var">act_body</span>:</span> <span class="inlinecode">(<span class="id" title="var">act_call</span></span> <span class="inlinecode">128%256,</span> <span class="inlinecode">79,</span> <span class="inlinecode"><span class="id" title="var">create_proposal</span></span> <span class="inlinecode">(<span class="id" title="var">call</span>:</span> <span class="inlinecode">128%256,</span> <span class="inlinecode">80,</span> <span class="inlinecode"><span class="id" title="var">add_member</span></span> <span class="inlinecode">0%256))}</span>;<br/>
+Block&nbsp;5&nbsp;<span class="inlinecode"></span>
+<span class="inlinecode"><span class="id" title="var">Action</span>{<span class="id" title="var">act_from</span>:</span> <span class="inlinecode">10%256,</span> <span class="inlinecode"><span class="id" title="var">act_body</span>:</span> <span class="inlinecode">(<span class="id" title="var">act_call</span></span> <span class="inlinecode">128%256,</span> <span class="inlinecode">13,</span> <span class="inlinecode"><span class="id" title="var">finish_proposal</span></span> <span class="inlinecode">1)}</span>;|}<br/>
+<br/>
+***&nbsp;Failed&nbsp;after&nbsp;33&nbsp;tests&nbsp;and&nbsp;0&nbsp;shrinks.&nbsp;(0&nbsp;discards)<br/>
+*)</span><br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="https://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>
